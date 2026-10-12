@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://appliances-autonotify.rhizomatics.org.uk/sitemap.xml

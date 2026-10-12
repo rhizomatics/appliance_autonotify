@@ -1,0 +1,14 @@
+# Appliances AutoNotify for Home Assistant
+
+> Automated discovery and live notification activities for household appliances
+
+Appliances AutoNotify is a Home Assistant custom integration (installed via HACS) that sends automatic notifications for household appliances, with no automations or YAML: a notification when a cycle starts, a Live Activity with progress and time remaining while it runs, and a notification when it finishes. Appliances are discovered from the Home Connect integration (Bosch, Neff and Siemens), and any other appliance can be added by hand if it has a power monitor, such as a smart plug.
+
+## Start here
+
+- [Appliance Auto Notify](https://appliances-autonotify.rhizomatics.org.uk/index.md): What it does, requirements, installation, settings, what gets sent, known limits and issues
+
+## Optional
+
+- [0.6.1](https://appliances-autonotify.rhizomatics.org.uk/changelog/index.md): Release history
+
