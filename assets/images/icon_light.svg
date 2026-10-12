@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <title>Appliance AutoNotify, for light themes</title>
+  <!-- shared by every AutoNotify: the tile, and the progress bar along the bottom -->
+  <rect width="512" height="512" rx="112" fill="#E4EDF2"/>
+  <rect x="64" y="380" width="384" height="48" rx="24" fill="#16313F" fill-opacity="0.15"/>
+  <rect x="64" y="380" width="250" height="48" rx="24" fill="#FFB300"/>
+  <!-- particular to this one: what is being watched, drawn within 64,84 to 448,332 -->
+  <g fill="#16313F">
+    <rect x="64" y="84" width="176" height="248" rx="28"/>
+    <rect x="272" y="84" width="176" height="248" rx="28"/>
+  </g>
+  <g fill="#E4EDF2">
+    <!-- washing machine -->
+    <rect x="64" y="136" width="176" height="8"/>
+    <circle cx="98" cy="110" r="10"/>
+    <rect x="160" y="101" width="52" height="18" rx="9"/>
+    <circle cx="152" cy="238" r="62"/>
+    <!-- oven -->
+    <rect x="272" y="136" width="176" height="8"/>
+    <circle cx="308" cy="110" r="10"/>
+    <circle cx="360" cy="110" r="10"/>
+    <circle cx="412" cy="110" r="10"/>
+    <rect x="300" y="168" width="120" height="14" rx="7"/>
+    <rect x="300" y="204" width="120" height="100" rx="16"/>
+  </g>
+  <circle cx="152" cy="238" r="38" fill="none" stroke="#16313F" stroke-width="12"/>
+  <rect x="318" y="250" width="84" height="8" rx="4" fill="#16313F"/>
+</svg>

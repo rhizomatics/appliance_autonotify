@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+        <loc>https://appliances-autonotify.rhizomatics.org.uk/</loc>
+        <lastmod>2026-10-12</lastmod>
+        <changefreq>daily</changefreq>
+    </url>
+    <url>
+        <loc>https://appliances-autonotify.rhizomatics.org.uk/changelog/</loc>
+        <lastmod>2026-10-12</lastmod>
+        <changefreq>daily</changefreq>
+    </url>
+    <url>
+        <loc>https://appliances-autonotify.rhizomatics.org.uk/developer/coverage/</loc>
+        <lastmod>2026-10-12</lastmod>
+        <changefreq>daily</changefreq>
+    </url>
+</urlset>
