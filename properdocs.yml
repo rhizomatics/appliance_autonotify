@@ -48,7 +48,7 @@ plugins:
           dest: docs/changelog.md
           copy: true
   - llmstxt:
-      base_url: https://appliances-autonotify.rhizomatics.org.uk/
+      base_url: https://appliance-autonotify.rhizomatics.org.uk/
       preprocess: docgen/llms_preprocess.py
       markdown_description: >-
         Appliances AutoNotify is a Home Assistant custom integration (installed via HACS) that
