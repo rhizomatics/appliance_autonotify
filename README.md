@@ -23,7 +23,7 @@ in English only. Any other appliance can be added by hand if it has a power moni
 - Home Assistant 2026.7 or later
 - An appliance set up with the Home Connect integration, or one with a power sensor
 - [Supernotify](https://supernotify.rhizomatics.org.uk), installed from HACS, for Live Activities and for anything
-  beyond a plain notification. 
+  beyond a plain notification.
   - `v2.14.0` recommended as minimum, though most features will work with earlier releases
 - Home Assistant app installed on an Apple mobile device, minimum iOS 17.2, or on an Android one, where a
   [Live Update](https://companion.home-assistant.io/docs/notifications/live-activities) needs Android 16 or later,

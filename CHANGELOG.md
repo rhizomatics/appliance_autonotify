@@ -6,11 +6,11 @@ title: What's New
 - Power monitors automatically detected and icons assigned for common usage, for example if its a 'Washing Machine Plug'
 ## 📝 Other changes
 - With a dashboard chosen, where a tap on a notification goes is now sent as a Supernotify [notification level action](https://supernotify.rhizomatics.org.uk/usage/mobile_actions/#notification-level-actions)
-  - Supernotify sends as `url` to iOS and `clickAction` to Android. 
+  - Supernotify sends as `url` to iOS and `clickAction` to Android.
   - Supernotify can also use this tap-thru URL for other notifications that support it, including *HTML5 Push*, *gotify* and *ntfy*
   - Needs Supernotify 2.14.0 or later. Earlier versions will
   ignore the URL, but everything else work
-- Supernotify `2.14.0` is the recommended minimum version.   
+- Supernotify `2.14.0` is the recommended minimum version.
   - Recent versions also have changes not to log when AutoNotify sends scenarios that haven't been configured.
 
 
