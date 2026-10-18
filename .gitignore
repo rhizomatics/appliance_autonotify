@@ -17,3 +17,6 @@ site/
 # copied from README.md and CHANGELOG.md by mkdocs-homepage-copier
 docs/index.md
 docs/changelog.md
+
+# Claude Code: personal permissions stay local; share only deliberate project settings in settings.json
+.claude/settings.local.json
