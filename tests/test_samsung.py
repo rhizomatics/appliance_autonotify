@@ -156,7 +156,7 @@ async def test_drying_is_a_cycle_over_once_it_only_tumbles(hass: HomeAssistant) 
     # tumbling now and then so the load won't crease is the end, though it's still running
     await set_state(hass, dryer["dryer_job_state"], "wrinkle_prevent")
     assert len(calls) == 5
-    assert calls[4].data == ended("Asciugatrice", entry.entry_id, TUMBLE_DRYER, force_resend=True)
+    assert calls[4].data == ended("Asciugatrice", entry.entry_id, TUMBLE_DRYER, track=True, force_resend=True)
 
     # nothing more while it's still said to be running, nor once it stops
     hass.states.async_set(dryer["dryer_machine_state"], "run", {"refreshed": True})
@@ -178,7 +178,7 @@ async def test_stopped_is_the_end(hass: HomeAssistant) -> None:
         await set_state(hass, dryer["dryer_machine_state"], state)
     assert calls == []
     await set_state(hass, dryer["dryer_machine_state"], "stop")
-    assert calls[-1].data == ended("Asciugatrice", entry.entry_id, TUMBLE_DRYER, force_resend=True)
+    assert calls[-1].data == ended("Asciugatrice", entry.entry_id, TUMBLE_DRYER, track=True, force_resend=True)
 
 
 async def test_local_dryer_with_progress_and_program(hass: HomeAssistant) -> None:
@@ -204,7 +204,7 @@ async def test_local_dryer_with_progress_and_program(hass: HomeAssistant) -> Non
     # idle is the end once it has stayed so
     await set_state(hass, dryer["machine_state"], "idle")
     await pass_time(hass, CYCLE_SETTLE)
-    assert calls[-1].data == ended("Samsung Dryer", entry.entry_id, TUMBLE_DRYER, force_resend=True)
+    assert calls[-1].data == ended("Samsung Dryer", entry.entry_id, TUMBLE_DRYER, track=True, force_resend=True)
 
 
 async def test_local_network_preferred_to_the_cloud(hass: HomeAssistant) -> None:
@@ -298,7 +298,7 @@ async def test_end_told_by_the_cloud_before_the_local_one_went(hass: HomeAssista
     await set_state(hass, cloud["dryer_machine_state"], "stop")
     assert calls == []
     await set_state(hass, local["machine_state"], "unavailable")
-    assert calls[-1].data == ended("Samsung Dryer", entry.entry_id, TUMBLE_DRYER, force_resend=True)
+    assert calls[-1].data == ended("Samsung Dryer", entry.entry_id, TUMBLE_DRYER, track=True, force_resend=True)
 
 
 async def test_still_running_after_its_stage_said_it_was_over(hass: HomeAssistant) -> None:

@@ -377,9 +377,9 @@ async def test_settings_without_supernotify(hass: HomeAssistant) -> None:
     assert not {"live_title", "live_detail"} & {str(k) for k in result["data_schema"].schema}
     # everything but whether to notify progress is tucked away in three sections
     sections = {str(k): v for k, v in result["data_schema"].schema.items()}
-    for switch in ("notify_start", "notify_end", "notify_progress"):
+    for switch in ("notify_start", "notify_end", "maintenance", "notify_progress"):
         assert sections.pop(switch) is not None
-    assert list(sections) == ["start", "end", "notify"]
+    assert list(sections) == ["start", "end", "notify", "maintenance_items"]
     assert all(s.options == {"collapsed": True} for s in sections.values())
     assert list(sections["notify"].schema.schema) == ["targets"]
     assert list(sections["end"].schema.schema) == ["end_title", "end_message"]
@@ -432,17 +432,20 @@ async def test_settings_with_supernotify(hass: HomeAssistant) -> None:
     assert list(result["data_schema"].schema) == [
         "notify_start",
         "notify_end",
+        "maintenance",
         "notify_progress",
         "live_title",
         "live_detail",
         "start",
         "end",
         "notify",
+        "maintenance_items",
     ]
     switches = {str(k): k.default() for k in result["data_schema"].schema if k.default is not vol.UNDEFINED}
     assert switches == {
         "notify_start": False,
         "notify_end": True,
+        "maintenance": False,
         "notify_progress": False,
         "live_title": "name_program",
         "live_detail": "time_remaining",

@@ -66,7 +66,8 @@
                     "notify_progress": "Notifica l'avanzamento",
                     "dashboard": "Dashboard da aprire",
                     "live_title": "Titolo della Live Activity",
-                    "live_detail": "La Live Activity mostra"
+                    "live_detail": "La Live Activity mostra",
+                    "maintenance": "Segui la manutenzione"
                 },
                 "data_description": {
                     "notify_start": "Invia una notifica quando l'elettrodomestico parte. Se disattivato, la Live Activity viene comunque aperta, senza suono e solo sui telefoni.",
@@ -75,7 +76,8 @@
                     "dashboard": "Aperta quando si tocca una notifica o la Live Activity. Lascia vuoto per aprire l'app dove si trovava. Impostata su una dashboard con il nome dell'elettrodomestico o del suo tipo, ad esempio \"Lavastoviglie\" o \"Lavatrice\", se ce n'era una quando l'elettrodomestico è stato aggiunto.",
                     "notify_progress": "Invia una notifica ogni 10% del ciclo. Se disattivato, l'avanzamento compare solo nella barra della Live Activity, aggiornata senza suono.",
                     "live_title": "Il titolo della Live Activity. Il programma accanto al nome è utile quando il tempo residuo prende il posto del messaggio, come nella schermata di blocco dell'iPhone. Scegli solo il nome se i nomi dei programmi sono troppo lunghi, o se l'elettrodomestico usa sempre lo stesso programma.",
-                    "live_detail": "Mostra il tempo residuo, se l'elettrodomestico indica quando finirà, oppure al suo posto il programma, lo stato, cioè cosa sta facendo nel ciclo, come l'asciugatura o un robot aspirapolvere che si riposiziona, o entrambi. Il programma può essere l'intero ciclo o una sua fase, come un prelavaggio, e per un robot aspirapolvere è la modalità di pulizia. Ciò che l'elettrodomestico non indica viene omesso."
+                    "live_detail": "Mostra il tempo residuo, se l'elettrodomestico indica quando finirà, oppure al suo posto il programma, lo stato, cioè cosa sta facendo nel ciclo, come l'asciugatura o un robot aspirapolvere che si riposiziona, o entrambi. Il programma può essere l'intero ciclo o una sua fase, come un prelavaggio, e per un robot aspirapolvere è la modalità di pulizia. Ciò che l'elettrodomestico non indica viene omesso.",
+                    "maintenance": "Conta i cicli, e quanta vita resta alle parti di cui l'apparecchio la riporta, e mette ciò che va fatto nella lista Manutenzione elettrodomestici, con una notifica quando scade. Se è spento viene proposto una volta sulla notifica di fine."
                 },
                 "sections": {
                     "start": {
@@ -116,6 +118,17 @@
                             "target": "Chi o cosa avvisare, come per qualsiasi notifica Supernotify. Lascia vuoto per far scegliere a Supernotify.",
                             "custom_target": "Destinatari fuori da Home Assistant, come indirizzi e-mail o numeri di telefono.",
                             "deliveries": "Limita le notifiche a queste consegne di Supernotify. Lascia vuoto per far scegliere a Supernotify."
+                        }
+                    },
+                    "maintenance_items": {
+                        "name": "Manutenzione",
+                        "description": "Cicli tra un intervento e l'altro, quando la manutenzione è seguita. 0 per togliere una voce. Il conteggio parte quando la si attiva, e per uno già in corso si imposta con l'azione Azzera manutenzione.",
+                        "data": {
+                            "maintenance_drum_clean": "Pulizia del cestello",
+                            "maintenance_filter": "Pulizia del filtro",
+                            "maintenance_lint_filter": "Pulizia del filtro lanugine",
+                            "maintenance_machine_clean": "Pulizia della macchina",
+                            "maintenance_condenser": "Pulizia del condensatore"
                         }
                     }
                 }
@@ -171,6 +184,51 @@
                 "program": "Programma",
                 "status": "Stato",
                 "program_status": "Programma e stato"
+            }
+        }
+    },
+    "entity": {
+        "todo": {
+            "maintenance": {
+                "name": "Manutenzione elettrodomestici"
+            }
+        }
+    },
+    "services": {
+        "reset_maintenance": {
+            "name": "Azzera manutenzione",
+            "description": "Segna come fatta la manutenzione, di una voce di un apparecchio o di tutte, oppure imposta i cicli dall'ultima volta, come noti da prima che venisse seguita qui. Una parte di cui l'apparecchio riporta la vita viene azzerata col pulsante della sua integrazione, dove c'è.",
+            "fields": {
+                "config_entry_id": {
+                    "name": "Apparecchio",
+                    "description": "L'apparecchio, come sua voce di Appliance Auto Notify"
+                },
+                "item": {
+                    "name": "Voce",
+                    "description": "La voce, come drum_clean o l'entità di una parte, oppure niente per tutte"
+                },
+                "cycles": {
+                    "name": "Cicli",
+                    "description": "I cicli dall'ultima volta, 0 se fatta ora"
+                }
+            }
+        },
+        "snooze_maintenance": {
+            "name": "Rimanda manutenzione",
+            "description": "Rimanda la manutenzione dovuta, di una voce di un apparecchio o di tutte, dopo di che torna dovuta.",
+            "fields": {
+                "config_entry_id": {
+                    "name": "Apparecchio",
+                    "description": "L'apparecchio, come sua voce di Appliance Auto Notify"
+                },
+                "item": {
+                    "name": "Voce",
+                    "description": "La voce, come drum_clean o l'entità di una parte, oppure niente per tutte"
+                },
+                "days": {
+                    "name": "Giorni",
+                    "description": "Per quanto rimandarla"
+                }
             }
         }
     }

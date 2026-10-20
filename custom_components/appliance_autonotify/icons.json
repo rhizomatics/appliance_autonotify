@@ -1,0 +1,17 @@
+{
+  "entity": {
+    "todo": {
+      "maintenance": {
+        "default": "mdi:wrench-clock"
+      }
+    }
+  },
+  "services": {
+    "reset_maintenance": {
+      "service": "mdi:wrench-check"
+    },
+    "snooze_maintenance": {
+      "service": "mdi:wrench-clock"
+    }
+  }
+}
