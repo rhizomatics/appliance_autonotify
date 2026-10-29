@@ -5,6 +5,10 @@
         "home_connect",
         "supernotify"
     ],
+    "categories": [
+        "appliances_cleaning",
+        "messaging_notifications"
+    ],
     "codeowners": [
         "@jeyrb"
     ],
