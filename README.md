@@ -30,10 +30,10 @@ or [LocalThings](https://github.com/mbillow/localthings), in English only. Any o
 
 ## Install
 
-[![Open in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=rhizomatics&repository=appliance_autonotify&category=integration)
+[![Open in Marketplace](https://my.home-assistant.io/badges/marketplace_repository.svg)](https://my.home-assistant.io/redirect/marketplace_repository/?owner=rhizomatics&repository=appliance_autonotify&category=integration)
 
-1. Use the button above, or in HACS search for *Appliance Auto Notify* and restart Home Assistant
-   - Appliance Auto Notify is in the default HACS catalogue, so no need to add any custom repository
+1. Use the button above, or in Home Assistant Marketplace (previously *HACS*) search for *Appliance Auto Notify* and restart Home Assistant
+   - Appliance Auto Notify is in the default marketplace catalogue, so no need to add any custom repository
 2. In *Settings*, *Devices & services*, choose *Add integration* and pick *Appliance Auto Notify*
 3. Leave *Set up appliances automatically* on, and submit
 
