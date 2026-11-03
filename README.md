@@ -18,7 +18,7 @@ or [LocalThings](https://github.com/mbillow/localthings), in English only. Any o
 
 ## What You Need
 
-- Home Assistant 2026.7 or later
+- Home Assistant 2026.5 or later
 - An appliance set up with the Home Connect, SmartThings or LocalThings integration, a robot vacuum of any make, or
   one with a power sensor
 - [Supernotify](https://supernotify.rhizomatics.org.uk), installed from HACS, for Live Activities and for anything beyond a plain notification.
@@ -40,6 +40,15 @@ or [LocalThings](https://github.com/mbillow/localthings), in English only. Any o
 That's all. Every appliance with a cycle Home Assistant reports is set up straight away, and so is any you add later. Each is listed on the integration's page, alongside *Automatic discovery*, and notifies with no further settings.
 
 To stop the notifications for an appliance, disable it rather than delete it, since a deleted appliance is found and set up again.
+
+### Removing
+
+1. In *Settings*, *Devices & services*, open *Appliance Auto Notify* and delete *Automatic discovery* first, so the
+   appliances aren't found and set up again, then delete each appliance. A cycle it was keeping through restarts is
+   deleted with it
+2. Remove *Appliance Auto Notify* in Marketplace and restart Home Assistant
+
+It adds no automations, scripts or YAML of its own, so there is nothing else to clear up.
 
 ### Choosing Appliances Yourself
 
@@ -98,7 +107,7 @@ dishwasher whose light comes on, so that isn't notified as a cycle. Time above t
 
 ### The Appliance's Device
 
-Each appliance gets a device of its own, listed under it on the integration's page with its model and area. It
+From Home Assistant 2026.8, each appliance gets a device of its own, listed under it on the integration's page with its model and area. It
 shares the identifiers of the device the appliance already has, from Home Connect, SmartThings, LocalThings or the
 vacuum's integration, so each shows the other under *Linked devices*, with the integration's icon, as Home Assistant
 does for the same hardware through two integrations, such as a camera through UniFi and ONVIF. Appliances are still
@@ -144,6 +153,10 @@ so while there's a time left to show, *Live Activity title* is *Appliance name a
 too long to fit, or for an appliance that's always on the same program.
 
 ## What Gets Sent
+
+Nothing is polled. Each appliance is followed through the state changes of its own entities, or its power sensor,
+as Home Assistant reports them, and a notification goes out as soon as one of those says a cycle has started,
+moved on or finished.
 
 | When                                   | With Supernotify                                                    | Without             |
 | -------------------------------------- | ------------------------------------------------------------------- | ------------------- |

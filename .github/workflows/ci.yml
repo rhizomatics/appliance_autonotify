@@ -62,8 +62,8 @@ jobs:
       matrix:
         # oldest supported, 6 months back, and the locked latest
         include:
-          - ha-version: "2026.4"
-            ha-override: "2026.4.*"
+          - ha-version: "2026.5"
+            ha-override: "2026.5.*"
           - ha-version: "2026.10"
 
     steps:
