@@ -1,0 +1,278 @@
+---
+# Quality Scale tracking for Appliance Auto Notify
+# Created: 2026-11-03 (2026-Q4 architecture review, rhizomatics/hq-private)
+# Rule set verified against https://contributors.home-assistant.io/core/quality-scale/rules/#checklist
+# (HA 2026.10; 54 rules: Bronze 20, Silver 10, Gold 21, Platinum 3). No rules added, removed,
+# renamed or moved since the set Supernotify verified on 2026-08-06.
+#
+# The integration has no entity platforms: it watches other integrations' entities and notifies
+# through Supernotify or notify entities, with one device per appliance entry (device.py). The
+# entity rules are exempt for that reason.
+#
+# Changelog
+# 2026-11-03: first file. Silver met once docs-removal-instructions is done (same change).
+
+rules:
+  # ==================
+  # BRONZE TIER
+  # ==================
+
+  action-setup:
+    status: exempt
+    comment: Registers no actions. It calls supernotify.notify, notify.send_message and switch.turn_off.
+
+  appropriate-polling:
+    status: exempt
+    comment: Nothing is polled (iot_class calculated). It follows state change events of other entities.
+
+  brands:
+    status: done
+    comment: Icons and logos in custom_components/appliance_autonotify/brand/, checked by the HACS action in CI.
+
+  common-modules:
+    status: done
+    comment: |
+      watcher.py (one watcher class per kind of appliance), device.py, discovery.py and
+      supernotify_api.py. No coordinator, since there is nothing to poll.
+
+  config-flow:
+    status: done
+    comment: |
+      config_flow.py: user, power, integration_discovery, import and confirm steps, and an
+      OptionsFlowWithReload. Every field has a data_description in translations/en.json.
+
+  config-flow-test-coverage:
+    status: done
+    comment: tests/test_config_flow.py. CI enforces 90% overall coverage (pyproject.toml addopts).
+
+  dependency-transparency:
+    status: done
+    comment: No requirements in manifest.json.
+
+  docs-actions:
+    status: exempt
+    comment: Provides no actions.
+
+  docs-conditions:
+    status: exempt
+    comment: Provides no conditions.
+
+  docs-high-level-description:
+    status: done
+    comment: README.md introduction.
+
+  docs-installation-instructions:
+    status: done
+    comment: README.md "Install".
+
+  docs-removal-instructions:
+    status: done
+    comment: README.md "Removing" (added 2026-11-03).
+
+  docs-triggers:
+    status: exempt
+    comment: Provides no triggers.
+
+  entity-event-setup:
+    status: exempt
+    comment: No entities. Event and state listeners belong to the watcher and are removed through entry.async_on_unload.
+
+  entity-unique-id:
+    status: exempt
+    comment: No entities.
+
+  has-entity-name:
+    status: exempt
+    comment: No entities.
+
+  runtime-data:
+    status: done
+    comment: __init__.py sets entry.runtime_data to the watcher, typed as AppliancesConfigEntry.
+
+  test-before-configure:
+    status: exempt
+    comment: |
+      Nothing to connect to. The flow picks existing devices and entities with selectors, and
+      discovery only offers ones that are there.
+
+  test-before-setup:
+    status: done
+    comment: |
+      The watchers raise ConfigEntryNotReady when the appliance's cycle entity or vacuum is
+      missing (watcher.py HomeConnectWatcher and VacuumWatcher), so setup retries.
+
+  unique-config-entry:
+    status: done
+    comment: |
+      Unique ID per appliance device or power entity, and a single "discovery" entry
+      (config_flow.py, async_set_unique_id plus _abort_if_unique_id_configured).
+
+  # ==================
+  # SILVER TIER
+  # ==================
+
+  action-exceptions:
+    status: exempt
+    comment: Provides no actions.
+
+  config-entry-unloading:
+    status: done
+    comment: |
+      async_unload_entry; every listener, timer and the store flush are registered with
+      entry.async_on_unload (watcher.py), and async_remove_entry deletes the stored cycle.
+
+  docs-configuration-parameters:
+    status: done
+    comment: README.md "Settings".
+
+  docs-installation-parameters:
+    status: done
+    comment: README.md "Install" (the one setup option) and "Power Monitored Appliances".
+
+  entity-unavailable:
+    status: exempt
+    comment: No entities.
+
+  integration-owner:
+    status: done
+    comment: codeowners in manifest.json.
+
+  log-when-unavailable:
+    status: exempt
+    comment: |
+      Connects to no device or service of its own. An appliance whose entities go unavailable
+      is the source integration's to report.
+
+  parallel-updates:
+    status: exempt
+    comment: No entity platforms.
+
+  reauthentication-flow:
+    status: exempt
+    comment: No authentication.
+
+  test-coverage:
+    status: done
+    comment: --cov-fail-under=90 in pyproject.toml, enforced in CI on the oldest and latest supported HA.
+
+  # ==================
+  # GOLD TIER
+  # ==================
+
+  devices:
+    status: done
+    comment: |
+      device.py: one device per appliance, linked to the appliance's own device by shared
+      identifiers, or via the smart plug for a power monitored one. Only from HA 2026.8, where
+      devices are linked (compat.LINKED_DEVICES); earlier releases go without.
+
+  diagnostics:
+    status: todo
+    comment: |
+      None yet. A dump of the entry's options, watched entity IDs and the watcher's cycle state
+      would cover most support questions.
+
+  discovery:
+    status: done
+    comment: discovery.py starts integration_discovery flows for appliances and power sensors as they appear.
+
+  discovery-update-info:
+    status: exempt
+    comment: Discovers Home Assistant devices and entities, not network devices with addresses to update.
+
+  docs-data-update:
+    status: done
+    comment: README.md "What Gets Sent" (event driven, nothing polled; added 2026-11-03).
+
+  docs-examples:
+    status: exempt
+    comment: |
+      Needs no automations; notifications are sent with no YAML. The README shows what is sent
+      for each kind of appliance.
+
+  docs-known-limitations:
+    status: done
+    comment: README.md "Known Limits" and "Known Issues".
+
+  docs-supported-devices:
+    status: done
+    comment: README.md introduction and "What You Need"; docs/mobile_platforms.md for phones.
+
+  docs-supported-functions:
+    status: done
+    comment: README.md "Settings" and "What Gets Sent".
+
+  docs-troubleshooting:
+    status: todo
+    comment: |
+      "Known Issues" covers two iPhone symptoms. Missing: what to do when nothing is sent
+      (the "Nothing to notify" and "No mobile push delivery found" warnings in watcher.py) or
+      an appliance stays not ready ("No cycle state entity found").
+
+  docs-use-cases:
+    status: done
+    comment: README.md introduction.
+
+  dynamic-devices:
+    status: done
+    comment: discovery.py picks up appliances added after setup.
+
+  entity-category:
+    status: exempt
+    comment: No entities.
+
+  entity-device-class:
+    status: exempt
+    comment: No entities.
+
+  entity-disabled-by-default:
+    status: exempt
+    comment: No entities.
+
+  entity-translations:
+    status: exempt
+    comment: No entities.
+
+  exception-translations:
+    status: todo
+    comment: |
+      ConfigEntryNotReady messages in watcher.py ("No cycle state entity found",
+      "No vacuum entity found") are literal strings; translations/en.json has no "exceptions".
+
+  icon-translations:
+    status: exempt
+    comment: No entities.
+
+  reconfiguration-flow:
+    status: exempt
+    comment: |
+      The entry's data is only the appliance's identity (device or kind); everything that can
+      change, including a power monitored appliance's sensor, is in the options flow.
+
+  repair-issues:
+    status: todo
+    comment: |
+      Candidates: no notify targets and no Supernotify (watcher.py logs "Nothing to notify"),
+      and the appliance's device or power sensor removed. Both are only logged today.
+
+  stale-devices:
+    status: todo
+    comment: |
+      Not verified: what happens to an entry and its device when the appliance's own device or
+      power sensor is removed from Home Assistant.
+
+  # ==================
+  # PLATINUM TIER
+  # ==================
+
+  async-dependency:
+    status: exempt
+    comment: No requirements.
+
+  inject-websession:
+    status: exempt
+    comment: Makes no HTTP requests.
+
+  strict-typing:
+    status: todo
+    comment: mypy runs in CI, but without strict = true in pyproject.toml.
