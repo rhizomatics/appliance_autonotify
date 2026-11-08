@@ -105,6 +105,8 @@ quiet-level = 2
 asyncio_mode = "auto"
 testpaths = ["tests"]
 addopts = [
+    # pytest-homeassistant installs respx, whose pytest plugin it asks to be switched off
+    "-p", "no:respx",
     "--cov=custom_components.appliance_autonotify",
     "--cov-report=xml:cov.xml",
     "--cov-report=html",
@@ -113,7 +115,7 @@ addopts = [
 ]
 
 [[tool.mypy.overrides]]
-module = ["pytest_homeassistant_custom_component.*"]
+module = ["pytest_homeassistant_custom_component.*", "pytest_homeassistant.*"]
 follow_untyped_imports = true
 
 [project.urls]

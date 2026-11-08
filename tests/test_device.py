@@ -5,10 +5,10 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import area_registry as ar
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
-from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.appliance_autonotify.compat import LINKED_DEVICES
 from custom_components.appliance_autonotify.const import DOMAIN
+from tests.ha_testing import MockConfigEntry
 
 from .conftest import add_appliance, setup_watcher
 

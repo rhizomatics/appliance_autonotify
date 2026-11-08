@@ -16,10 +16,10 @@ from homeassistant.data_entry_flow import FlowResultType, InvalidData
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 from homeassistant.setup import async_setup_component
-from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.appliance_autonotify.compat import vol
 from custom_components.appliance_autonotify.const import DOMAIN, SUPERNOTIFY_MISSING, SUPERNOTIFY_PRESENT
+from tests.ha_testing import MockConfigEntry
 
 from .conftest import add_appliance, mock_dashboard, mock_dashboards, mock_supernotify, placeholders, schema, setup_watcher
 
@@ -120,7 +120,6 @@ async def test_without_automatic_discovery_appliances_are_offered(hass: HomeAssi
     assert all(f["step_id"] == "confirm" for f in flows)
     offered = next(f for f in flows if f["context"]["unique_id"] == oven.device_id)
     assert offered["context"]["title_placeholders"] == {"name": "Oven"}
-    assert offered["context"]["confirm_only"] is True
 
     # adding one takes no more than a confirmation
     result = await hass.config_entries.flow.async_configure(offered["flow_id"], {})

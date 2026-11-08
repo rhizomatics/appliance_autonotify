@@ -327,7 +327,6 @@ class AppliancesConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_confirm(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         if user_input is not None:
             return self.async_create_entry(title=self._name, data={CONF_DEVICE_ID: self._device_id} | self._type)
-        self._set_confirm_only()
         return self.async_show_form(
             step_id="confirm",
             description_placeholders={"name": self._name, "supernotify": supernotify_status(self.hass)},
