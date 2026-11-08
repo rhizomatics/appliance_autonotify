@@ -12,10 +12,10 @@ from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import entity_registry as er
 from homeassistant.setup import async_setup_component
-from pytest_homeassistant_custom_component.common import MockConfigEntry, async_fire_time_changed, async_mock_service
 
 from custom_components.appliance_autonotify.const import DOMAIN, VACUUM_SETTLE
 from custom_components.appliance_autonotify.maintenance import DATA_MAINTENANCE, STORAGE_KEY
+from tests.ha_testing import MockConfigEntry, async_fire_time_changed, async_mock_service
 
 from .conftest import FakeAppliance, add_appliance, mock_supernotify, setup_watcher
 from .test_vacuum import add_vacuum, advance, setup_vacuum

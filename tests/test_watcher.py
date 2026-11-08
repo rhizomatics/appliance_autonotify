@@ -11,9 +11,9 @@ from homeassistant.core import Context, HomeAssistant, ServiceCall, SupportsResp
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import entity_registry as er
 from homeassistant.util import dt as dt_util
-from pytest_homeassistant_custom_component.common import MockConfigEntry, async_fire_time_changed, async_mock_service
 
 from custom_components.appliance_autonotify.const import ANDROID_CHANNEL, CYCLE_SETTLE, DOMAIN, PREHEAT_SETTLE
+from tests.ha_testing import MockConfigEntry, async_fire_time_changed, async_mock_service
 
 from .conftest import (
     DISHWASHER_PROGRAMS,

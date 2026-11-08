@@ -8,7 +8,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 from homeassistant.setup import async_setup_component
-from pytest_homeassistant_custom_component.common import MockConfigEntry, async_fire_time_changed, async_mock_service
 
 from custom_components.appliance_autonotify.const import (
     DOMAIN,
@@ -18,6 +17,7 @@ from custom_components.appliance_autonotify.const import (
     VACUUM_MIDWAY_SETTLE,
     VACUUM_SETTLE,
 )
+from tests.ha_testing import MockConfigEntry, async_fire_time_changed, async_mock_service
 
 from .conftest import mock_supernotify
 from .test_watcher import ANDROID, ended, pass_time, set_state

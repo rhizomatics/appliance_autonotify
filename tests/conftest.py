@@ -11,9 +11,9 @@ from homeassistant.core import HomeAssistant, ServiceCall, SupportsResponse
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 from homeassistant.setup import async_setup_component
-from pytest_homeassistant_custom_component.common import MockConfigEntry, async_mock_service
 
 from custom_components.appliance_autonotify.const import DOMAIN
+from tests.ha_testing import MockConfigEntry, async_mock_service
 
 
 @pytest.fixture(autouse=True)
