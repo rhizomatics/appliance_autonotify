@@ -40,7 +40,7 @@ class MaintenanceList(TodoListEntity):
         self.async_on_remove(self._tracker.async_add_listener(self.async_write_ha_state))
 
     @property
-    def todo_items(self) -> list[TodoItem]:
+    def todo_items(self) -> list[TodoItem]:  # ty: ignore[invalid-property-type-override]
         return [
             TodoItem(
                 uid=f"{entry_id}{UID_SEPARATOR}{item.key}",

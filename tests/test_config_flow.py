@@ -21,7 +21,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 from custom_components.appliance_autonotify.compat import vol
 from custom_components.appliance_autonotify.const import DOMAIN, SUPERNOTIFY_MISSING, SUPERNOTIFY_PRESENT
 
-from .conftest import add_appliance, mock_dashboard, mock_dashboards, mock_supernotify, setup_watcher
+from .conftest import add_appliance, mock_dashboard, mock_dashboards, mock_supernotify, placeholders, schema, setup_watcher
 
 
 async def start_discovery(hass: HomeAssistant, auto_discover: bool = True) -> ConfigEntry:
@@ -43,7 +43,7 @@ def appliances(hass: HomeAssistant) -> dict[str | None, str]:
 def suggested(result: ConfigFlowResult) -> dict[str, Any]:
     """Suggested values of a form, with those in sections alongside the rest"""
     values: dict[str, Any] = {}
-    for key, field in result["data_schema"].schema.items():  # type: ignore[union-attr] #ty: ignore[unresolved-attribute]
+    for key, field in schema(result).items():
         for k in field.schema.schema if hasattr(field, "schema") else [key]:
             if k.description:
                 values[str(k)] = k.description["suggested_value"]
@@ -60,7 +60,7 @@ async def test_first_screen_sets_up_every_appliance(hass: HomeAssistant) -> None
         "supernotify": SUPERNOTIFY_MISSING,
     }
     # automatic discovery unless turned off
-    defaults = {str(k): k.default() for k in result["data_schema"].schema}
+    defaults = {str(k): k.default() for k in schema(result)}
     assert defaults == {"auto_discover": True}
 
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {"auto_discover": True})
@@ -132,7 +132,7 @@ async def test_without_automatic_discovery_appliances_are_offered(hass: HomeAssi
     # the switch is on the discovery entry, and turning it on sets up whatever is still on offer
     result = await hass.config_entries.options.async_init(discovery.entry_id)
     assert result["step_id"] == "discovery"
-    defaults = {str(k): k.default() for k in result["data_schema"].schema}
+    defaults = {str(k): k.default() for k in schema(result)}
     assert defaults == {"auto_discover": False}
     result = await hass.config_entries.options.async_configure(result["flow_id"], {"auto_discover": True})
     assert result["type"] is FlowResultType.CREATE_ENTRY
@@ -163,7 +163,7 @@ async def test_existing_install_without_discovery_entry(hass: HomeAssistant) -> 
     # adding to the integration gives the first screen, with only what isn't yet set up
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
     assert result["step_id"] == "user"
-    assert result["description_placeholders"]["found"] == "Appliances found:\n\n- Oven"
+    assert placeholders(result)["found"] == "Appliances found:\n\n- Oven"
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {"auto_discover": True})
     await hass.async_block_till_done()
     assert appliances(hass) == {dishwasher.device_id: "Dishwasher", oven.device_id: "Oven"}
@@ -183,7 +183,7 @@ async def test_power_flow(hass: HomeAssistant) -> None:
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
     assert result["type"] is FlowResultType.FORM
     assert result["step_id"] == "power"
-    defaults = {str(k): k.default() for k in result["data_schema"].schema if k.default is not vol.UNDEFINED}
+    defaults = {str(k): k.default() for k in schema(result) if k.default is not vol.UNDEFINED}
     assert defaults == {"threshold": 1, "grace_period": 60, "min_duration": 0, "switch_off_button": True}
 
     power = {"power_entity": "sensor.washer_power", "threshold": 5, "grace_period": 60, "min_duration": 60}
@@ -212,7 +212,7 @@ async def test_power_flow(hass: HomeAssistant) -> None:
         result["flow_id"], {"start": {}, "end": {"end_message": "Hang out the washing"}, "notify": {}}
     )
     assert result["step_id"] == "power"
-    assert "name" not in result["data_schema"].schema
+    assert "name" not in schema(result)
     assert suggested(result) == stored
     plug = {"switch_entity": "switch.washer_plug", "switch_off_button": False}
     result = await hass.config_entries.options.async_configure(result["flow_id"], power | plug | {"threshold": 3})
@@ -374,9 +374,9 @@ async def test_settings_without_supernotify(hass: HomeAssistant) -> None:
         "program_placeholder": "{program}",
     }
     # with no Live Activity, there's no title for the program to go in
-    assert not {"live_title", "live_detail"} & {str(k) for k in result["data_schema"].schema}
+    assert not {"live_title", "live_detail"} & {str(k) for k in schema(result)}
     # everything but whether to notify progress is tucked away in three sections
-    sections = {str(k): v for k, v in result["data_schema"].schema.items()}
+    sections = {str(k): v for k, v in schema(result).items()}
     for switch in ("notify_start", "notify_end", "maintenance", "notify_progress"):
         assert sections.pop(switch) is not None
     assert list(sections) == ["start", "end", "notify", "maintenance_items"]
@@ -425,11 +425,11 @@ async def test_settings_with_supernotify(hass: HomeAssistant) -> None:
     entry = await setup_watcher(hass, appliance, {"start_title": "{name}", "start_message": "{name} is go"})
 
     result = await hass.config_entries.options.async_init(entry.entry_id)
-    assert result["description_placeholders"]["supernotify"] == SUPERNOTIFY_PRESENT
+    assert placeholders(result)["supernotify"] == SUPERNOTIFY_PRESENT
     assert suggested(result)["start_title"] == "Dishwasher"
     assert suggested(result)["start_message"] == "Dishwasher is go"
     # progress isn't notified until asked for, and the choice isn't hidden away in a section
-    assert list(result["data_schema"].schema) == [
+    assert list(schema(result)) == [
         "notify_start",
         "notify_end",
         "maintenance",
@@ -441,7 +441,7 @@ async def test_settings_with_supernotify(hass: HomeAssistant) -> None:
         "notify",
         "maintenance_items",
     ]
-    switches = {str(k): k.default() for k in result["data_schema"].schema if k.default is not vol.UNDEFINED}
+    switches = {str(k): k.default() for k in schema(result) if k.default is not vol.UNDEFINED}
     assert switches == {
         "notify_start": False,
         "notify_end": True,
@@ -450,11 +450,11 @@ async def test_settings_with_supernotify(hass: HomeAssistant) -> None:
         "live_title": "name_program",
         "live_detail": "time_remaining",
     }
-    notify = next(v for k, v in result["data_schema"].schema.items() if k == "notify").schema.schema
+    notify = next(v for k, v in schema(result).items() if k == "notify").schema.schema
     # the notify entity list is only for use without Supernotify
     assert list(notify) == ["target", "custom_target", "deliveries"]
     # reminders and buttons on the end need Supernotify, so are only offered with it
-    end = next(v for k, v in result["data_schema"].schema.items() if k == "end").schema.schema
+    end = next(v for k, v in schema(result).items() if k == "end").schema.schema
     assert list(end) == ["end_title", "end_message", "reminder", "reminder_repeats"]
     assert notify["deliveries"].config["options"] == ["chimes", "email", "mobile_push", "phones"]
 
@@ -504,8 +504,8 @@ async def test_phases_are_notified_for_an_oven_unless_turned_off(hass: HomeAssis
     assert entry.runtime_data.notify_phase is True
 
     result = await hass.config_entries.options.async_init(entry.entry_id)
-    assert list(result["data_schema"].schema)[:4] == ["notify_start", "notify_end", "notify_phase", "notify_progress"]
-    assert next(k for k in result["data_schema"].schema if k == "notify_phase").default() is True
+    assert list(schema(result))[:4] == ["notify_start", "notify_end", "notify_phase", "notify_progress"]
+    assert next(k for k in schema(result) if k == "notify_phase").default() is True
 
     # left as it comes it isn't a setting, turned off it is
     form: dict[str, dict[str, Any]] = {"start": {}, "end": {}, "notify": {}}
@@ -523,7 +523,7 @@ async def test_phases_are_notified_for_an_oven_unless_turned_off(hass: HomeAssis
     entry = await setup_watcher(hass, other)
     assert entry.runtime_data.notify_phase is False
     result = await hass.config_entries.options.async_init(entry.entry_id)
-    assert next(k for k in result["data_schema"].schema if k == "notify_phase").default() is False
+    assert next(k for k in schema(result) if k == "notify_phase").default() is False
     result = await hass.config_entries.options.async_configure(result["flow_id"], form | {"notify_phase": True})
     await hass.async_block_till_done()
     assert entry.options == {"notify_phase": True}
@@ -531,7 +531,7 @@ async def test_phases_are_notified_for_an_oven_unless_turned_off(hass: HomeAssis
     # and an appliance that reports none has no switch for them
     entry = await setup_watcher(hass, add_appliance(hass))
     result = await hass.config_entries.options.async_init(entry.entry_id)
-    assert "notify_phase" not in result["data_schema"].schema
+    assert "notify_phase" not in schema(result)
 
 
 async def test_dashboard_is_chosen_from_those_there_are(hass: HomeAssistant) -> None:
@@ -542,7 +542,7 @@ async def test_dashboard_is_chosen_from_those_there_are(hass: HomeAssistant) -> 
     entry = await setup_watcher(hass, appliance, {"dashboard": "dashboard-garage"})
 
     result = await hass.config_entries.options.async_init(entry.entry_id)
-    dashboard = next(v for k, v in result["data_schema"].schema.items() if k == "dashboard")
+    dashboard = next(v for k, v in schema(result).items() if k == "dashboard")
     assert dashboard.config["options"] == [
         {"value": "dashboard-kitchen", "label": "Kitchen"},
         {"value": "lovelace", "label": "Overview"},
@@ -589,7 +589,7 @@ async def test_dashboards_with_the_same_title_are_told_apart(hass: HomeAssistant
     entry = await setup_watcher(hass, appliance)
 
     result = await hass.config_entries.options.async_init(entry.entry_id)
-    dashboard = next(v for k, v in result["data_schema"].schema.items() if k == "dashboard")
+    dashboard = next(v for k, v in schema(result).items() if k == "dashboard")
     assert [option["label"] for option in dashboard.config["options"]] == [
         "Kitchen",
         "Overview",

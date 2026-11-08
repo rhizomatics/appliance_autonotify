@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from types import SimpleNamespace
 from typing import Any
@@ -152,3 +153,23 @@ async def setup_watcher(
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
     return entry
+
+
+def schema(result: Mapping[str, Any]) -> dict[Any, Any]:
+    """The fields of the form a flow is showing"""
+    data_schema = result["data_schema"]
+    assert data_schema is not None
+    return data_schema.schema
+
+
+def placeholders(result: Mapping[str, Any]) -> Mapping[str, str]:
+    """What the description of the form a flow is showing is filled in with"""
+    found = result["description_placeholders"]
+    assert found is not None
+    return found
+
+
+def state_of(hass: HomeAssistant, entity_id: str) -> str:
+    state = hass.states.get(entity_id)
+    assert state is not None
+    return state.state

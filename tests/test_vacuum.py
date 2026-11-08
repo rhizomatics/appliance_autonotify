@@ -19,7 +19,7 @@ from custom_components.appliance_autonotify.const import (
     VACUUM_SETTLE,
 )
 
-from .conftest import mock_supernotify
+from .conftest import mock_supernotify, placeholders, schema
 from .test_watcher import ANDROID, ended, pass_time, set_state
 
 if TYPE_CHECKING:
@@ -89,7 +89,7 @@ async def setup_vacuum(hass: HomeAssistant, device_id: str, **options: object) -
 async def test_vacuum_is_set_up_automatically(hass: HomeAssistant) -> None:
     device_id, _ = add_vacuum(hass)
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
-    assert result["description_placeholders"]["found"] == "Appliances found:\n\n- Bruno"
+    assert placeholders(result)["found"] == "Appliances found:\n\n- Bruno"
     await hass.config_entries.flow.async_configure(result["flow_id"], {"auto_discover": True})
     await hass.async_block_till_done()
 
@@ -561,7 +561,7 @@ async def test_vacuum_wait_on_its_dock_is_a_setting(hass: HomeAssistant, freezer
     # offered with the end, as it comes and so not kept
     result = await hass.config_entries.options.async_init(entry.entry_id)
     assert result["data_schema"] is not None
-    end = next(v for k, v in result["data_schema"].schema.items() if k == "end")
+    end = next(v for k, v in schema(result).items() if k == "end")
     assert next(k for k in end.schema.schema if k == "grace_period").default() == VACUUM_SETTLE
     form: dict[str, dict[str, object]] = {"start": {}, "notify": {}}
     await hass.config_entries.options.async_configure(result["flow_id"], form | {"end": {"grace_period": VACUUM_SETTLE}})
@@ -812,10 +812,10 @@ async def test_vacuum_live_activity_settings(hass: HomeAssistant) -> None:
 
     result = await hass.config_entries.options.async_init(entry.entry_id)
     assert result["data_schema"] is not None
-    fields = {str(k): k for k in result["data_schema"].schema}
+    fields = {str(k): k for k in schema(result)}
     assert "notify_progress" not in fields
     assert (fields["live_title"].default(), fields["live_detail"].default()) == ("name", "program_status")
-    detail = result["data_schema"].schema[fields["live_detail"]]
+    detail = schema(result)[fields["live_detail"]]
     assert detail.config["options"] == ["program_status", "status", "program"]
 
     form: dict[str, object] = {"start": {}, "end": {}, "notify": {}}

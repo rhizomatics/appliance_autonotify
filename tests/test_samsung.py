@@ -20,7 +20,7 @@ from custom_components.appliance_autonotify import discovery
 from custom_components.appliance_autonotify.const import CYCLE_SETTLE, DOMAIN
 from custom_components.appliance_autonotify.discovery import find_appliances
 
-from .conftest import mock_supernotify
+from .conftest import mock_supernotify, placeholders
 from .test_config_flow import start_discovery
 from .test_watcher import ended, pass_time, set_state
 
@@ -102,7 +102,7 @@ async def setup_appliance(hass: HomeAssistant, device_id: str, **options: object
 async def test_samsung_dryer_is_found(hass: HomeAssistant) -> None:
     dryer = smartthings_dryer(hass)
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
-    assert result["description_placeholders"]["found"] == "Appliances found:\n\n- Asciugatrice"
+    assert placeholders(result)["found"] == "Appliances found:\n\n- Asciugatrice"
     await hass.config_entries.flow.async_configure(result["flow_id"], {"auto_discover": True})
     await hass.async_block_till_done()
     assert hass.config_entries.async_entry_for_domain_unique_id(DOMAIN, dryer["device_id"]) is not None
@@ -211,7 +211,7 @@ async def test_local_network_preferred_to_the_cloud(hass: HomeAssistant) -> None
     smartthings_dryer(hass)
     local = localthings_dryer(hass)
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
-    assert result["description_placeholders"]["found"] == "Appliances found:\n\n- Samsung Dryer"
+    assert placeholders(result)["found"] == "Appliances found:\n\n- Samsung Dryer"
     await hass.config_entries.flow.async_configure(result["flow_id"], {"auto_discover": True})
     await hass.async_block_till_done()
     appliances = [e.unique_id for e in hass.config_entries.async_entries(DOMAIN) if e.data.get("device_id")]

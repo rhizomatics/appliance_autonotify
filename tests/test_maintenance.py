@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 from datetime import timedelta
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import pytest
 from homeassistant.const import CONF_DEVICE_ID, EVENT_HOMEASSISTANT_FINAL_WRITE
@@ -17,7 +17,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry, async_
 from custom_components.appliance_autonotify.const import DOMAIN, VACUUM_SETTLE
 from custom_components.appliance_autonotify.maintenance import DATA_MAINTENANCE, STORAGE_KEY
 
-from .conftest import FakeAppliance, add_appliance, mock_supernotify, setup_watcher
+from .conftest import FakeAppliance, add_appliance, mock_supernotify, schema, setup_watcher, state_of
 from .test_vacuum import add_vacuum, advance, setup_vacuum
 from .test_watcher import set_state
 
@@ -48,7 +48,8 @@ async def press(hass: HomeAssistant, action: str) -> None:
 
 async def items(hass: HomeAssistant) -> list[dict[str, Any]]:
     result = await hass.services.async_call("todo", "get_items", {"entity_id": LIST}, blocking=True, return_response=True)
-    return list(result[LIST]["items"])  # type: ignore[index]
+    assert result is not None
+    return cast("list[dict[str, Any]]", cast("dict[str, Any]", result[LIST])["items"])
 
 
 def tag(entry_id: str, key: str) -> str:
@@ -115,7 +116,7 @@ async def test_due_after_its_cycles(hass: HomeAssistant) -> None:
 
     await cycle(hass, appliance)
     assert not maintenance_calls(calls)
-    assert hass.states.get(LIST).state == "0"
+    assert state_of(hass, LIST) == "0"
 
     await cycle(hass, appliance)
     assert calls[-1].data == {
@@ -128,7 +129,7 @@ async def test_due_after_its_cycles(hass: HomeAssistant) -> None:
         ],
         "extra_data": {"notification_icon": "mdi:wrench-clock", "mobile_push_notification_tag": filter_tag},
     }
-    assert hass.states.get(LIST).state == "1"
+    assert state_of(hass, LIST) == "1"
     assert await items(hass) == [
         {
             "uid": f"{entry.entry_id}|filter",
@@ -181,7 +182,7 @@ async def test_done_and_later_from_the_notification(hass: HomeAssistant, freezer
     freezer.tick(timedelta(days=2))
     async_fire_time_changed(hass)
     await hass.async_block_till_done()
-    assert hass.states.get(LIST).state == "1"
+    assert state_of(hass, LIST) == "1"
     told = len(maintenance_calls(calls))
     # and told of again with the next cycle, along with the filter due again by then
     await cycle(hass, appliance)
@@ -453,7 +454,7 @@ async def test_settings(hass: HomeAssistant) -> None:
     mock_supernotify(hass)
     entry = await setup_watcher(hass, appliance)
     result = await hass.config_entries.options.async_init(entry.entry_id)
-    items_section = next(v for k, v in result["data_schema"].schema.items() if k == "maintenance_items").schema.schema
+    items_section = next(v for k, v in schema(result).items() if k == "maintenance_items").schema.schema
     assert {str(k): k.default() for k in items_section} == {"maintenance_filter": 30, "maintenance_machine_clean": 60}
 
     # left as they come, nothing is kept, and an item at 0 is one taken out
@@ -485,7 +486,7 @@ async def test_settings(hass: HomeAssistant) -> None:
     )
     await hass.async_block_till_done()
     result = await hass.config_entries.options.async_init(entry.entry_id)
-    assert "maintenance" in {str(k) for k in result["data_schema"].schema}
+    assert "maintenance" in {str(k) for k in schema(result)}
     await hass.config_entries.options.async_configure(
         result["flow_id"],
         {

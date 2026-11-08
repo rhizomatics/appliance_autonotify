@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.const import CONF_DEVICE_ID
-from homeassistant.core import Context, HomeAssistant, ServiceCall, SupportsResponse
+from homeassistant.core import Context, HomeAssistant, ServiceCall, ServiceResponse, SupportsResponse
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import entity_registry as er
 from homeassistant.util import dt as dt_util
@@ -752,7 +752,7 @@ async def test_progress_update_cannot_overtake_the_end(hass: HomeAssistant) -> N
     held = asyncio.Event()
     release = asyncio.Event()
 
-    async def slow_enquiry(call: ServiceCall) -> dict[str, list[str]]:
+    async def slow_enquiry(call: ServiceCall) -> ServiceResponse:
         if not held.is_set():
             held.set()
             await release.wait()
