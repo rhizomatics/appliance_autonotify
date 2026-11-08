@@ -66,7 +66,8 @@
                     "notify_progress": "Notify progress",
                     "dashboard": "Dashboard to open",
                     "live_title": "Live Activity title",
-                    "live_detail": "Live Activity shows"
+                    "live_detail": "Live Activity shows",
+                    "maintenance": "Track maintenance"
                 },
                 "data_description": {
                     "notify_start": "Send a notification when the appliance starts. When off, the Live Activity is still opened, silently and on phones only.",
@@ -75,7 +76,8 @@
                     "dashboard": "Opened when a notification or the Live Activity is tapped. Leave empty to open the app where it was. Set to a dashboard named for the appliance or its type, such as \"Dishwasher\" or \"Washing Machine\", if there was one when the appliance was added.",
                     "notify_progress": "Send a notification every 10% of the cycle. When off, progress is only shown on the progress bar of the Live Activity, which is updated silently.",
                     "live_title": "What the Live Activity is titled with. The program is useful beside the name when the time left takes the place of the message, as it does on an iPhone's Lock Screen. Choose the name only if the program names are too long to fit, or if the appliance is always on the same program.",
-                    "live_detail": "Show the time left, where the appliance reports when it will finish, or in its place the program, the status, which is what it's doing within its cycle, such as drying or a robot vacuum relocating, or both. The program can be the whole cycle, or a phase of it, such as a pre-rinse, and for a robot vacuum is its cleaning mode. Whichever the appliance doesn't report is left out."
+                    "live_detail": "Show the time left, where the appliance reports when it will finish, or in its place the program, the status, which is what it's doing within its cycle, such as drying or a robot vacuum relocating, or both. The program can be the whole cycle, or a phase of it, such as a pre-rinse, and for a robot vacuum is its cleaning mode. Whichever the appliance doesn't report is left out.",
+                    "maintenance": "Keep count of the cycles, and of how much life the parts the appliance reports on have left, and put whatever is due on the Appliance maintenance to-do list, with a notification as it falls due. Offered once on the end notification if left off."
                 },
                 "sections": {
                     "start": {
@@ -116,6 +118,17 @@
                             "target": "Who or what to notify, as for any Supernotify notification. Leave empty for Supernotify to choose.",
                             "custom_target": "Targets outside of Home Assistant, such as e-mail addresses or phone numbers.",
                             "deliveries": "Limit notifications to these Supernotify deliveries. Leave empty for Supernotify to choose."
+                        }
+                    },
+                    "maintenance_items": {
+                        "name": "Maintenance",
+                        "description": "Cycles between each item, when maintenance is tracked. 0 to leave an item out. The count starts when tracking is turned on, and is set with the Reset maintenance action for one already under way.",
+                        "data": {
+                            "maintenance_drum_clean": "Drum clean",
+                            "maintenance_filter": "Filter clean",
+                            "maintenance_lint_filter": "Lint filter clean",
+                            "maintenance_machine_clean": "Machine clean",
+                            "maintenance_condenser": "Condenser clean"
                         }
                     }
                 }
@@ -171,6 +184,51 @@
                 "program": "Program",
                 "status": "Status",
                 "program_status": "Program and status"
+            }
+        }
+    },
+    "entity": {
+        "todo": {
+            "maintenance": {
+                "name": "Appliance maintenance"
+            }
+        }
+    },
+    "services": {
+        "reset_maintenance": {
+            "name": "Reset maintenance",
+            "description": "Says maintenance has been done, for one item of an appliance or all it has, or sets the cycles since it was last done, as known from before it was tracked here. A part whose life the appliance reports is reset with its own integration's button where it has one.",
+            "fields": {
+                "config_entry_id": {
+                    "name": "Appliance",
+                    "description": "The appliance, as its Appliance Auto Notify entry"
+                },
+                "item": {
+                    "name": "Item",
+                    "description": "The item, such as drum_clean or the entity of a part, or leave out for all of them"
+                },
+                "cycles": {
+                    "name": "Cycles",
+                    "description": "The cycles since it was last done, 0 for done now"
+                }
+            }
+        },
+        "snooze_maintenance": {
+            "name": "Snooze maintenance",
+            "description": "Puts off maintenance that's due, for one item of an appliance or all it has, after which it's due again.",
+            "fields": {
+                "config_entry_id": {
+                    "name": "Appliance",
+                    "description": "The appliance, as its Appliance Auto Notify entry"
+                },
+                "item": {
+                    "name": "Item",
+                    "description": "The item, such as drum_clean or the entity of a part, or leave out for all of them"
+                },
+                "days": {
+                    "name": "Days",
+                    "description": "How long to put it off"
+                }
             }
         }
     }

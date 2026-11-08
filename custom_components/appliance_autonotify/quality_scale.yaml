@@ -5,12 +5,13 @@
 # (HA 2026.10; 54 rules: Bronze 20, Silver 10, Gold 21, Platinum 3). No rules added, removed,
 # renamed or moved since the set Supernotify verified on 2026-08-06.
 #
-# The integration has no entity platforms: it watches other integrations' entities and notifies
-# through Supernotify or notify entities, with one device per appliance entry (device.py). The
-# entity rules are exempt for that reason.
+# The integration watches other integrations' entities and notifies through Supernotify or notify
+# entities, with one device per appliance entry (device.py). Its one entity is the maintenance
+# to-do list, a todo platform on the discovery entry (todo.py).
 #
 # Changelog
 # 2026-11-03: first file. Silver met once docs-removal-instructions is done (same change).
+# 2026-11-08: maintenance, with the integration's first entity (a to-do list) and two actions.
 
 rules:
   # ==================
@@ -18,8 +19,8 @@ rules:
   # ==================
 
   action-setup:
-    status: exempt
-    comment: Registers no actions. It calls supernotify.notify, notify.send_message and switch.turn_off.
+    status: done
+    comment: "reset_maintenance and snooze_maintenance are registered in async_setup (__init__.py). It also calls supernotify.notify, notify.send_message and switch.turn_off."
 
   appropriate-polling:
     status: exempt
@@ -50,8 +51,8 @@ rules:
     comment: No requirements in manifest.json.
 
   docs-actions:
-    status: exempt
-    comment: Provides no actions.
+    status: done
+    comment: "README.md \"Maintenance\" describes reset_maintenance and snooze_maintenance; services.yaml has their fields."
 
   docs-conditions:
     status: exempt
@@ -74,16 +75,16 @@ rules:
     comment: Provides no triggers.
 
   entity-event-setup:
-    status: exempt
-    comment: No entities. Event and state listeners belong to the watcher and are removed through entry.async_on_unload.
+    status: done
+    comment: "The to-do list subscribes to the maintenance tracker in async_added_to_hass with async_on_remove (todo.py). The watchers' listeners are removed through entry.async_on_unload."
 
   entity-unique-id:
-    status: exempt
-    comment: No entities.
+    status: done
+    comment: "The one to-do list, on the single discovery entry, has unique ID \"maintenance\" (todo.py)."
 
   has-entity-name:
-    status: exempt
-    comment: No entities.
+    status: done
+    comment: "The to-do list sets _attr_has_entity_name with a translation key (todo.py)."
 
   runtime-data:
     status: done
@@ -112,8 +113,8 @@ rules:
   # ==================
 
   action-exceptions:
-    status: exempt
-    comment: Provides no actions.
+    status: done
+    comment: "The maintenance actions raise ServiceValidationError for an appliance not tracked, an unknown item, or cycles set on a part (__init__.py)."
 
   config-entry-unloading:
     status: done
@@ -131,7 +132,7 @@ rules:
 
   entity-unavailable:
     status: exempt
-    comment: No entities.
+    comment: "The to-do list holds what the integration itself tracks, so there is nothing for it to lose contact with."
 
   integration-owner:
     status: done
@@ -144,8 +145,8 @@ rules:
       is the source integration's to report.
 
   parallel-updates:
-    status: exempt
-    comment: No entity platforms.
+    status: done
+    comment: "PARALLEL_UPDATES = 0 in todo.py: the list only reflects the tracker, with nothing to fetch."
 
   reauthentication-flow:
     status: exempt
@@ -219,19 +220,19 @@ rules:
 
   entity-category:
     status: exempt
-    comment: No entities.
+    comment: "The one entity, the maintenance to-do list, is a primary entity."
 
   entity-device-class:
     status: exempt
-    comment: No entities.
+    comment: "To-do lists have no device classes."
 
   entity-disabled-by-default:
     status: exempt
-    comment: No entities.
+    comment: "The one entity, the maintenance to-do list, is wanted by anyone who tracks maintenance."
 
   entity-translations:
-    status: exempt
-    comment: No entities.
+    status: done
+    comment: "The to-do list is named through translations (entity.todo.maintenance)."
 
   exception-translations:
     status: todo
@@ -240,8 +241,8 @@ rules:
       "No vacuum entity found") are literal strings; translations/en.json has no "exceptions".
 
   icon-translations:
-    status: exempt
-    comment: No entities.
+    status: done
+    comment: "icons.json has the to-do list's icon and those of the two actions."
 
   reconfiguration-flow:
     status: exempt

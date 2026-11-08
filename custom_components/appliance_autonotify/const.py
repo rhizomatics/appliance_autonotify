@@ -107,6 +107,69 @@ ACTION_TITLES: Final[dict[str, dict[str, str]]] = {
     "it": {ACTION_FINISHED: "Finito", ACTION_REMIND: "Ricordamelo dopo", ACTION_SWITCH_OFF: "Spegni presa"},
 }
 MOBILE_ACTION_EVENT: Final[str] = "mobile_app_notification_action"
+# action buttons Android shows on a notification, any after those being left out
+ANDROID_BUTTONS: Final[int] = 3
+
+# whether maintenance is tracked for the appliance, unset until it's been asked for or turned down, so it's offered
+# once, on the first end notification, rather than left for someone to go looking for
+CONF_MAINTENANCE: Final[str] = "maintenance"
+# the cycles between each item of maintenance, by item, as `maintenance_drum_clean`, 0 leaving the item out
+CONF_MAINTENANCE_PREFIX: Final[str] = "maintenance_"
+# the items each type of appliance starts with, and how many cycles apart, generous since vendors are keen to sell
+# cleaning tablets and spares, all to be changed or taken out in its settings
+MAINTENANCE_ITEMS: Final[dict[str, dict[str, int]]] = {
+    "washer": {"drum_clean": 30, "filter": 50},
+    "washer_dryer": {"drum_clean": 30, "filter": 50, "lint_filter": 20},
+    "dishwasher": {"filter": 30, "machine_clean": 60},
+    "dryer": {"condenser": 30},
+}
+# an entity of the appliance's own that says how much life a part has left, as a robot vacuum's brushes and filters,
+# which is the item instead of a count of cycles, due once it's this low
+LIFESPAN_KEY: Final[str] = "lifespan"
+LIFESPAN_DUE: Final[float] = 10
+# the button the same integration has to reset that part, by the translation key, as Ecovacs has it
+LIFESPAN_RESET_PREFIX: Final[str] = "reset_"
+# days that later is, for one item or all of an appliance's, after which it's due again
+MAINTENANCE_SNOOZE_DAYS: Final[int] = 30
+# buttons on the notification of an item due, followed by the entry id and the item, and on the first end
+# notification of an appliance whose maintenance isn't tracked, followed by the entry id
+ACTION_MAINTAINED: Final[str] = "APPLIANCE_MAINTAINED_"
+ACTION_MAINTENANCE_LATER: Final[str] = "APPLIANCE_MAINTENANCE_LATER_"
+ACTION_TRACK_MAINTENANCE: Final[str] = "APPLIANCE_TRACK_MAINTENANCE_"
+MAINTENANCE_ACTION_TITLES: Final[dict[str, dict[str, str]]] = {
+    "en": {ACTION_MAINTAINED: "Done", ACTION_MAINTENANCE_LATER: "In a Month", ACTION_TRACK_MAINTENANCE: "Track Maintenance"},
+    "it": {ACTION_MAINTAINED: "Fatto", ACTION_MAINTENANCE_LATER: "Tra un mese", ACTION_TRACK_MAINTENANCE: "Segui manutenzione"},
+}
+# the name of each item, and what its notification says, by the language of Home Assistant as for the buttons
+MAINTENANCE_NAMES: Final[dict[str, dict[str, str]]] = {
+    "en": {
+        "drum_clean": "Drum clean",
+        "filter": "Filter clean",
+        "lint_filter": "Lint filter clean",
+        "machine_clean": "Machine clean",
+        "condenser": "Condenser clean",
+    },
+    "it": {
+        "drum_clean": "Pulizia del cestello",
+        "filter": "Pulizia del filtro",
+        "lint_filter": "Pulizia del filtro lanugine",
+        "machine_clean": "Pulizia della macchina",
+        "condenser": "Pulizia del condensatore",
+    },
+}
+MAINTENANCE_MESSAGES: Final[dict[str, dict[str, str]]] = {
+    "en": {
+        "cycle": "{item}, 1 cycle since the last one",
+        "cycles": "{item}, {cycles} cycles since the last one",
+        "lifespan": "{item} at {value}%",
+    },
+    "it": {
+        "cycle": "{item}, 1 ciclo dall'ultima",
+        "cycles": "{item}, {cycles} cicli dall'ultima",
+        "lifespan": "{item} al {value}%",
+    },
+}
+
 # the text of the Android status bar chip, which shows it in full only up to about 7 characters
 PROGRESS_CHIP: Final[str] = "{progress}%"
 PREHEAT_PHASE: Final[str] = "Pre-heating"

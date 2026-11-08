@@ -71,7 +71,7 @@ async def test_power_end_waited_for_through_a_restart(hass: HomeAssistant, freez
     assert len(calls) == 1
     await wait(hass, freezer, 1)
     assert messages(calls) == ["Washer started", "Washer is finished", "Washer is finished"]
-    assert calls[2].data == ended("Washer", entry.entry_id, "mdi:washing-machine", force_resend=True)
+    assert calls[2].data == ended("Washer", entry.entry_id, "mdi:washing-machine", track=True, force_resend=True)
     assert not entry.runtime_data.running
 
 

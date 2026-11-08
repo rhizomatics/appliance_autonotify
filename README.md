@@ -185,6 +185,39 @@ With Supernotify, the end notification has buttons, in the language of Home Assi
 
 With a *Reminder* set in the *End message* section, the end notification is sent again after that many minutes, up to the *Reminder repeats* times, 3 unless changed, until *Finished* is pressed or the next cycle starts. Supernotify adds the buttons of its own scenarios after these, and Android shows only the first 3.
 
+### Maintenance
+
+Nothing is tracked until it's asked for. For an appliance with something to maintain, the first end notification has
+one more button, *Track Maintenance*, which turns it on, as does *Track maintenance* in its settings. Either way it's
+offered only the once. Where the end notification already has three buttons, which is all Android shows, it takes the
+place of *Remind Later* on that one notification.
+
+Once on, each finished cycle is counted, and the appliance starts with a set of items for its type, each due after a
+number of cycles, to change or take out (0) in the *Maintenance* section of its settings:
+
+| Appliance       | Items, and cycles apart                         |
+| --------------- | ----------------------------------------------- |
+| Washing machine | Drum clean 30, filter clean 50                  |
+| Washer dryer    | Drum clean 30, filter clean 50, lint filter 20  |
+| Dishwasher      | Filter clean 30, machine clean 60               |
+| Dryer           | Condenser clean 30                              |
+
+An appliance whose integration reports how much life a part has left as a percentage, such as the brushes and filters
+of an Ecovacs robot vacuum, has an item for each of those instead, due once it's down to 10%, and told of as soon as it
+is, whether or not the vacuum is cleaning.
+
+Whatever is due is on the one *Appliance maintenance* to-do list, held by the *Automatic discovery* entry, and is
+told of with a notification as it falls due, the once:
+
+| Where                | What it does                                                                                |
+| -------------------- | ------------------------------------------------------------------------------------------- |
+| Done, or ticked off  | Counts from 0 again. A part is reset with its integration's own button where it has one, and otherwise left off the list until it reads as replaced |
+| In a Month, or deleted from the list | Put off for 30 days, after which it's due, and told of, again             |
+
+The *Reset maintenance* action says it's done without the notification, or sets the cycles since it was last done,
+such as for an appliance already counted another way, and *Snooze maintenance* puts it off, for one item or all of
+an appliance's. Done for all of them resets only the parts that are due, so the life of the rest is kept.
+
 ### Oven Pre-heating
 
 An oven with no timer set has no progress to report, so while it warms up, on any program, the bar is its

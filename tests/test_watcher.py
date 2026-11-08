@@ -28,14 +28,16 @@ from .conftest import (
 ANDROID = {"channel": ANDROID_CHANNEL, "importance": "high", "sticky": True}
 
 
-def ended(name: str, entry_id: str, icon: str, switch: bool = False, **extra: Any) -> dict[str, Any]:
-    """The end notification, with its buttons"""
-    actions = [
-        {"action": f"APPLIANCE_FINISHED_{entry_id}", "title": "Finished"},
-        {"action": f"APPLIANCE_REMIND_{entry_id}", "title": "Remind Later"},
-    ]
+def ended(name: str, entry_id: str, icon: str, switch: bool = False, track: bool = False, **extra: Any) -> dict[str, Any]:
+    """The end notification, with its buttons, the first of an appliance with maintenance to track offering that, in
+    place of Remind Later where there'd otherwise be more than Android shows"""
+    actions = [{"action": f"APPLIANCE_FINISHED_{entry_id}", "title": "Finished"}]
+    if not (switch and track):
+        actions.append({"action": f"APPLIANCE_REMIND_{entry_id}", "title": "Remind Later"})
     if switch:
         actions.append({"action": f"APPLIANCE_SWITCH_OFF_{entry_id}", "title": "Switch Off"})
+    if track:
+        actions.append({"action": f"APPLIANCE_TRACK_MAINTENANCE_{entry_id}", "title": "Track Maintenance"})
     return {
         "message": f"{name} is finished",
         "title": name,
@@ -86,7 +88,7 @@ async def test_cycle_with_supernotify(hass: HomeAssistant) -> None:
         "delivery": ["mobile_push", "phones"],
         "extra_data": {"mobile_push_notification_tag": tag, "mobile_push_clear_notification": True},
     }
-    assert calls[2].data == ended("Dishwasher", entry.entry_id, "mdi:dishwasher", force_resend=True)
+    assert calls[2].data == ended("Dishwasher", entry.entry_id, "mdi:dishwasher", track=True, force_resend=True)
 
     # finished only once
     await set_state(hass, appliance.cycle, "inactive")
@@ -1040,7 +1042,7 @@ async def test_power_monitored_cycle(hass: HomeAssistant, freezer) -> None:
     await pass_time(hass, 0)
     assert len(calls) == 3
     assert calls[1].data["extra_data"] == {"mobile_push_notification_tag": tag, "mobile_push_clear_notification": True}
-    assert calls[2].data == ended("Washer", entry.entry_id, "mdi:washing-machine", force_resend=True)
+    assert calls[2].data == ended("Washer", entry.entry_id, "mdi:washing-machine", track=True, force_resend=True)
 
     # ended only once
     await set_state(hass, "sensor.washer_power", "0")
@@ -1241,7 +1243,7 @@ async def test_switch_off_once_finished(hass: HomeAssistant, freezer, caplog) ->
     hass.states.async_set("switch.washer_plug", "on")
     entry = await setup_power_watcher(hass, switch_entity="switch.washer_plug")
     await finish_power_cycle(hass, freezer)
-    assert calls[2].data == ended("Washer", entry.entry_id, "mdi:washing-machine", switch=True, force_resend=True)
+    assert calls[2].data == ended("Washer", entry.entry_id, "mdi:washing-machine", switch=True, track=True, force_resend=True)
 
     await press(hass, f"APPLIANCE_SWITCH_OFF_{entry.entry_id}")
     assert [c.data for c in switched] == [{"entity_id": "switch.washer_plug"}]
@@ -1275,7 +1277,7 @@ async def test_switch_off_only_offered_with_a_plug_to_switch(hass: HomeAssistant
     # a plug chosen that has since gone
     entry = await setup_power_watcher(hass, switch_entity="switch.washer_plug")
     await finish_power_cycle(hass, freezer)
-    assert calls[2].data == ended("Washer", entry.entry_id, "mdi:washing-machine", force_resend=True)
+    assert calls[2].data == ended("Washer", entry.entry_id, "mdi:washing-machine", track=True, force_resend=True)
     # nor is a button left from before answered
     await press(hass, f"APPLIANCE_SWITCH_OFF_{entry.entry_id}")
     assert not switched
@@ -1288,7 +1290,7 @@ async def test_switch_off_button_turned_off(hass: HomeAssistant, freezer) -> Non
     hass.states.async_set("switch.washer_plug", "on")
     entry = await setup_power_watcher(hass, switch_entity="switch.washer_plug", switch_off_button=False)
     await finish_power_cycle(hass, freezer)
-    assert calls[2].data == ended("Washer", entry.entry_id, "mdi:washing-machine", force_resend=True)
+    assert calls[2].data == ended("Washer", entry.entry_id, "mdi:washing-machine", track=True, force_resend=True)
     await press(hass, f"APPLIANCE_SWITCH_OFF_{entry.entry_id}")
     assert not switched
 
@@ -1301,7 +1303,7 @@ async def test_switch_off_is_not_for_a_discovered_appliance(hass: HomeAssistant)
     entry = await setup_watcher(hass, appliance, {"switch_entity": "switch.washer_plug"})
     await set_state(hass, appliance.cycle, "run")
     await set_state(hass, appliance.cycle, "finished")
-    assert calls[2].data == ended("Dishwasher", entry.entry_id, "mdi:dishwasher", force_resend=True)
+    assert calls[2].data == ended("Dishwasher", entry.entry_id, "mdi:dishwasher", track=True, force_resend=True)
 
 
 async def test_buttons_in_the_language_of_home_assistant(hass: HomeAssistant, freezer) -> None:
@@ -1311,7 +1313,11 @@ async def test_buttons_in_the_language_of_home_assistant(hass: HomeAssistant, fr
     hass.states.async_set("switch.washer_plug", "on")
     await setup_power_watcher(hass, switch_entity="switch.washer_plug", reminder=45)
     await finish_power_cycle(hass, freezer)
-    assert [a["title"] for a in calls[2].data["actions"]] == ["Finito", "Ricordamelo dopo", "Spegni presa"]
+    assert [a["title"] for a in calls[2].data["actions"]] == [
+        "Finito",
+        "Spegni presa",
+        "Segui manutenzione",
+    ]
 
 
 async def test_reminders_stop_when_unloaded(hass: HomeAssistant, freezer) -> None:
