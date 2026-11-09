@@ -86,8 +86,8 @@ jobs:
       - name: Pin Home Assistant ${{ matrix.ha-version }}
         if: matrix.ha-override
         run: |
-          uv pip uninstall pytest-homeassistant pytest-homeassistant-custom-component
           if [ "${{ matrix.ha-test-package }}" = "pytest-homeassistant" ]; then
+            uv pip uninstall pytest-homeassistant-custom-component
             uv pip install --no-config "homeassistant==${{ matrix.ha-override }}" "pytest-homeassistant==${{ matrix.ha-override }}"
           else
             uv pip install --no-config "homeassistant==${{ matrix.ha-override }}" pytest-homeassistant-custom-component

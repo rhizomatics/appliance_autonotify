@@ -68,7 +68,7 @@ environments = [
 ]
 
 exclude-newer = "7 days"
-exclude-newer-package = { homeassistant_repl = false, ruff = "2 days", homeassistant = "2 days", homeassistant-stubs = "2 days", pytest-homeassistant-custom-component = "2 days", uv = "2 days" }
+exclude-newer-package = { homeassistant_repl = false, ruff = "2 days", homeassistant = "2 days", homeassistant-stubs = "2 days", pytest-homeassistant = "2 days", pytest-homeassistant-custom-component = "2 days", uv = "2 days" }
 add-bounds = "major"
 # Home Assistant pins uv exactly, and under `uv run` the venv's uv comes first on PATH,
 # shadowing the mise-managed one. Floor at the latest uv security fix (GHSA-hq85-5cpj-mr62).
@@ -95,6 +95,13 @@ allow-star-arg-any = true
 
 [tool.ruff.format]
 preview = true
+
+# only one of the two test helper packages is installed at a time
+[[tool.ty.overrides]]
+include = ["tests/ha_testing.py"]
+
+[tool.ty.overrides.rules]
+unresolved-import = "ignore"
 
 [tool.codespell]
 ignore-words-list = "hass"

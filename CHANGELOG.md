@@ -2,6 +2,9 @@
 title: What's New
 ---
 
+# 0.14.0
+- Maintenance reminders for appliances
+
 # 0.13.0
 ## ✨ Enhancements
 - A cycle under way survives a Home Assistant restart
