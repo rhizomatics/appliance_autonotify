@@ -192,6 +192,8 @@ one more button, *Track Maintenance*, which turns it on, as does *Track maintena
 offered only the once. Where the end notification already has three buttons, which is all Android shows, it takes the
 place of *Remind Later* on that one notification.
 
+![Switch on Maintenance](./assets/images/track_maint.png)
+
 Once on, each finished cycle is counted, and the appliance starts with a set of items for its type, each due after a
 number of cycles, to change or take out (0) in the *Maintenance* section of its settings:
 
