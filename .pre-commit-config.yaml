@@ -31,12 +31,14 @@ repos:
           - --quiet
         files: ^(custom_components)/.+\.py$
   # mypy from the project's own environment, so it type checks against the locked Home Assistant
-  # (probatio since 2026.10) rather than a separately resolved set of stubs that drifts from it
+  # (probatio since 2026.10) rather than a separately resolved set of stubs that drifts from it.
+  # --frozen syncs the environment to uv.lock first, without re-locking: the exclude-newer window
+  # moves daily, so a re-lock here would change uv.lock and fail the hook
   - repo: local
     hooks:
       - id: mypy
         name: mypy
-        entry: uv run --no-sync mypy --pretty --explicit-package-bases --show-error-codes --show-error-context
+        entry: uv run --frozen mypy --pretty --explicit-package-bases --show-error-codes --show-error-context
         language: system
         types_or: [python, pyi]
         require_serial: true
@@ -53,5 +55,5 @@ repos:
     rev: v0.0.95
     hooks:
       - id: ty
-        # docs group for docgen's bs4
-        args: [--isolated, --no-python-downloads, --group, docs]
+        # docs group for docgen's bs4; --frozen as for mypy above
+        args: [--frozen, --isolated, --no-python-downloads, --group, docs]
