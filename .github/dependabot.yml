@@ -46,18 +46,3 @@ updates:
       uv-security:
         applies-to: security-updates
         patterns: ["*"]
-
-  - package-ecosystem: docker
-    directory: /
-    schedule:
-      interval: cron
-      cronjob: "0 6 1,15 * *"
-    cooldown:
-      default-days: 7
-    groups:
-      docker:
-        patterns: ["*"]
-        update-types: [minor, patch]
-      docker-security:
-        applies-to: security-updates
-        patterns: ["*"]
