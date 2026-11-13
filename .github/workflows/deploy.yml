@@ -8,31 +8,10 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-  release:
-    # edited too, so the zip is rebuilt when a release is moved to a new tag
-    types: [published, edited]
+  # releases are published, with their zip, by release.yml
 
 jobs:
-  release-zip:
-    # separate from build so HACS can download the zip as soon as possible
-    if: github.event_name == 'release'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-    - uses: actions/checkout@v7.0.1
-    - name: Package release zip
-      run: |
-        cd custom_components/appliance_autonotify
-        zip -r "${{ github.workspace }}/appliance_autonotify.zip" . -x "__pycache__/*" "*/__pycache__/*"
-    - name: Upload release zip asset
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: gh release upload "${{ github.event.release.tag_name }}" appliance_autonotify.zip --clobber
-
   build:
-    # an edited release only needs its zip rebuilt
-    if: github.event.action != 'edited'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -67,7 +46,7 @@ jobs:
       run: |
         uv run pytest . --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov=custom_components.appliance_autonotify --cov-report=xml --cov-report=html
     - name: Generate badges
-      # the tests of a pull request aren't those of main, and a release has nothing new to show
+      # the tests of a pull request aren't those of main
       if: github.event_name == 'push'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -107,7 +86,7 @@ jobs:
         sudo apt-get install pngquant
         uv run properdocs build
     - name: Upload docs site
-      # only main is published, a pull request or release just proves the docs build
+      # only main is published, a pull request just proves the docs build
       if: github.event_name == 'push'
       uses: actions/upload-pages-artifact@v5
       with:

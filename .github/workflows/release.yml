@@ -1,0 +1,56 @@
+# Releases are immutable once published, so the zip HACS installs from (hacs.json zip_release) has to be attached
+# while the release is still a draft. Write the release as a draft in GitHub as usual, with its notes and whether
+# it's a pre-release, then run this from the Actions tab with its tag, to attach the zip and publish it.
+
+name: Publish Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag of the draft release, such as v0.14.0-beta4"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ inputs.tag }}
+    steps:
+    - name: Find the draft release
+      id: draft
+      run: |
+        release=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json isDraft,targetCommitish)
+        if [ "$(jq -r .isDraft <<<"$release")" != "true" ]; then
+          echo "::error::$TAG is already published, and a published release can't have the zip added. Draft a new release."
+          exit 1
+        fi
+        # a tag chosen as new in the draft isn't made till the release is published, so till then the draft's
+        # target is what's released
+        if git ls-remote --exit-code --tags "https://github.com/$GITHUB_REPOSITORY" "refs/tags/$TAG" >/dev/null; then
+          ref="refs/tags/$TAG"
+        else
+          ref=$(jq -r .targetCommitish <<<"$release")
+        fi
+        echo "Releasing $TAG from $ref"
+        echo "ref=$ref" >> "$GITHUB_OUTPUT"
+
+    - uses: actions/checkout@v7.0.1
+      with:
+        ref: ${{ steps.draft.outputs.ref }}
+
+    - name: Package release zip
+      run: |
+        cd custom_components/appliance_autonotify
+        zip -r "${{ github.workspace }}/appliance_autonotify.zip" . -x "__pycache__/*" "*/__pycache__/*"
+
+    - name: Attach zip to the draft
+      run: gh release upload "$TAG" appliance_autonotify.zip --clobber --repo "$GITHUB_REPOSITORY"
+
+    - name: Publish
+      run: gh release edit "$TAG" --draft=false --repo "$GITHUB_REPOSITORY"
