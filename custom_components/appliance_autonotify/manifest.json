@@ -3,6 +3,9 @@
     "name": "Appliance Auto Notify",
     "after_dependencies": [
         "home_connect",
+        "homeconnect_ws",
+        "localthings",
+        "smartthings",
         "supernotify"
     ],
     "categories": [

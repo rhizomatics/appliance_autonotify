@@ -14,7 +14,7 @@ When a dishwasher, washing machine, oven or other appliance starts a cycle, you'
 and time remaining while it runs, and you're told when it finishes.
 
 It works with Bosch, Neff and Siemens appliances connected with the Home Assistant [Home Connect](https://www.home-assistant.io/integrations/home_connect/) integration, robot vacuums using the [Vacuum Integration](https://www.home-assistant.io/integrations/vacuum/) and Samsung washers, dryers and dishwashers through [SmartThings](https://www.home-assistant.io/integrations/smartthings/)
-or [LocalThings](https://github.com/mbillow/localthings), in English only. Any other appliance can be added by hand if it has a power monitor, such as a smart plug.
+or [LocalThings](https://github.com/mbillow/localthings), in English only. Support for [Home Connect Local](https://github.com/chris-mc1/homeconnect_local_hass) is new, see [New Integrations](#new-integrations). Support for [Home Connect Local](https://github.com/chris-mc1/homeconnect_local_hass) is new, see [New integrations](#new-integrations). Any other appliance can be added by hand if it has a power monitor, such as a smart plug.
 
 ![Pizza Time](https://appliance-autonotify.rhizomatics.org.uk/assets/images/pizza_time.png)
 
@@ -65,6 +65,16 @@ A stage that means the cycle is over ends it there, such as a dryer's *Wrinkle p
 
 The same appliance through two integrations, as a Samsung one is through SmartThings and LocalThings, which share its `id`, is set up once, through the integration that reaches it on the local network rather than through the vendor's cloud, or failing that the one that tells more of its cycle. The other is only listened to while the first can't be
 heard from, though an end it told meanwhile still counts once the first goes quiet. An appliance already set up through one isn't offered again when the other is added, and one offered through the cloud is offered through the local network instead once that's found.
+
+### New Integrations
+
+Where an integration names its entities or states its own way, or has more to tell than others, what's different is written down for it, and the rest is taken to work as it does for any other. Support for an integration written from its source, before it has been tried with a real appliance in a home, is *new*:
+
+| Integration | Appliances | Issue |
+| ----------- | ---------- | ----- |
+| [Home Connect Local](https://github.com/chris-mc1/homeconnect_local_hass) | Bosch, Siemens, Neff | [#28](https://github.com/rhizomatics/appliance_autonotify/issues/28) |
+
+An appliance through a new integration is never set up automatically, it's offered as *Discovered*, saying that support is new. Once added, what it reports through its first three cycles is kept, and once the first has finished a repair asks how it went. Download the diagnostics of the appliance, from its entry under *Appliance Auto Notify* on the *Devices & services* page, and add them to the issue, whether it went well or not, since it takes a cycle on a real appliance to know.
 
 ### Robot Vacuums
 

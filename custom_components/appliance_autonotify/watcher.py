@@ -22,6 +22,7 @@ from homeassistant.const import (
     STATE_UNAVAILABLE,
     STATE_UNKNOWN,
     UnitOfPower,
+    UnitOfTime,
 )
 from homeassistant.core import CALLBACK_TYPE, Context, Event, EventStateChangedData, HomeAssistant, State, callback
 from homeassistant.exceptions import ConfigEntryNotReady, HomeAssistantError
@@ -31,7 +32,7 @@ from homeassistant.helpers.event import async_call_later, async_track_state_chan
 from homeassistant.helpers.storage import Store
 from homeassistant.helpers.translation import async_translate_state
 from homeassistant.util import dt as dt_util
-from homeassistant.util.unit_conversion import PowerConverter
+from homeassistant.util.unit_conversion import DurationConverter, PowerConverter
 
 from .const import (
     ACTION_FINISHED,
@@ -118,6 +119,7 @@ from .const import (
     PROGRESS_MESSAGE,
     PROGRESS_NOTIFY_STEP,
     PROGRESS_STEP,
+    REMAINING_TIME_KEY,
     STAGE_KEY,
     STAGES_FINISHED,
     STAGES_NONE,
@@ -771,6 +773,22 @@ class ApplianceWatcher:
         state = self._program_state()
         return self._translated(state) if state is not None else None
 
+    def _finish_time(self) -> datetime | None:
+        """When the cycle will finish, as the appliance says, or as long from now as it says is left"""
+        state = self._state(FINISH_TIME_KEY)
+        if state is not None and (finish_time := dt_util.parse_datetime(state.state)) is not None:
+            return finish_time
+        state = self._state(REMAINING_TIME_KEY)
+        unit = state.attributes.get(ATTR_UNIT_OF_MEASUREMENT, UnitOfTime.SECONDS) if state is not None else None
+        remaining = self._number(REMAINING_TIME_KEY)
+        if remaining is None or remaining <= 0 or unit not in DurationConverter.VALID_UNITS:
+            return None
+        seconds = DurationConverter.convert(remaining, unit, UnitOfTime.SECONDS)
+        # to the nearest minute, so the countdown stays put from one update to the next unless the appliance has
+        # changed its mind
+        finish = (dt_util.utcnow() + timedelta(seconds=seconds)).timestamp()
+        return dt_util.utc_from_timestamp(round(finish / 60) * 60)
+
     def _translated(self, state: State) -> str:
         """A state as Home Assistant shows it, in its language"""
         entity = er.async_get(self.hass).async_get(state.entity_id)
@@ -800,8 +818,7 @@ class ApplianceWatcher:
         if progress is not None:
             data["progress"] = progress
             data["progress_max"] = 100
-        state = self._state(FINISH_TIME_KEY)
-        finish_time = dt_util.parse_datetime(state.state) if state is not None else None
+        finish_time = self._finish_time()
         if finish_time is not None and self.live_detail == LIVE_DETAIL_TIME:
             data["chronometer"] = True
             data["when"] = int(finish_time.timestamp())
@@ -905,7 +922,7 @@ class HomeConnectWatcher(ApplianceWatcher):
             translation_keys.append(entity.translation_key or "")
             if is_cycle_entity(entity):
                 self.cycle_entity_id = entity.entity_id
-            elif ENTITY_DOMAINS.get(key) == entity.domain:
+            elif entity.domain in ENTITY_DOMAINS.get(key, ()):
                 self.entity_ids[key] = entity.entity_id
                 if key in PROGRAM_KEYS:
                     programs.extend((entity.capabilities or {}).get("options") or [])
@@ -917,7 +934,7 @@ class HomeConnectWatcher(ApplianceWatcher):
             self.fallback_cycle_entity_id = self.fallback_cycle_entity_id or cycles[companion].entity_id
             for entity in er.async_entries_for_device(entity_registry, companion):
                 key = role_key(entity)
-                if key is not None and not entity.disabled and ENTITY_DOMAINS.get(key) == entity.domain:
+                if key is not None and not entity.disabled and entity.domain in ENTITY_DOMAINS.get(key, ()):
                     self.fallback_ids.setdefault(key, entity.entity_id)
         # the type of appliance isn't kept anywhere to be read, but its programs are named for it, or failing that,
         # for an integration with several types, its entities

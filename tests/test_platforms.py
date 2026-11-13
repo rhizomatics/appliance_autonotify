@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from unittest.mock import patch
 
 from homeassistant.core import HomeAssistant
@@ -68,3 +70,9 @@ async def test_appliance_found_by_its_integration_own_names(hass: HomeAssistant)
     assert find_appliances(hass) == []
     with patch.dict(platforms.PROFILES, {"vendor": VENDOR}):
         assert [appliance.name for appliance in find_appliances(hass)] == ["Washer"]
+
+
+def test_every_known_integration_set_up_first() -> None:
+    """Each integration with a profile is set up before this one, so its appliances are there to be found"""
+    manifest = json.loads((Path(platforms.__file__).parent / "manifest.json").read_text())
+    assert set(platforms.PROFILES) <= set(manifest["after_dependencies"])

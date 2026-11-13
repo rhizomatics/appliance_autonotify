@@ -3,10 +3,15 @@ title: What's New
 ---
 
 # 0.14.0
+## ✨ Enhancements
 - Maintenance reminders for appliances
+- Home Connect Local appliances discovered, as a new integration (#28)
+  - Preferred to Home Connect where an appliance is on both, as it's on the local network
+  - A countdown from the time remaining, for any integration that reports a duration rather than a finish time
+  - A program reported as a sensor rather than a select, for any integration
+## 📝 Other changes
 - Diagnostics download for each appliance, with its entities as its integration has them
-- Groundwork for more integrations: an appliance of an integration whose support is new is offered rather than set up
-  automatically, its first cycles are recorded for its diagnostics, and once one has finished a repair asks how it went
+- Groundwork for more integrations: an appliance of an integration whose support is new is offered rather than set up automatically, its first cycles are recorded for its diagnostics, and once one has finished a repair asks how it went
 
 # 0.13.0
 ## ✨ Enhancements

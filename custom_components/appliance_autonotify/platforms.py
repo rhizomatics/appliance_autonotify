@@ -10,7 +10,15 @@ from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from typing import Final, Literal
 
-from .const import APPLIANCE_TYPES, KEY_TYPE_PREFIXES, ROLE_KEY_PREFIXES, ROLE_KEYS
+from .const import (
+    APPLIANCE_TYPES,
+    CYCLE_KEY,
+    KEY_TYPE_PREFIXES,
+    PROGRESS_KEY,
+    REMAINING_TIME_KEY,
+    ROLE_KEY_PREFIXES,
+    ROLE_KEYS,
+)
 
 # supported once it's been seen to work with a real appliance in a home, beta when written from its source alone
 type Status = Literal["supported", "beta"]
@@ -77,6 +85,29 @@ PROFILES: Final[dict[str, PlatformProfile]] = {
         PlatformProfile("home_connect"),
         PlatformProfile("smartthings"),
         PlatformProfile("localthings"),
+        # Home Connect Local, the same appliances as Home Connect, on the local network rather than through the
+        # cloud, with its entities named for their platform, and its programs named for the BSH keys without the
+        # underscores Home Connect puts between words
+        PlatformProfile(
+            "homeconnect_ws",
+            status=STATUS_BETA,
+            role_keys={
+                "sensor_operation_state": CYCLE_KEY,
+                "sensor_program_progress": PROGRESS_KEY,
+                "sensor_remaining_program_time": REMAINING_TIME_KEY,
+                "sensor_active_program": "active_program",
+                "select_program": "selected_program",
+            },
+            program_types={
+                "laundrycare_washer_program_": "washer",
+                "laundrycare_washerdryer_program_": "washer_dryer",
+                "laundrycare_dryer_program_": "dryer",
+                "consumerproducts_coffeemaker_program_": "coffee_maker",
+                "consumerproducts_cleaningrobot_program_": "cleaning_robot",
+                "heatingventilationairconditioning_airconditioner_program_": "air_conditioner",
+            },
+            issue_url="https://github.com/rhizomatics/appliance_autonotify/issues/28",
+        ),
     )
     if profile.platform is not None
 }

@@ -244,6 +244,8 @@ PROGRESS_KEY: Final[str] = "program_progress"
 FINISH_TIME_KEY: Final[str] = "program_finish_time"
 # selects, unlike the others, of the program under way, and of the one chosen, which is all an oven reports
 PROGRAM_KEYS: Final[tuple[str, ...]] = ("active_program", "selected_program")
+# how long is left, as a duration, for an integration that reports no finish time
+REMAINING_TIME_KEY: Final[str] = "remaining_time"
 # what the appliance is doing within its cycle, such as drying then cooling, which Home Connect doesn't report
 STAGE_KEY: Final[str] = "stage"
 # the same entities as other integrations name them, whichever integration they come from, since it's what an
@@ -269,16 +271,18 @@ TARGET_TEMPERATURE_KEY: Final[str] = "setpoint_temperature"
 CAVITY_TEMPERATURE_KEY: Final[str] = "oven_current_cavity_temperature"
 PREHEAT_FINISHED_KEYS: Final[tuple[str, ...]] = ("preheat_finished", "regular_preheat_finished")
 FAST_PREHEAT_KEY: Final[str] = "fast_pre_heat"
-# domain, by translation key, of each entity of an appliance that's made use of
-ENTITY_DOMAINS: Final[dict[str, str]] = {
-    PROGRESS_KEY: "sensor",
-    STAGE_KEY: "sensor",
-    FINISH_TIME_KEY: "sensor",
-    **dict.fromkeys(PROGRAM_KEYS, "select"),
-    TARGET_TEMPERATURE_KEY: "number",
-    CAVITY_TEMPERATURE_KEY: "sensor",
-    **dict.fromkeys(PREHEAT_FINISHED_KEYS, "sensor"),
-    FAST_PREHEAT_KEY: "switch",
+# domains, by translation key, of each entity of an appliance that's made use of, a program being a select where it
+# can be chosen, and only a sensor where it can't
+ENTITY_DOMAINS: Final[dict[str, tuple[str, ...]]] = {
+    PROGRESS_KEY: ("sensor",),
+    STAGE_KEY: ("sensor",),
+    FINISH_TIME_KEY: ("sensor",),
+    REMAINING_TIME_KEY: ("sensor",),
+    **dict.fromkeys(PROGRAM_KEYS, ("select", "sensor")),
+    TARGET_TEMPERATURE_KEY: ("number",),
+    CAVITY_TEMPERATURE_KEY: ("sensor",),
+    **dict.fromkeys(PREHEAT_FINISHED_KEYS, ("sensor",)),
+    FAST_PREHEAT_KEY: ("switch",),
 }
 # degrees between Live Activity updates of an oven up to heat, whose temperature never stops wandering
 TEMPERATURE_STEP: Final[float] = 5
