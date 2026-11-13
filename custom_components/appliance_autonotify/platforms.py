@@ -13,11 +13,13 @@ from typing import Final, Literal
 from .const import (
     APPLIANCE_TYPES,
     CYCLE_KEY,
+    FINISH_TIME_KEY,
     KEY_TYPE_PREFIXES,
     PROGRESS_KEY,
     REMAINING_TIME_KEY,
     ROLE_KEY_PREFIXES,
     ROLE_KEYS,
+    TOTAL_TIME_KEY,
 )
 
 # supported once it's been seen to work with a real appliance in a home, beta when written from its source alone
@@ -38,6 +40,11 @@ class PlatformProfile:
     # the type of appliance, by how the integration names its programs, or else its entities
     program_types: Mapping[str, str] = field(default_factory=dict)
     key_types: Mapping[str, str] = field(default_factory=dict)
+    # the states of a cycle as the integration has them, by the states of every integration they mean, for one
+    # whose cycle state says more than whether it's running, and states it doesn't know left as they are
+    cycle_states: Mapping[str, str] = field(default_factory=dict)
+    # whether the cycle state also says what it's doing within its cycle, for an integration with no stage of its own
+    stage_from_cycle: bool = False
     # where to tell of how it went, for one in beta
     issue_url: str | None = None
 
@@ -56,6 +63,10 @@ class PlatformProfile:
         if translation_key in ROLE_KEYS:
             return ROLE_KEYS[translation_key]
         return _by_prefix(ROLE_KEY_PREFIXES, translation_key) or translation_key
+
+    def cycle_state(self, state: str) -> str:
+        """A state of the cycle as every integration has it"""
+        return self.cycle_states.get(state, state)
 
     def appliance_type(self, programs: Iterable[str], translation_keys: Iterable[str]) -> str | None:
         """The type of appliance by its programs, or failing that, for an integration with several types, its
@@ -78,6 +89,33 @@ def _by_prefix(prefixes: Mapping[str, str], key: str) -> str | None:
 
 
 GENERIC: Final[PlatformProfile] = PlatformProfile(None)
+
+# the states of an LG ThinQ washer, dryer or dishwasher going through its cycle, each of which is its stage too, up to
+# a dryer's wrinkle care, tumbling its load now and then once it's done, which is over by its stage as for others
+THINQ_RUNNING: Final[tuple[str, ...]] = (
+    "running",
+    "detecting",
+    "checking_turbidity",
+    "display_loadsize",
+    "detergent_amount",
+    "dispensing",
+    "prewash",
+    "soaking",
+    "add_drain",
+    "rinsing",
+    "spinning",
+    "softening",
+    "steam_softening",
+    "drying",
+    "night_dry",
+    "cooling",
+    "cool_down",
+    "end_cooling",
+    "refreshing",
+    "steam",
+    "sterilize",
+    "wrinkle_care",
+)
 
 PROFILES: Final[dict[str, PlatformProfile]] = {
     profile.platform: profile
@@ -107,6 +145,33 @@ PROFILES: Final[dict[str, PlatformProfile]] = {
                 "heatingventilationairconditioning_airconditioner_program_": "air_conditioner",
             },
             issue_url="https://github.com/rhizomatics/appliance_autonotify/issues/28",
+        ),
+        # LG ThinQ, whose one state says both whether a washer, dryer or dishwasher is running and what it's doing,
+        # with when it will finish and how long it takes, but nothing of how far along it is
+        PlatformProfile(
+            "lg_thinq",
+            status=STATUS_BETA,
+            role_keys={
+                "current_state": CYCLE_KEY,
+                "remain": FINISH_TIME_KEY,
+                "total": TOTAL_TIME_KEY,
+                "current_dish_washing_course": "active_program",
+            },
+            cycle_states={
+                **dict.fromkeys(THINQ_RUNNING, "run"),
+                "pause": "pause",
+                "paused": "pause",
+                # waiting for the rinse to be let go on with
+                "rinse_hold": "actionrequired",
+                **dict.fromkeys(("end", "complete", "done", "running_end", "cleaning_is_done"), "finished"),
+                **dict.fromkeys(("power_off", "initial", "initializing", "standby", "sleep"), "inactive"),
+                # switched on and waiting, as an appliance just finished may be
+                "power_on": "ready",
+                **dict.fromkeys(("reserved", "reservation"), "delayedstart"),
+                **dict.fromkeys(("error", "power_fail"), "error"),
+            },
+            stage_from_cycle=True,
+            issue_url="https://github.com/rhizomatics/appliance_autonotify/issues/27",
         ),
     )
     if profile.platform is not None

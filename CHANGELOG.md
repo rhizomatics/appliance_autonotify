@@ -9,6 +9,10 @@ title: What's New
   - Preferred to Home Connect where an appliance is on both, as it's on the local network
   - A countdown from the time remaining, for any integration that reports a duration rather than a finish time
   - A program reported as a sensor rather than a select, for any integration
+- LG ThinQ washers, dryers and dishwashers discovered, as a new integration (#27)
+  - Its one state taken for both the cycle and what it's doing within it
+  - Progress worked out from the time the cycle takes and the time left, for any integration that reports those but no progress
+  - The type of appliance from the device's model, for any integration that names its models for the type
 ## 📝 Other changes
 - Diagnostics download for each appliance, with its entities as its integration has them
 - Groundwork for more integrations: an appliance of an integration whose support is new is offered rather than set up automatically, its first cycles are recorded for its diagnostics, and once one has finished a repair asks how it went

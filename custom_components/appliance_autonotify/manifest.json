@@ -4,6 +4,7 @@
     "after_dependencies": [
         "home_connect",
         "homeconnect_ws",
+        "lg_thinq",
         "localthings",
         "smartthings",
         "supernotify"

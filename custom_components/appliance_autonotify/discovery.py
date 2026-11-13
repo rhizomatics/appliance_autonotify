@@ -67,7 +67,8 @@ def is_cycle_entity(entity: er.RegistryEntry) -> bool:
     if entity.disabled or entity.device_id is None or entity.domain != SENSOR_DOMAIN or role_key(entity) != CYCLE_KEY:
         return False
     options = (entity.capabilities or {}).get("options") or []
-    return any(option in STATES_RUN for option in options)
+    profile = profile_for(entity.platform)
+    return any(profile.cycle_state(option) in STATES_RUN for option in options)
 
 
 @callback

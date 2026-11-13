@@ -28,7 +28,7 @@ from homeassistant.core import CALLBACK_TYPE, Context, Event, EventStateChangedD
 from homeassistant.exceptions import ConfigEntryNotReady, HomeAssistantError
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
-from homeassistant.helpers.event import async_call_later, async_track_state_change_event
+from homeassistant.helpers.event import async_call_later, async_track_state_change_event, async_track_time_interval
 from homeassistant.helpers.storage import Store
 from homeassistant.helpers.translation import async_translate_state
 from homeassistant.util import dt as dt_util
@@ -119,6 +119,7 @@ from .const import (
     PROGRESS_MESSAGE,
     PROGRESS_NOTIFY_STEP,
     PROGRESS_STEP,
+    PROGRESS_TICK,
     REMAINING_TIME_KEY,
     STAGE_KEY,
     STAGES_FINISHED,
@@ -134,6 +135,7 @@ from .const import (
     SUPERNOTIFY_DOMAIN,
     TARGET_TEMPERATURE_KEY,
     TEMPERATURE_STEP,
+    TOTAL_TIME_KEY,
     TYPE_DISCOVERY,
     TYPE_ICONS,
     TYPE_VACUUM,
@@ -260,6 +262,8 @@ class ApplianceWatcher:
         self._offering: bool = False
         # the integration the appliance comes through, and what it does, kept while that's yet to be tried
         self.profile: PlatformProfile = GENERIC
+        # and that of each cycle state entity, from either integration for the same appliance
+        self._cycle_profiles: dict[str, PlatformProfile] = {}
         self.trace: CycleTrace | None = None
 
     async def async_load(self) -> None:
@@ -412,6 +416,12 @@ class ApplianceWatcher:
         return progress - progress % (PROGRESS_FINAL_STEP if progress >= PROGRESS_FINAL else PROGRESS_STEP)
 
     async def _progress_changed(self, event: Event[EventStateChangedData]) -> None:
+        await self._progress_now(event.context)
+
+    async def _progress_tick(self, now: datetime) -> None:
+        await self._progress_now(Context())
+
+    async def _progress_now(self, context: Context) -> None:
         progress = self._progress()
         if not self.running or progress is None:
             return
@@ -434,7 +444,7 @@ class ApplianceWatcher:
             if live and not ordinary:
                 # the bar already shows how far along it is, so there's room to say what it's doing
                 message = self._phase() or message
-            await self._tell(message, ordinary, event.context, resend=True)
+            await self._tell(message, ordinary, context, resend=True)
 
     async def _started(self, context: Context) -> None:
         self.program_kept = False
@@ -726,6 +736,12 @@ class ApplianceWatcher:
         state = self.hass.states.get(entity_id) if entity_id else None
         return None if state is None or state.state in (STATE_UNKNOWN, STATE_UNAVAILABLE) else state
 
+    def _cycle_value(self, state: State | None) -> str | None:
+        """A state of the cycle as every integration has it, by the integration whose state it is"""
+        if state is None:
+            return None
+        return self._cycle_profiles.get(state.entity_id, self.profile).cycle_state(state.state)
+
     def _cycle_state(self) -> State | None:
         """The state of the cycle, from another integration for the same appliance while the first doesn't know it"""
         return self._known(self.cycle_entity_id) or self._known(self.fallback_cycle_entity_id)
@@ -739,7 +755,7 @@ class ApplianceWatcher:
 
     def _progress(self) -> int | None:
         progress = self._number(PROGRESS_KEY)
-        return None if progress is None else int(progress)
+        return self._timed_progress() if progress is None else int(progress)
 
     def _progress_message(self, progress: int) -> str:
         return PROGRESS_MESSAGE.format(progress=progress)
@@ -773,17 +789,33 @@ class ApplianceWatcher:
         state = self._program_state()
         return self._translated(state) if state is not None else None
 
+    def _seconds(self, key: str) -> float | None:
+        """A duration the appliance reports, in whatever unit of time, in seconds"""
+        state = self._state(key)
+        value = self._number(key)
+        unit = state.attributes.get(ATTR_UNIT_OF_MEASUREMENT, UnitOfTime.SECONDS) if state is not None else None
+        if value is None or unit not in DurationConverter.VALID_UNITS:
+            return None
+        return DurationConverter.convert(value, unit, UnitOfTime.SECONDS)
+
+    def _timed_progress(self) -> int | None:
+        """How far along the cycle is by the time it has left of the time it takes, for an appliance that reports
+        both but not its progress"""
+        total = self._seconds(TOTAL_TIME_KEY)
+        finish_time = self._finish_time()
+        if not total or total <= 0 or finish_time is None:
+            return None
+        left = (finish_time - dt_util.utcnow()).total_seconds()
+        return int(min(max(100 * (1 - left / total), 0), 100))
+
     def _finish_time(self) -> datetime | None:
         """When the cycle will finish, as the appliance says, or as long from now as it says is left"""
         state = self._state(FINISH_TIME_KEY)
         if state is not None and (finish_time := dt_util.parse_datetime(state.state)) is not None:
             return finish_time
-        state = self._state(REMAINING_TIME_KEY)
-        unit = state.attributes.get(ATTR_UNIT_OF_MEASUREMENT, UnitOfTime.SECONDS) if state is not None else None
-        remaining = self._number(REMAINING_TIME_KEY)
-        if remaining is None or remaining <= 0 or unit not in DurationConverter.VALID_UNITS:
+        seconds = self._seconds(REMAINING_TIME_KEY)
+        if seconds is None or seconds <= 0:
             return None
-        seconds = DurationConverter.convert(remaining, unit, UnitOfTime.SECONDS)
         # to the nearest minute, so the countdown stays put from one update to the next unless the appliance has
         # changed its mind
         finish = (dt_util.utcnow() + timedelta(seconds=seconds)).timestamp()
@@ -940,7 +972,16 @@ class HomeConnectWatcher(ApplianceWatcher):
         # for an integration with several types, its entities
         cycle = entity_registry.async_get(self.cycle_entity_id)
         self.profile = profile_for(cycle.platform if cycle else None)
-        appliance_type = self.profile.appliance_type(programs, translation_keys)
+        for entity_id in (self.cycle_entity_id, self.fallback_cycle_entity_id):
+            if entity_id and (registered := entity_registry.async_get(entity_id)) is not None:
+                self._cycle_profiles[entity_id] = profile_for(registered.platform)
+        if self.profile.stage_from_cycle:
+            self.entity_ids.setdefault(STAGE_KEY, self.cycle_entity_id)
+        # or failing that its model, as an integration names it for its type
+        model = device.model if isinstance(device, dr.DeviceEntry) and device.model else ""
+        appliance_type = self.profile.appliance_type(programs, translation_keys) or name_type(
+            self.hass, model.replace("_", " ")
+        )
         self.appliance_type = appliance_type or name_type(self.hass, self.name)
         self.icon = TYPE_ICONS.get(appliance_type or "", self._name_icon())
         # the one phase there is to know of is an oven warming up, Home Connect reporting none for anything else
@@ -950,7 +991,7 @@ class HomeConnectWatcher(ApplianceWatcher):
 
         # a cycle under way at startup still has its Live Activity closed when it ends
         state = self._cycle_state()
-        self.running = state is not None and state.state in STATES_ACTIVE
+        self.running = self._cycle_value(state) in STATES_ACTIVE
         # and with no knowing whether its oven has been up to heat, it isn't taken to be warming up
         self.preheated = self.running
         phase: dict[str, Any] = self._restored.get("phase") or {}
@@ -977,9 +1018,15 @@ class HomeConnectWatcher(ApplianceWatcher):
         ):
             if entity_ids := [ids[key] for ids in (self.entity_ids, self.fallback_ids) for key in keys if key in ids]:
                 self.entry.async_on_unload(async_track_state_change_event(self.hass, entity_ids, listener))
+        if PROGRESS_KEY not in self.entity_ids and PROGRESS_KEY not in self.fallback_ids and TOTAL_TIME_KEY in self.entity_ids:
+            # progress worked out from the time, which moves on with no change of the appliance's to say so
+            self.entry.async_on_unload(
+                async_track_time_interval(self.hass, self._progress_tick, timedelta(seconds=PROGRESS_TICK))
+            )
         if self._restored and state is not None:
             # whatever it has done while Home Assistant was off, such as finishing, as if it were happening now
-            self.entry.async_create_task(self.hass, self._cycle_is(state.state, Context()), eager_start=False)
+            value = self._cycle_value(state) or state.state
+            self.entry.async_create_task(self.hass, self._cycle_is(value, Context()), eager_start=False)
         self._save()
 
     def _phase_data(self) -> dict[str, Any]:
@@ -1136,7 +1183,7 @@ class HomeConnectWatcher(ApplianceWatcher):
             # can't be heard from, so the other integration for the appliance may already have told of its end
             await self._fallback_over(event.context)
             return
-        await self._cycle_is(state, event.context)
+        await self._cycle_is(self._cycle_value(new_state) or state, event.context)
 
     async def _cycle_is(self, state: str, context: Context) -> None:
         if state in (*STATES_FINISHED, *STATES_SETTLING, *STATES_ABANDONED) and self.over_by_stage:
@@ -1159,7 +1206,7 @@ class HomeConnectWatcher(ApplianceWatcher):
             finally:
                 self.starting = False
             cycle = self._cycle_state()
-            if self.running or cycle is None or cycle.state not in STATES_ACTIVE:
+            if self.running or self._cycle_value(cycle) not in STATES_ACTIVE:
                 # over, or started by another report, while it waited
                 self._save()
                 return
@@ -1196,8 +1243,9 @@ class HomeConnectWatcher(ApplianceWatcher):
             await self._over_by_stage(context)
             return
         cycle = self._known(self.fallback_cycle_entity_id)
-        if cycle is not None and cycle.state in (*STATES_FINISHED, *STATES_SETTLING, *STATES_ABANDONED):
-            await self._cycle_is(cycle.state, context)
+        value = self._cycle_value(cycle)
+        if value in (*STATES_FINISHED, *STATES_SETTLING, *STATES_ABANDONED):
+            await self._cycle_is(value, context)
 
     async def _stage_changed(self, event: Event[EventStateChangedData]) -> None:
         """The appliance moving on within its cycle, such as a dryer from drying to cooling"""
@@ -1206,6 +1254,9 @@ class HomeConnectWatcher(ApplianceWatcher):
             return
         if new_state.entity_id != self.entity_ids.get(STAGE_KEY) and self._known(self.cycle_entity_id):
             # the other integration for the same appliance, while this one can be heard from, is only an echo
+            return
+        if new_state.entity_id in self._cycle_profiles and self._cycle_value(new_state) not in STATES_RUN:
+            # a cycle state that's its stage too, which says no more than the cycle state once it isn't running
             return
         if new_state.state in STAGES_FINISHED:
             await self._over_by_stage(event.context)
@@ -1219,7 +1270,7 @@ class HomeConnectWatcher(ApplianceWatcher):
     async def _over_by_stage(self, context: Context) -> None:
         # done, though it may carry on as it is a while, a dryer tumbling its load now and then
         cycle = self._cycle_state()
-        self.over_by_stage = cycle is not None and cycle.state in STATES_ACTIVE
+        self.over_by_stage = self._cycle_value(cycle) in STATES_ACTIVE
         await self._cycle_over(True, context)
 
     async def _settled(self, context: Context, now: datetime) -> None:
