@@ -64,7 +64,8 @@ plugins:
       full_output: llms-full.txt
       sections:
         Start here:
-          - index.md: What it does, requirements, installation, settings, what gets sent, known limits and issues
+          - index.md: What it does, requirements, installation, settings, notifications, known limits and issues
+          - how_it_works.md: What gets sent when, how appliances are found through any integration, new integrations in beta, and the appliance's device
         Optional:
           - changelog.md: Release history
         # developer pages left out - coverage reports are no use to an agent
@@ -93,6 +94,8 @@ extra_javascript:
 hooks:
   # records the site directory for the llmstxt preprocess
   - docgen/llms_preprocess.py
+  # the README's links to other pages, as from the repository root, made right for the home page
+  - docgen/readme_links.py
 
 
 markdown_extensions:

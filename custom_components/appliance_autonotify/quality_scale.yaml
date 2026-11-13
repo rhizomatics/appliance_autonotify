@@ -184,7 +184,7 @@ rules:
 
   docs-data-update:
     status: done
-    comment: README.md "What Gets Sent" (event driven, nothing polled; added 2026-11-03).
+    comment: docs/how_it_works.md "What Gets Sent" (event driven, nothing polled; added 2026-11-03).
 
   docs-examples:
     status: exempt
@@ -202,7 +202,7 @@ rules:
 
   docs-supported-functions:
     status: done
-    comment: README.md "Settings" and "What Gets Sent".
+    comment: README.md "Settings" and docs/how_it_works.md "What Gets Sent".
 
   docs-troubleshooting:
     status: todo
