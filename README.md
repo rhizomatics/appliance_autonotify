@@ -187,15 +187,11 @@ With a *Reminder* set in the *End message* section, the end notification is sent
 
 ### Maintenance
 
-Nothing is tracked until it's asked for. For an appliance with something to maintain, the first end notification has
-one more button, *Track Maintenance*, which turns it on, as does *Track maintenance* in its settings. Either way it's
-offered only the once. Where the end notification already has three buttons, which is all Android shows, it takes the
-place of *Remind Later* on that one notification.
+Nothing is tracked until it's asked for. For an appliance with something to maintain, the first end notification has one more button, *Track Maintenance*, which turns it on, as does *Track maintenance* in its settings. Either way it's offered only the once. Where the end notification already has three buttons, which is all Android shows, it takes the place of *Remind Later* on that one notification.
 
 ![Switch on Maintenance](./assets/images/track_maint.png)
 
-Once on, each finished cycle is counted, and the appliance starts with a set of items for its type, each due after a
-number of cycles, to change or take out (0) in the *Maintenance* section of its settings:
+Once on, each finished cycle is counted, and the appliance starts with a set of items for its type, each due after a number of cycles, to change or take out (0) in the *Maintenance* section of its settings:
 
 | Appliance       | Items, and cycles apart                         |
 | --------------- | ----------------------------------------------- |
@@ -204,27 +200,21 @@ number of cycles, to change or take out (0) in the *Maintenance* section of its 
 | Dishwasher      | Filter clean 30, machine clean 60               |
 | Dryer           | Condenser clean 30                              |
 
-An appliance whose integration reports how much life a part has left as a percentage, such as the brushes and filters
-of an Ecovacs robot vacuum, has an item for each of those instead, due once it's down to 10%, and told of as soon as it
-is, whether or not the vacuum is cleaning.
+An appliance whose integration reports how much life a part has left as a percentage, such as the brushes and filters of an Ecovacs robot vacuum, has an item for each of those instead, due once it's down to 10%, and told of as soon as it is, whether or not the vacuum is cleaning.
 
-Whatever is due is on the one *Appliance maintenance* to-do list, held by the *Automatic discovery* entry, and is
-told of with a notification as it falls due, the once:
+Whatever is due is on the one *Appliance maintenance* to-do list, held by the *Automatic discovery* entry, and is told of with a notification as it falls due, the once:
 
 | Where                | What it does                                                                                |
 | -------------------- | ------------------------------------------------------------------------------------------- |
 | Done, or ticked off  | Counts from 0 again. A part is reset with its integration's own button where it has one, and otherwise left off the list until it reads as replaced |
 | In a Month, or deleted from the list | Put off for 30 days, after which it's due, and told of, again             |
 
-The *Reset maintenance* action says it's done without the notification, or sets the cycles since it was last done,
-such as for an appliance already counted another way, and *Snooze maintenance* puts it off, for one item or all of
-an appliance's. Done for all of them resets only the parts that are due, so the life of the rest is kept.
+The *Reset maintenance* action says it's done without the notification, or sets the cycles since it was last done, such as for an appliance already counted another way, and *Snooze maintenance* puts it off, for one item or all of an appliance's. Done for all of them resets only the parts that are due, so the life of the rest is kept.
 
 ### Oven Pre-heating
 
 An oven with no timer set has no progress to report, so while it warms up, on any program, the bar is its
-temperature as a percentage of the one it's set to, and the message is the two of them, such as "Pre-heating,
-150 of 200°C", or "Fast pre-heat" in place of "Pre-heating" while that is on.
+temperature as a percentage of the one it's set to, and the message is the two of them, such as "Pre-heating, 150 of 200°C", or "Fast pre-heat" in place of "Pre-heating" while that is on.
 
 Once the oven is as hot as asked for, or reports that pre-heating is finished, "Oven is pre-heated" is sent
 everywhere as a notification of its own, unless *Notify phases* is off. The Live Activity stays until the oven is
@@ -236,28 +226,20 @@ of the program.
 All of this depends on Home Connect telling Home Assistant the temperature the oven is set to, as its *Setpoint
 temperature* entity, or reporting that pre-heating is finished. Neither can be relied on:
 
-- An oven started with its own knobs or buttons, rather than from the Home Connect app or Home Assistant, often
-  leaves *Setpoint temperature* unavailable for the whole cycle, even though Home Connect itself knows it
+- An oven started with its own knobs or buttons, rather than from the Home Connect app or Home Assistant, often leaves *Setpoint temperature* unavailable for the whole cycle, even though Home Connect itself knows it
 - Many ovens send *Pre-heat finished* only now and then, or not at all
 
-When neither is there, the oven is shown with its program and temperature as it heats, such as "Hot air, 150°C",
-with no pre-heating bar and no "Oven is pre-heated" notification. Whether the *Setpoint temperature* entity has a
-value while the oven is heating shows whether yours is affected.
+When neither is there, the oven is shown with its program and temperature as it heats, such as "Hot air, 150°C", with no pre-heating bar and no "Oven is pre-heated" notification. Whether the *Setpoint temperature* entity has a value while the oven is heating shows whether yours is affected.
 
 ### Icons
 
-The icon of a notification follows the type of appliance: dishwasher, washer, dryer, washer dryer, oven, hob, hood,
-coffee maker, cleaning robot or air conditioner. A power monitored appliance has none to go by, so its name is
-used instead, as in "Washer" or "Kettle".
+The icon of a notification follows the type of appliance: dishwasher, washer, dryer, washer dryer, oven, hob, hood, coffee maker, cleaning robot or air conditioner. A power monitored appliance has none to go by, so its name is used instead, as in "Washer" or "Kettle".
 
 ## Known Limits
 
 - On a Samsung phone, the status bar chip, the Now Bar and the appliance's colour only show with the developer option
-  *Live notifications for all apps* turned on. See [Android and iOS](docs/mobile_platforms.md) for everything each
-  platform shows
-- On Android the notifications go in their own *Appliances* channel, made with sound the first time, since a Live
-  Update in the app's usual channel is silent. Its sound can be changed in the phone's settings for the Home
-  Assistant app, and is kept from then on
+  *Live notifications for all apps* turned on. See [Android and iOS](docs/mobile_platforms.md) for everything each platform shows
+- On Android the notifications go in their own *Appliances* channel, made with sound the first time, since a Live Update in the app's usual channel is silent. Its sound can be changed in the phone's settings for the Home Assistant app, and is kept from then on
 
 - Pre-heating is the only phase of a Home Connect appliance's cycle there is to tell of, since Home Connect reports none for a dishwasher or washer, such as pre-wash or rinse
 - An appliance with a stage but no progress, such as a Samsung one through SmartThings, has its Live Activity brought up to date only as its stage changes, so its time remaining may lag a change of its finish time until then

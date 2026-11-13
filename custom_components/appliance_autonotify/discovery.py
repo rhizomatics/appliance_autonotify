@@ -21,12 +21,11 @@ from .const import (
     DERIVED_POWER_PLATFORMS,
     DOMAIN,
     ENTITY_DOMAINS,
-    ROLE_KEY_PREFIXES,
-    ROLE_KEYS,
     STATES_RUN,
     TYPE_DISCOVERY,
     TYPE_VACUUM,
 )
+from .platforms import profile_for
 from .words import name_type
 
 if TYPE_CHECKING:
@@ -55,11 +54,9 @@ class PowerMonitor:
 
 
 def role_key(entity: er.RegistryEntry) -> str | None:
-    """What an entity does, as the translation key Home Connect gives an entity that does the same"""
-    key = entity.translation_key
-    if key is None or key in ROLE_KEYS:
-        return ROLE_KEYS.get(key or "")
-    return next((role for prefix, role in ROLE_KEY_PREFIXES.items() if key.startswith(prefix)), key)
+    """What an entity does, as the translation key Home Connect gives an entity that does the same, by the names of
+    its own integration before those of every integration"""
+    return profile_for(entity.platform).role_key(entity.translation_key)
 
 
 def is_cycle_entity(entity: er.RegistryEntry) -> bool:

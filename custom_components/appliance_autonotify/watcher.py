@@ -43,7 +43,6 @@ from .const import (
     ACTION_TRACK_MAINTENANCE,
     ANDROID_BUTTONS,
     ANDROID_CHANNEL,
-    APPLIANCE_TYPES,
     CAVITY_TEMPERATURE_KEY,
     CONF_CUSTOM_TARGET,
     CONF_DASHBOARD,
@@ -88,7 +87,6 @@ from .const import (
     FAST_PREHEAT_KEY,
     FAST_PREHEAT_PHASE,
     FINISH_TIME_KEY,
-    KEY_TYPE_PREFIXES,
     LIVE_DEFAULTS,
     LIVE_DETAIL_PROGRAM,
     LIVE_DETAIL_PROGRAM_STATUS,
@@ -160,6 +158,7 @@ from .const import (
 from .dashboards import dashboard_url
 from .discovery import companions, cycle_entities, is_cycle_entity, role_key
 from .maintenance import DATA_MAINTENANCE, MaintenanceItem, MaintenanceTracker, maintenance_items, translated
+from .platforms import profile_for
 from .supernotify_api import deliveries_by_transport, supernotify_available
 from .words import name_type
 
@@ -895,12 +894,8 @@ class HomeConnectWatcher(ApplianceWatcher):
                     self.fallback_ids.setdefault(key, entity.entity_id)
         # the type of appliance isn't kept anywhere to be read, but its programs are named for it, or failing that,
         # for an integration with several types, its entities
-        appliance_type = next(
-            (kind for prefix, kind in APPLIANCE_TYPES.items() if any(p.startswith(prefix) for p in programs)), None
-        ) or next(
-            (kind for prefix, kind in KEY_TYPE_PREFIXES.items() if any(k.startswith(prefix) for k in translation_keys)),
-            None,
-        )
+        cycle = entity_registry.async_get(self.cycle_entity_id)
+        appliance_type = profile_for(cycle.platform if cycle else None).appliance_type(programs, translation_keys)
         self.appliance_type = appliance_type or name_type(self.hass, self.name)
         self.icon = TYPE_ICONS.get(appliance_type or "", self._name_icon())
         # the one phase there is to know of is an oven warming up, Home Connect reporting none for anything else
