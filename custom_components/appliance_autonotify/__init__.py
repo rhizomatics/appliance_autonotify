@@ -29,6 +29,7 @@ from .dashboards import matching_dashboard
 from .device import async_register_device
 from .discovery import async_discover, async_start_discovery
 from .maintenance import DATA_MAINTENANCE, MaintenanceTracker
+from .trace import TRACE_STORE, TRACE_STORE_VERSION, async_forget_feedback
 from .watcher import ApplianceWatcher, HomeConnectWatcher, PowerWatcher, VacuumWatcher
 from .words import async_load_words
 
@@ -129,6 +130,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: AppliancesConfigEntry) -
     # a cycle under way before Home Assistant restarted, to carry on with as it starts
     await watcher.async_load()
     watcher.async_start()
+    await watcher.async_start_trace()
+    if not watcher.profile.beta:
+        # its integration has since been seen to work, so there's nothing more to ask
+        async_forget_feedback(hass, entry.entry_id)
     watcher.async_listen_for_actions()
     watcher.async_start_maintenance()
     entry.runtime_data = watcher
@@ -157,6 +162,9 @@ async def async_unload_entry(hass: HomeAssistant, entry: AppliancesConfigEntry) 
 async def async_remove_entry(hass: HomeAssistant, entry: AppliancesConfigEntry) -> None:
     # whatever was kept of its cycle through a restart
     await Store(hass, CYCLE_STORE_VERSION, CYCLE_STORE.format(entry_id=entry.entry_id)).async_remove()
+    # and of its first cycles, with the question of how they went
+    await Store(hass, TRACE_STORE_VERSION, TRACE_STORE.format(entry_id=entry.entry_id)).async_remove()
+    async_forget_feedback(hass, entry.entry_id)
     # what was counted goes with the appliance
     if (tracker := hass.data.get(DATA_MAINTENANCE)) is not None:
         tracker.async_forget(entry.entry_id)

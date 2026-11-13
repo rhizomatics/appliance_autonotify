@@ -36,7 +36,7 @@
             },
             "confirm": {
                 "title": "Notifiche per {name}",
-                "description": "Vuoi essere avvisato quando {name} inizia e finisce?\n\n{supernotify}"
+                "description": "Vuoi essere avvisato quando {name} inizia e finisce?\n\n{supernotify}{beta}"
             }
         },
         "abort": {
@@ -230,6 +230,12 @@
                     "description": "Per quanto rimandarla"
                 }
             }
+        }
+    },
+    "issues": {
+        "beta_feedback": {
+            "title": "Com'è andata {name}?",
+            "description": "{name} è collegato tramite {integration}, il cui supporto in Appliance Auto Notify è nuovo ed è stato scritto senza un vero elettrodomestico su cui provarlo. Il primo ciclo è finito: le notifiche di inizio e fine, l'avanzamento e il tempo rimanente sono arrivati quando dovevano?\n\nChe sia andata bene o no, faccelo sapere con *Ulteriori informazioni* e allega la diagnostica di {name}, scaricata dalla sua voce in *Appliance Auto Notify* in *Dispositivi e servizi*. Contiene ciò che l'elettrodomestico ha riportato nei primi cicli, ed è così che il supporto migliora. Ignora questo avviso una volta fatto."
         }
     }
 }

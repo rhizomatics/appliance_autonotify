@@ -168,10 +168,11 @@ rules:
       devices are linked (compat.LINKED_DEVICES); earlier releases go without.
 
   diagnostics:
-    status: todo
+    status: done
     comment: |
-      None yet. A dump of the entry's options, watched entity IDs and the watcher's cycle state
-      would cover most support questions.
+      diagnostics.py: the entry (notify targets redacted), the integration's profile and status, the
+      watcher's entities, every entity of the appliance's devices with its role, options and state,
+      and the trace of its first cycles where its integration is in beta (trace.py).
 
   discovery:
     status: done
@@ -253,8 +254,9 @@ rules:
   repair-issues:
     status: todo
     comment: |
-      Candidates: no notify targets and no Supernotify (watcher.py logs "Nothing to notify"),
-      and the appliance's device or power sensor removed. Both are only logged today.
+      One so far: beta_feedback (trace.py), asking how the first cycle went of an appliance whose
+      integration is in beta. Candidates: no notify targets and no Supernotify (watcher.py logs
+      "Nothing to notify"), and the appliance's device or power sensor removed. Both are only logged today.
 
   stale-devices:
     status: todo

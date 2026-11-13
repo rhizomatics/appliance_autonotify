@@ -190,6 +190,13 @@ SUPERNOTIFY_MISSING: Final[str] = (
     "**Supernotify is not installed.** Only a plain start and end notification can be sent, to every phone with the "
     "Home Assistant app, with no Live Activity. Install Supernotify from HACS for the full experience."
 )
+# an appliance of an integration not yet tried on a real appliance, as it's offered to be added
+BETA_NOTICE: Final[str] = (
+    "\n\n**Support for {integration} is new**, written from the integration's source but not yet tried with a real "
+    "appliance, so notifications may come at the wrong time or not at all. Once its first cycle is over you'll be "
+    "asked how it went."
+)
+BETA_FOUND: Final[str] = " (new, offered to be added)"
 
 # activities of a robot vacuum, as Home Assistant has them for every make
 VACUUM_CLEANING: Final[str] = "cleaning"

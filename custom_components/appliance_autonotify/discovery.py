@@ -25,7 +25,7 @@ from .const import (
     TYPE_DISCOVERY,
     TYPE_VACUUM,
 )
-from .platforms import profile_for
+from .platforms import PlatformProfile, profile_for
 from .words import name_type
 
 if TYPE_CHECKING:
@@ -43,6 +43,8 @@ class Appliance:
     name: str
     # how its cycle is told, None for an appliance of a vendor platform
     type: str | None = None
+    # the integration it comes through
+    platform: str | None = None
 
 
 @dataclass(frozen=True)
@@ -141,13 +143,42 @@ def find_appliances(hass: HomeAssistant) -> list[Appliance]:
     found: dict[str, Appliance] = {}
     for device_id, cycle in _chosen_devices(hass)[0].items():
         if (device := device_registry.async_get(device_id)) is not None:
-            found[device_id] = Appliance(device_id, device.name_by_user or device.name or cycle.entity_id)
+            found[device_id] = Appliance(
+                device_id, device.name_by_user or device.name or cycle.entity_id, platform=cycle.platform
+            )
     for entity in er.async_get(hass).entities.values():
         if entity.domain != TYPE_VACUUM or entity.device_id is None or entity.disabled:
             continue
         if (device := device_registry.async_get(entity.device_id)) is not None:
-            found[device.id] = Appliance(device.id, device.name_by_user or device.name or entity.entity_id, TYPE_VACUUM)
+            found[device.id] = Appliance(
+                device.id, device.name_by_user or device.name or entity.entity_id, TYPE_VACUUM, entity.platform
+            )
     return list(found.values())
+
+
+@callback
+def appliance_profile(hass: HomeAssistant, device_id: str) -> PlatformProfile:
+    """The profile of the integration an appliance comes through, by its cycle state entity, or its vacuum"""
+    if (cycle := cycle_entities(hass).get(device_id)) is not None:
+        return profile_for(cycle.platform)
+    vacuum = next(
+        (
+            entity
+            for entity in er.async_entries_for_device(er.async_get(hass), device_id)
+            if entity.domain == TYPE_VACUUM and not entity.disabled
+        ),
+        None,
+    )
+    return profile_for(vacuum.platform if vacuum is not None else None)
+
+
+@callback
+def integration_name(hass: HomeAssistant, platform: str | None) -> str:
+    """The name an integration goes by, or its domain where it isn't loaded"""
+    try:
+        return async_get_loaded_integration(hass, platform or "").name
+    except IntegrationNotLoaded:
+        return platform or ""
 
 
 def is_power_sensor(entity: er.RegistryEntry) -> bool:
@@ -225,11 +256,12 @@ def async_discover(hass: HomeAssistant) -> None:
         if flow["context"].get("unique_id") in passed_over:
             hass.config_entries.flow.async_abort(flow["flow_id"])
     for appliance in find_appliances(hass):
-        # appliances already configured, ignored or in progress are dropped by the flow's unique id
+        # appliances already configured, ignored or in progress are dropped by the flow's unique id, and one of an
+        # integration not yet tried on a real appliance is only ever offered, to be added knowing that
         discovery_flow.async_create_flow(
             hass,
             DOMAIN,
-            context={"source": source},
+            context={"source": SOURCE_INTEGRATION_DISCOVERY if profile_for(appliance.platform).beta else source},
             data={CONF_DEVICE_ID: appliance.device_id, CONF_NAME: appliance.name}
             | ({CONF_TYPE: appliance.type} if appliance.type else {}),
         )

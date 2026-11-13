@@ -69,6 +69,7 @@ from .const import (
     CONF_TARGETS,
     CONF_THRESHOLD,
     CYCLE_KEPT_HOURS,
+    CYCLE_KEY,
     CYCLE_SAVE_DELAY,
     CYCLE_SETTLE,
     CYCLE_STORE,
@@ -156,10 +157,11 @@ from .const import (
     VACUUM_STATUS_KEYS,
 )
 from .dashboards import dashboard_url
-from .discovery import companions, cycle_entities, is_cycle_entity, role_key
+from .discovery import companions, cycle_entities, integration_name, is_cycle_entity, role_key
 from .maintenance import DATA_MAINTENANCE, MaintenanceItem, MaintenanceTracker, maintenance_items, translated
-from .platforms import profile_for
+from .platforms import GENERIC, PlatformProfile, profile_for
 from .supernotify_api import deliveries_by_transport, supernotify_available
+from .trace import CycleTrace, async_ask_feedback
 from .words import name_type
 
 if TYPE_CHECKING:
@@ -254,6 +256,9 @@ class ApplianceWatcher:
         self.maintenance_items: list[MaintenanceItem] = []
         # tracking offered on the end notification of the cycle just over
         self._offering: bool = False
+        # the integration the appliance comes through, and what it does, kept while that's yet to be tried
+        self.profile: PlatformProfile = GENERIC
+        self.trace: CycleTrace | None = None
 
     async def async_load(self) -> None:
         """What was kept of the cycle before Home Assistant restarted, unless too old to carry on from, as when it
@@ -323,6 +328,20 @@ class ApplianceWatcher:
     @callback
     def async_start(self) -> None:
         raise NotImplementedError
+
+    async def async_start_trace(self) -> None:
+        """Keep what an appliance of an integration in beta does through its first cycles"""
+        if not self.profile.beta:
+            return
+        trace = CycleTrace(self.hass, self.entry.entry_id)
+        await trace.async_load()
+        self.trace = trace
+        if (unsubscribe := trace.async_start(self._traced_roles())) is not None:
+            self.entry.async_on_unload(unsubscribe)
+
+    def _traced_roles(self) -> dict[str, str]:
+        """The entities made use of, by entity id, with what each is made use of for"""
+        return {}
 
     @property
     def _tracker(self) -> MaintenanceTracker | None:
@@ -481,6 +500,14 @@ class ApplianceWatcher:
         message = self._text(CONF_END_MESSAGE, DEFAULT_END_MESSAGE)
         notify = finished and self.notify_end
         self._save()
+        if self.trace is not None and self.trace.async_cycle_ended(finished):
+            async_ask_feedback(
+                self.hass,
+                self.entry.entry_id,
+                self.name,
+                integration_name(self.hass, self.profile.platform),
+                self.profile.issue_url,
+            )
         await self._tell_ended(notify, title, message, context)
         if finished:
             await self._maintenance_due(context)
@@ -895,7 +922,8 @@ class HomeConnectWatcher(ApplianceWatcher):
         # the type of appliance isn't kept anywhere to be read, but its programs are named for it, or failing that,
         # for an integration with several types, its entities
         cycle = entity_registry.async_get(self.cycle_entity_id)
-        appliance_type = profile_for(cycle.platform if cycle else None).appliance_type(programs, translation_keys)
+        self.profile = profile_for(cycle.platform if cycle else None)
+        appliance_type = self.profile.appliance_type(programs, translation_keys)
         self.appliance_type = appliance_type or name_type(self.hass, self.name)
         self.icon = TYPE_ICONS.get(appliance_type or "", self._name_icon())
         # the one phase there is to know of is an oven warming up, Home Connect reporting none for anything else
@@ -939,6 +967,15 @@ class HomeConnectWatcher(ApplianceWatcher):
 
     def _phase_data(self) -> dict[str, Any]:
         return {"preheated": self.preheated, "over_by_stage": self.over_by_stage, "starting": self.starting}
+
+    def _traced_roles(self) -> dict[str, str]:
+        roles = {entity_id: f"fallback_{key}" for key, entity_id in self.fallback_ids.items()}
+        roles |= {entity_id: key for key, entity_id in self.entity_ids.items()}
+        if self.fallback_cycle_entity_id:
+            roles[self.fallback_cycle_entity_id] = f"fallback_{CYCLE_KEY}"
+        if self.cycle_entity_id:
+            roles[self.cycle_entity_id] = CYCLE_KEY
+        return roles
 
     def _worth_keeping(self) -> bool:
         return super()._worth_keeping() or self.over_by_stage or self.starting

@@ -4,6 +4,9 @@ title: What's New
 
 # 0.14.0
 - Maintenance reminders for appliances
+- Diagnostics download for each appliance, with its entities as its integration has them
+- Groundwork for more integrations: an appliance of an integration whose support is new is offered rather than set up
+  automatically, its first cycles are recorded for its diagnostics, and once one has finished a repair asks how it went
 
 # 0.13.0
 ## ✨ Enhancements

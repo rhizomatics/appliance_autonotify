@@ -36,7 +36,7 @@
             },
             "confirm": {
                 "title": "Notifications for {name}",
-                "description": "Get told when {name} starts and finishes?\n\n{supernotify}"
+                "description": "Get told when {name} starts and finishes?\n\n{supernotify}{beta}"
             }
         },
         "abort": {
@@ -230,6 +230,12 @@
                     "description": "How long to put it off"
                 }
             }
+        }
+    },
+    "issues": {
+        "beta_feedback": {
+            "title": "How did {name} do?",
+            "description": "{name} comes through {integration}, whose support in Appliance Auto Notify is new and was written without a real appliance to try it on. Its first cycle is over: did the start and end notifications, progress and time left come when they should?\n\nWhether it went well or not, please say so with *Learn more*, and attach the diagnostics of {name}, downloaded from its entry under *Appliance Auto Notify* in *Devices & services*. They hold what the appliance reported through its first cycles, which is how support gets right. Ignore this once done."
         }
     }
 }
