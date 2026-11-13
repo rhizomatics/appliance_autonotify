@@ -74,11 +74,21 @@ def is_cycle_entity(entity: er.RegistryEntry) -> bool:
 @callback
 def cycle_entities(hass: HomeAssistant) -> dict[str, er.RegistryEntry]:
     """The cycle state entity of every device that has one, by device"""
+    registry = er.async_get(hass)
     found: dict[str, er.RegistryEntry] = {}
-    for entity in er.async_get(hass).entities.values():
-        if is_cycle_entity(entity) and entity.device_id is not None:
+    for entity in registry.entities.values():
+        if is_cycle_entity(entity) and entity.device_id is not None and _has_needs(registry, entity):
             found.setdefault(entity.device_id, entity)
     return found
+
+
+def _has_needs(registry: er.EntityRegistry, cycle: er.RegistryEntry) -> bool:
+    """Whether the device of a cycle state entity has whatever else its integration needs it to, to be an appliance"""
+    needs = profile_for(cycle.platform).cycle_needs
+    if not needs:
+        return True
+    roles = {role_key(e) for e in er.async_entries_for_device(registry, cycle.device_id or "") if not e.disabled}
+    return all(need in roles for need in needs)
 
 
 @callback

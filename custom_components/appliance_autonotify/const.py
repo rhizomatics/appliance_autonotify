@@ -248,6 +248,8 @@ PROGRAM_KEYS: Final[tuple[str, ...]] = ("active_program", "selected_program")
 REMAINING_TIME_KEY: Final[str] = "remaining_time"
 # how long the cycle takes in all, as a duration, from which its progress is worked out where it reports none
 TOTAL_TIME_KEY: Final[str] = "total_time"
+# or how long it has been going, which with the time left is the same
+ELAPSED_TIME_KEY: Final[str] = "elapsed_time"
 # seconds between updates of progress worked out from the time, there being no change of the appliance's to go by
 PROGRESS_TICK: Final[float] = 60
 # what the appliance is doing within its cycle, such as drying then cooling, which Home Connect doesn't report
@@ -283,6 +285,7 @@ ENTITY_DOMAINS: Final[dict[str, tuple[str, ...]]] = {
     FINISH_TIME_KEY: ("sensor",),
     REMAINING_TIME_KEY: ("sensor",),
     TOTAL_TIME_KEY: ("sensor",),
+    ELAPSED_TIME_KEY: ("sensor",),
     **dict.fromkeys(PROGRAM_KEYS, ("select", "sensor")),
     TARGET_TEMPERATURE_KEY: ("number",),
     CAVITY_TEMPERATURE_KEY: ("sensor",),
@@ -306,9 +309,9 @@ STATES_FINISHED: Final[tuple[str, ...]] = ("finished", "inactive", "stop")
 STATES_SETTLING: Final[tuple[str, ...]] = ("ready", "idle")
 # stages that mean the cycle is over, though the cycle state may stay running a long while after, as a dryer's does
 # while it tumbles its load now and then so it won't crease
-STAGES_FINISHED: Final[tuple[str, ...]] = ("finished", "finish", "wrinkle_prevent", "wrinkle_care")
+STAGES_FINISHED: Final[tuple[str, ...]] = ("finished", "finish", "wrinkle_prevent", "wrinkle_care", "anti_crease")
 # stages that say nothing of what it's doing
-STAGES_NONE: Final[tuple[str, ...]] = ("none", "idle")
+STAGES_NONE: Final[tuple[str, ...]] = ("none", "idle", "not_running")
 # seconds an appliance is left to settle before the cycle is over
 CYCLE_SETTLE: Final[float] = 10
 # seconds after the cycle starts before it's told of, since an integration may report its program and stage a moment

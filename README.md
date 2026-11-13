@@ -14,7 +14,7 @@ When a dishwasher, washing machine, oven or other appliance starts a cycle, you'
 and time remaining while it runs, and you're told when it finishes.
 
 It works with Bosch, Neff and Siemens appliances connected with the Home Assistant [Home Connect](https://www.home-assistant.io/integrations/home_connect/) integration, robot vacuums using the [Vacuum Integration](https://www.home-assistant.io/integrations/vacuum/) and Samsung washers, dryers and dishwashers through [SmartThings](https://www.home-assistant.io/integrations/smartthings/)
-or [LocalThings](https://github.com/mbillow/localthings), in English only. Support for [Home Connect Local](https://github.com/chris-mc1/homeconnect_local_hass) and LG washers, dryers and dishwashers through [LG ThinQ](https://www.home-assistant.io/integrations/lg_thinq/) is new, see [New Integrations](#new-integrations). Support for [Home Connect Local](https://github.com/chris-mc1/homeconnect_local_hass) is new, see [New integrations](#new-integrations). Any other appliance can be added by hand if it has a power monitor, such as a smart plug.
+or [LocalThings](https://github.com/mbillow/localthings), in English only. Support for [Home Connect Local](https://github.com/chris-mc1/homeconnect_local_hass), LG washers, dryers and dishwashers through [LG ThinQ](https://www.home-assistant.io/integrations/lg_thinq/), and [Miele](https://www.home-assistant.io/integrations/miele/) is new, see [New Integrations](#new-integrations). Any other appliance can be added by hand if it has a power monitor, such as a smart plug.
 
 ![Pizza Time](https://appliance-autonotify.rhizomatics.org.uk/assets/images/pizza_time.png)
 
@@ -74,8 +74,11 @@ Where an integration names its entities or states its own way, or has more to te
 | ----------- | ---------- | ----- |
 | [Home Connect Local](https://github.com/chris-mc1/homeconnect_local_hass) | Bosch, Siemens, Neff | [#28](https://github.com/rhizomatics/appliance_autonotify/issues/28) |
 | [LG ThinQ](https://www.home-assistant.io/integrations/lg_thinq/) | LG washers, dryers, dishwashers | [#27](https://github.com/rhizomatics/appliance_autonotify/issues/27) |
+| [Miele](https://www.home-assistant.io/integrations/miele/) | Miele washers, dryers, dishwashers, ovens | [Issues](https://github.com/rhizomatics/appliance_autonotify/issues) |
 
 LG ThinQ has one state for both whether the appliance is running and what it's doing, such as *Rinsing*, which is shown as its status, and reports no progress, so it's worked out from the time the cycle takes and the time left, and moved on each minute.
+
+Miele gives every appliance the same status, a fridge's as much as a washer's, so only one with a program phase too is taken to have a cycle. Its progress is worked out from the time the program has taken and the time it has left.
 
 An appliance through a new integration is never set up automatically, it's offered as *Discovered*, saying that support is new. Once added, what it reports through its first three cycles is kept, and once the first has finished a repair asks how it went. Download the diagnostics of the appliance, from its entry under *Appliance Auto Notify* on the *Devices & services* page, and add them to the issue, whether it went well or not, since it takes a cycle on a real appliance to know.
 

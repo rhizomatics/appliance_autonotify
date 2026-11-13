@@ -19,6 +19,7 @@ from .const import (
     REMAINING_TIME_KEY,
     ROLE_KEY_PREFIXES,
     ROLE_KEYS,
+    STAGE_KEY,
     TOTAL_TIME_KEY,
 )
 
@@ -45,6 +46,9 @@ class PlatformProfile:
     cycle_states: Mapping[str, str] = field(default_factory=dict)
     # whether the cycle state also says what it's doing within its cycle, for an integration with no stage of its own
     stage_from_cycle: bool = False
+    # what else an appliance must have for its cycle state to be one, for an integration that gives every device the
+    # same cycle state, a fridge's as much as a washer's
+    cycle_needs: tuple[str, ...] = ()
     # where to tell of how it went, for one in beta
     issue_url: str | None = None
 
@@ -172,6 +176,32 @@ PROFILES: Final[dict[str, PlatformProfile]] = {
             },
             stage_from_cycle=True,
             issue_url="https://github.com/rhizomatics/appliance_autonotify/issues/27",
+        ),
+        # Miele, whose status every appliance has, with the same states, so an appliance has a cycle only where it has
+        # a program phase too, which fridges, hoods and hobs don't
+        PlatformProfile(
+            "miele",
+            status=STATUS_BETA,
+            role_keys={
+                "status": CYCLE_KEY,
+                "program_phase": STAGE_KEY,
+                "program_id": "active_program",
+                "finish": FINISH_TIME_KEY,
+            },
+            cycle_states={
+                "in_use": "run",
+                "pause": "pause",
+                "rinse_hold": "actionrequired",
+                "program_ended": "finished",
+                "off": "inactive",
+                "on": "ready",
+                "programmed": "ready",
+                "waiting_to_start": "delayedstart",
+                "failure": "error",
+                # stopped part way, so no end to tell of
+                "program_interrupted": "aborting",
+            },
+            cycle_needs=(STAGE_KEY,),
         ),
     )
     if profile.platform is not None

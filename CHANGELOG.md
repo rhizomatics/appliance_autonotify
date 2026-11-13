@@ -13,6 +13,11 @@ title: What's New
   - Its one state taken for both the cycle and what it's doing within it
   - Progress worked out from the time the cycle takes and the time left, for any integration that reports those but no progress
   - The type of appliance from the device's model, for any integration that names its models for the type
+- Miele washers, dryers, dishwashers and ovens discovered, as a new integration
+  - Only appliances with a program phase, since fridges, hoods and hobs have the same status
+  - Progress worked out from the time taken and the time left, for any integration that reports those
+  - *Anti-crease* ends the cycle, as *Wrinkle prevent* does
+  - Robot vacuums show their program phase, such as *Returning*, as their status
 ## 📝 Other changes
 - Diagnostics download for each appliance, with its entities as its integration has them
 - Groundwork for more integrations: an appliance of an integration whose support is new is offered rather than set up automatically, its first cycles are recorded for its diagnostics, and once one has finished a repair asks how it went

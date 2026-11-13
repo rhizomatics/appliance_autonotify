@@ -85,6 +85,7 @@ from .const import (
     DEFAULT_THRESHOLD,
     DEFAULT_TITLE,
     DOMAIN,
+    ELAPSED_TIME_KEY,
     ENTITY_DOMAINS,
     FAST_PREHEAT_KEY,
     FAST_PREHEAT_PHASE,
@@ -799,13 +800,17 @@ class ApplianceWatcher:
         return DurationConverter.convert(value, unit, UnitOfTime.SECONDS)
 
     def _timed_progress(self) -> int | None:
-        """How far along the cycle is by the time it has left of the time it takes, for an appliance that reports
-        both but not its progress"""
-        total = self._seconds(TOTAL_TIME_KEY)
+        """How far along the cycle is by the time it has left of the time it takes, or of the time it has taken and
+        has left, for an appliance that reports those but not its progress"""
         finish_time = self._finish_time()
-        if not total or total <= 0 or finish_time is None:
+        if finish_time is None:
             return None
         left = (finish_time - dt_util.utcnow()).total_seconds()
+        total = self._seconds(TOTAL_TIME_KEY)
+        if total is None and (elapsed := self._seconds(ELAPSED_TIME_KEY)) is not None:
+            total = elapsed + max(left, 0)
+        if not total or total <= 0:
+            return None
         return int(min(max(100 * (1 - left / total), 0), 100))
 
     def _finish_time(self) -> datetime | None:
@@ -1018,7 +1023,11 @@ class HomeConnectWatcher(ApplianceWatcher):
         ):
             if entity_ids := [ids[key] for ids in (self.entity_ids, self.fallback_ids) for key in keys if key in ids]:
                 self.entry.async_on_unload(async_track_state_change_event(self.hass, entity_ids, listener))
-        if PROGRESS_KEY not in self.entity_ids and PROGRESS_KEY not in self.fallback_ids and TOTAL_TIME_KEY in self.entity_ids:
+        if (
+            PROGRESS_KEY not in self.entity_ids
+            and PROGRESS_KEY not in self.fallback_ids
+            and (TOTAL_TIME_KEY in self.entity_ids or ELAPSED_TIME_KEY in self.entity_ids)
+        ):
             # progress worked out from the time, which moves on with no change of the appliance's to say so
             self.entry.async_on_unload(
                 async_track_time_interval(self.hass, self._progress_tick, timedelta(seconds=PROGRESS_TICK))
@@ -1472,6 +1481,8 @@ class VacuumWatcher(ApplianceWatcher):
         )
         if self.cycle_entity_id is None:
             raise ConfigEntryNotReady(f"No vacuum entity found for {self.name}")
+        vacuum = er.async_get(self.hass).async_get(self.cycle_entity_id)
+        self.profile = profile_for(vacuum.platform if vacuum is not None else None)
         self.appliance_type = "cleaning_robot"
         self.icon = TYPE_ICONS[self.appliance_type]
         # a cleaning under way at startup still has its Live Activity closed when it ends
@@ -1500,13 +1511,31 @@ class VacuumWatcher(ApplianceWatcher):
             self.entry.async_on_unload(async_track_state_change_event(self.hass, self._runnings, self._running_changed))
             if self.running:
                 self._job = self._running_now(None)
+        # its status, cleaning mode and progress as its integration names them, where it's known to, or else as
+        # Roborock does, from any entity the integration isn't known to use for something else, as Miele's status is
+        own = self.profile.role_keys
+        for entity in entities:
+            role = own.get(entity.translation_key or "")
+            if (
+                role in (STAGE_KEY, *PROGRAM_KEYS, PROGRESS_KEY)
+                and not entity.disabled
+                and entity.domain in ENTITY_DOMAINS.get(role or "", ())
+            ):
+                self.entity_ids.setdefault(role or "", entity.entity_id)
         for key, domain, keys in (
             (STAGE_KEY, "sensor", VACUUM_STATUS_KEYS),
             (PROGRAM_KEYS[-1], "select", VACUUM_PROGRAM_KEYS),
             (PROGRESS_KEY, "sensor", VACUUM_PROGRESS_KEYS),
         ):
+            if any(k in self.entity_ids for k in (PROGRAM_KEYS if key in PROGRAM_KEYS else (key,))):
+                continue
             if found := next(
-                (e.entity_id for e in entities if e.domain == domain and not e.disabled and e.translation_key in keys), None
+                (
+                    e.entity_id
+                    for e in entities
+                    if e.domain == domain and not e.disabled and e.translation_key in keys and e.translation_key not in own
+                ),
+                None,
             ):
                 self.entity_ids[key] = found
         if STAGE_KEY in self.entity_ids:
@@ -1655,6 +1684,13 @@ class VacuumWatcher(ApplianceWatcher):
         if self._cancel_end is not None:
             self._cancel_end()
             self._cancel_end = None
+
+    def _traced_roles(self) -> dict[str, str]:
+        roles = {entity_id: key for key, entity_id in self.entity_ids.items()}
+        roles |= dict.fromkeys(self._runnings, "running")
+        if self.cycle_entity_id:
+            roles[self.cycle_entity_id] = TYPE_VACUUM
+        return roles
 
     async def _activity_changed(self, event: Event[EventStateChangedData]) -> None:
         new_state = event.data["new_state"]
