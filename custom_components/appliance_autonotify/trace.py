@@ -37,6 +37,9 @@ class CycleTrace:
         self.events: list[dict[str, Any]] = []
         self.cycles_ended: int = 0
         self.cycles_finished: int = 0
+        # the end of a cycle has just been kept, ahead of the change that ended it where the watcher heard of that
+        # first, as it does where its handler runs straight away, so that change goes before it
+        self._just_ended: bool = False
 
     async def async_load(self) -> None:
         kept = await self._store.async_load() or {}
@@ -56,15 +59,21 @@ class CycleTrace:
 
         @callback
         def changed(event: Event[EventStateChangedData]) -> None:
-            if not self.recording:
+            if not self.recording and not self._just_ended:
                 return
             old, new = event.data["old_state"], event.data["new_state"]
-            self._add({
+            change = {
+                "at": dt_util.utcnow().isoformat(),
                 "role": roles.get(event.data["entity_id"], ""),
                 "entity_id": event.data["entity_id"],
                 "from": old.state if old is not None else None,
                 "to": new.state if new is not None else None,
-            })
+            }
+            if self._just_ended and self.events and self.events[-1]["role"] == ENDED:
+                self.events.insert(len(self.events) - 1, change)
+                self._kept()
+            else:
+                self._add(change)
 
         return async_track_state_change_event(self.hass, list(roles), changed)
 
@@ -76,13 +85,22 @@ class CycleTrace:
             return False
         self.cycles_ended += 1
         self.cycles_finished += finished
-        # kept after the change that ended it, which the watcher hears of first, and is told of as it does
-        self.hass.loop.call_soon(self._add, {"role": ENDED, "finished": finished})
+        self._add({"role": ENDED, "finished": finished})
+        self._just_ended = True
+        self.hass.loop.call_soon(self._settled)
         return finished and self.cycles_finished == 1
+
+    @callback
+    def _settled(self) -> None:
+        self._just_ended = False
 
     @callback
     def _add(self, event: dict[str, Any]) -> None:
         self.events.append({"at": dt_util.utcnow().isoformat()} | event)
+        self._kept()
+
+    @callback
+    def _kept(self) -> None:
         del self.events[:-TRACE_LIMIT]
         self._store.async_delay_save(self.as_dict, TRACE_SAVE_DELAY)
 
