@@ -41,12 +41,12 @@ heard from, though an end it told meanwhile still counts once the first goes qui
 
 ## New Integrations
 
-Where an integration names its entities or states its own way, or has more to tell than others, what's different is written down for it, and the rest is taken to work as it does for any other. Support for an integration written from its source, before it has been tried with a real appliance in a home, is *new*:
+Where an integration names its entities or states its own way, or has more to tell than others, what's different is written down for it, and the rest is taken to work as it does for any other. Support for an integration written from its source, before it has been tried with a real appliance in a home, is *new*, for each type of appliance till one of that type has been:
 
 | Integration | Appliances | Issue |
 | ----------- | ---------- | ----- |
 | [Home Connect Local](https://github.com/chris-mc1/homeconnect_local_hass) | Bosch, Siemens, Neff | [#28](https://github.com/rhizomatics/appliance_autonotify/issues/28) |
-| [LG ThinQ](https://www.home-assistant.io/integrations/lg_thinq/) | LG washers, dryers, dishwashers | [#27](https://github.com/rhizomatics/appliance_autonotify/issues/27) |
+| [LG ThinQ](https://www.home-assistant.io/integrations/lg_thinq/) | LG dryers, dishwashers (washers supported) | [#27](https://github.com/rhizomatics/appliance_autonotify/issues/27) |
 | [Miele](https://www.home-assistant.io/integrations/miele/) | Miele washers, dryers, dishwashers, ovens | [Issues](https://github.com/rhizomatics/appliance_autonotify/issues) |
 
 LG ThinQ has one state for both whether the appliance is running and what it's doing, such as *Rinsing*, which is shown as its status, and reports no progress, so it's worked out from the time the cycle takes and the time left, and moved on each minute.

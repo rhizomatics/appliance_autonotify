@@ -21,6 +21,7 @@ from .const import (
     DERIVED_POWER_PLATFORMS,
     DOMAIN,
     ENTITY_DOMAINS,
+    PROGRAM_KEYS,
     STATES_RUN,
     TYPE_DISCOVERY,
     TYPE_VACUUM,
@@ -184,6 +185,39 @@ def appliance_profile(hass: HomeAssistant, device_id: str) -> PlatformProfile:
 
 
 @callback
+def device_type(hass: HomeAssistant, device_id: str, profile: PlatformProfile) -> str | None:
+    """The type of appliance a device is, as its integration names its programs, or failing that, for an integration
+    with several types, its entities, or failing that its model, None where none of them say"""
+    programs: list[str] = []
+    translation_keys: list[str] = []
+    for entity in er.async_entries_for_device(er.async_get(hass), device_id):
+        key = role_key(entity)
+        if key is None or entity.disabled:
+            continue
+        translation_keys.append(entity.translation_key or "")
+        if key in PROGRAM_KEYS and entity.domain in ENTITY_DOMAINS.get(key, ()):
+            programs.extend((entity.capabilities or {}).get("options") or [])
+    if kind := profile.appliance_type(programs, translation_keys):
+        return kind
+    device = dr.async_get(hass).async_get(device_id)
+    model = device.model if isinstance(device, dr.DeviceEntry) and device.model else ""
+    return name_type(hass, model.replace("_", " ")) if model else None
+
+
+@callback
+def appliance_beta(hass: HomeAssistant, device_id: str, profile: PlatformProfile | None = None) -> bool:
+    """Whether an appliance is of a type yet to be seen to work through its integration, by its own name where
+    nothing else says what it is"""
+    profile = profile or appliance_profile(hass, device_id)
+    if not profile.beta:
+        return False
+    kind = device_type(hass, device_id, profile)
+    if kind is None and (device := dr.async_get(hass).async_get(device_id)) is not None:
+        kind = name_type(hass, device.name_by_user or device.name or "")
+    return profile.beta_for(kind)
+
+
+@callback
 def integration_name(hass: HomeAssistant, platform: str | None) -> str:
     """The name an integration goes by, or its domain where it isn't loaded"""
     try:
@@ -272,7 +306,11 @@ def async_discover(hass: HomeAssistant) -> None:
         discovery_flow.async_create_flow(
             hass,
             DOMAIN,
-            context={"source": SOURCE_INTEGRATION_DISCOVERY if profile_for(appliance.platform).beta else source},
+            context={
+                "source": SOURCE_INTEGRATION_DISCOVERY
+                if appliance_beta(hass, appliance.device_id, profile_for(appliance.platform))
+                else source
+            },
             data={CONF_DEVICE_ID: appliance.device_id, CONF_NAME: appliance.name}
             | ({CONF_TYPE: appliance.type} if appliance.type else {}),
         )

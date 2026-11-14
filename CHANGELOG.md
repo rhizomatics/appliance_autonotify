@@ -2,6 +2,12 @@
 title: What's New
 ---
 
+# 0.14.1
+## ✨ Enhancements
+- **LG ThinQ** washers supported, having been seen through a whole cycle (#27), so set up automatically like any other, with nothing kept of their cycles nor any repair asking how it went
+  - Dryers and dishwashers still new, offered as *Discovered*, till one of each has been tried
+  - A new integration can be supported for some types of appliance before others
+
 # 0.14.0
 ## ✨ Enhancements
 - Maintenance reminders for appliances, optional, cycle based for cleaning and parts replacement

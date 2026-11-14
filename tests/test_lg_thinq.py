@@ -1,5 +1,6 @@
 """LG washers, dryers and dishwashers through LG ThinQ, whose one state says both whether the cycle is running and what
-it's doing, with how far along it is worked out from the time, in beta till it's been tried with a real appliance"""
+it's doing, with how far along it is worked out from the time, a washer seen to work, a dryer or dishwasher in beta till
+it's been tried with a real appliance"""
 
 from __future__ import annotations
 
@@ -51,6 +52,9 @@ def washer(hass: HomeAssistant) -> dict[str, str]:
 def test_states_as_every_integration_has_them() -> None:
     profile = profile_for("lg_thinq")
     assert profile.beta
+    assert not profile.beta_for("washer")
+    assert profile.beta_for("dryer")
+    assert profile.beta_for("dishwasher")
     assert profile.issue_url is not None
     assert profile.issue_url.endswith("/issues/27")
     assert profile.stage_from_cycle
@@ -67,15 +71,34 @@ def test_states_as_every_integration_has_them() -> None:
     assert GENERIC.cycle_state("rinsing") == "rinsing"
 
 
-async def test_washer_offered_as_new(hass: HomeAssistant) -> None:
+async def test_washer_set_up_and_dryer_offered_as_new(hass: HomeAssistant) -> None:
+    """A washer has been seen to work, so it's set up like any other, while a dryer is only offered"""
     laundry = washer(hass)
-    assert [appliance.device_id for appliance in find_appliances(hass)] == [laundry["device_id"]]
+    dryer = thinq_device(hass, DRYER_ID, "Asciugatrice", "RH90V9AV4N (DEVICE_DRYER)")
+    assert {appliance.device_id for appliance in find_appliances(hass)} == {laundry["device_id"], dryer["device_id"]}
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
-    assert placeholders(result)["found"] == f"Appliances found:\n\n- Laundry{BETA_FOUND}"
+    found = placeholders(result)["found"]
+    assert "- Laundry\n" in f"{found}\n"
+    assert f"- Asciugatrice{BETA_FOUND}" in found
     await hass.config_entries.flow.async_configure(result["flow_id"], {"auto_discover": True})
     await hass.async_block_till_done()
     [flow] = hass.config_entries.flow.async_progress_by_handler(DOMAIN)
     assert flow["context"]["source"] == SOURCE_INTEGRATION_DISCOVERY
+    assert flow["context"]["unique_id"] == dryer["device_id"]
+    assert laundry["device_id"] in {entry.data.get("device_id") for entry in hass.config_entries.async_entries(DOMAIN)}
+
+
+async def test_only_a_type_in_beta_is_traced(hass: HomeAssistant) -> None:
+    laundry = washer(hass)
+    dryer = thinq_device(hass, DRYER_ID, "Asciugatrice", "RH90V9AV4N (DEVICE_DRYER)")
+    hass.states.async_set(laundry["current_state"], "power_off")
+    hass.states.async_set(dryer["current_state"], "power_off")
+    washer_entry = await setup_appliance(hass, laundry["device_id"])
+    dryer_entry = await setup_appliance(hass, dryer["device_id"])
+    assert not washer_entry.runtime_data.beta
+    assert washer_entry.runtime_data.trace is None
+    assert dryer_entry.runtime_data.beta
+    assert dryer_entry.runtime_data.trace is not None
 
 
 async def test_same_states_of_another_integration_are_no_cycle(hass: HomeAssistant) -> None:

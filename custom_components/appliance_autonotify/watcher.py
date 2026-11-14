@@ -162,7 +162,7 @@ from .const import (
     VACUUM_STATUS_KEYS,
 )
 from .dashboards import dashboard_url
-from .discovery import companions, cycle_entities, integration_name, is_cycle_entity, role_key
+from .discovery import companions, cycle_entities, device_type, integration_name, is_cycle_entity, role_key
 from .maintenance import DATA_MAINTENANCE, MaintenanceItem, MaintenanceTracker, maintenance_items, translated
 from .platforms import GENERIC, PlatformProfile, profile_for
 from .supernotify_api import deliveries_by_transport, supernotify_available
@@ -336,9 +336,15 @@ class ApplianceWatcher:
     def async_start(self) -> None:
         raise NotImplementedError
 
+    @property
+    def beta(self) -> bool:
+        """Whether its type of appliance is yet to be seen to work through its integration"""
+        return self.profile.beta_for(self.appliance_type)
+
     async def async_start_trace(self) -> None:
-        """Keep what an appliance of an integration in beta does through its first cycles"""
-        if not self.profile.beta:
+        """Keep what an appliance of a type yet to be seen to work through its integration does through its first
+        cycles"""
+        if not self.beta:
             return
         trace = CycleTrace(self.hass, self.entry.entry_id)
         await trace.async_load()
@@ -949,20 +955,15 @@ class HomeConnectWatcher(ApplianceWatcher):
         device = dr.async_get(self.hass).async_get(device_id)
         if device is not None:
             self.name = device.name_by_user or device.name or self.name
-        programs: list[str] = []
-        translation_keys: list[str] = []
         entity_registry = er.async_get(self.hass)
         for entity in er.async_entries_for_device(entity_registry, device_id):
             key = role_key(entity)
             if key is None or entity.disabled:
                 continue
-            translation_keys.append(entity.translation_key or "")
             if is_cycle_entity(entity):
                 self.cycle_entity_id = entity.entity_id
             elif entity.domain in ENTITY_DOMAINS.get(key, ()):
                 self.entity_ids[key] = entity.entity_id
-                if key in PROGRAM_KEYS:
-                    programs.extend((entity.capabilities or {}).get("options") or [])
         if self.cycle_entity_id is None:
             raise ConfigEntryNotReady(f"No cycle state entity found for {self.name}")
         # the same appliance through another integration, heard from only while this one can't be
@@ -973,8 +974,6 @@ class HomeConnectWatcher(ApplianceWatcher):
                 key = role_key(entity)
                 if key is not None and not entity.disabled and entity.domain in ENTITY_DOMAINS.get(key, ()):
                     self.fallback_ids.setdefault(key, entity.entity_id)
-        # the type of appliance isn't kept anywhere to be read, but its programs are named for it, or failing that,
-        # for an integration with several types, its entities
         cycle = entity_registry.async_get(self.cycle_entity_id)
         self.profile = profile_for(cycle.platform if cycle else None)
         for entity_id in (self.cycle_entity_id, self.fallback_cycle_entity_id):
@@ -982,11 +981,8 @@ class HomeConnectWatcher(ApplianceWatcher):
                 self._cycle_profiles[entity_id] = profile_for(registered.platform)
         if self.profile.stage_from_cycle:
             self.entity_ids.setdefault(STAGE_KEY, self.cycle_entity_id)
-        # or failing that its model, as an integration names it for its type
-        model = device.model if isinstance(device, dr.DeviceEntry) and device.model else ""
-        appliance_type = self.profile.appliance_type(programs, translation_keys) or name_type(
-            self.hass, model.replace("_", " ")
-        )
+        # the type of appliance isn't kept anywhere to be read, but its programs, entities or model are named for it
+        appliance_type = device_type(self.hass, device_id, self.profile)
         self.appliance_type = appliance_type or name_type(self.hass, self.name)
         self.icon = TYPE_ICONS.get(appliance_type or "", self._name_icon())
         # the one phase there is to know of is an oven warming up, Home Connect reporting none for anything else

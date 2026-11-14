@@ -131,8 +131,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: AppliancesConfigEntry) -
     await watcher.async_load()
     watcher.async_start()
     await watcher.async_start_trace()
-    if not watcher.profile.beta:
-        # its integration has since been seen to work, so there's nothing more to ask
+    if not watcher.beta:
+        # its type of appliance has since been seen to work through its integration, so there's nothing more to ask
         async_forget_feedback(hass, entry.entry_id)
     watcher.async_listen_for_actions()
     watcher.async_start_maintenance()
