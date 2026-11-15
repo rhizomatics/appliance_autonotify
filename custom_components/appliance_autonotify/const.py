@@ -188,7 +188,7 @@ OVEN_MESSAGE: Final[str] = "{program}, {current}{unit}"
 SUPERNOTIFY_PRESENT: Final[str] = "Supernotify is installed, so mobile apps will show a Live Activity for each cycle."
 SUPERNOTIFY_MISSING: Final[str] = (
     "**Supernotify is not installed.** Only a plain start and end notification can be sent, to every phone with the "
-    "Home Assistant app, with no Live Activity. Install Supernotify from HACS for the full experience."
+    "Home Assistant app, with no Live Activity. Install Supernotify from Marketplace for the full experience."
 )
 # an appliance of an integration not yet tried on a real appliance, as it's offered to be added
 BETA_NOTICE: Final[str] = (

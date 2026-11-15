@@ -46,7 +46,7 @@ docs=[
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-# the version Home Assistant and HACS read is the only one kept
+# the version Home Assistant and Marketplace read is the only one kept
 [tool.hatch.version]
 path = "custom_components/appliance_autonotify/manifest.json"
 pattern = '"version": "(?P<version>[^"]+)"'

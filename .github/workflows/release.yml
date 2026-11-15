@@ -1,4 +1,4 @@
-# Releases are immutable once published, so the zip HACS installs from (hacs.json zip_release) has to be attached
+# Releases are immutable once published, so the zip Marketplace installs from (hacs.json zip_release) has to be attached
 # while the release is still a draft. Write the release as a draft in GitHub as usual, with its notes and whether
 # it's a pre-release, then run this from the Actions tab with its tag, to attach the zip and publish it.
 

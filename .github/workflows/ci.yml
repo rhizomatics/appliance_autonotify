@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: ["main"]
   schedule:
-    # weekly, so a change in what HACS or Home Assistant ask of an integration is found out here first
+    # weekly, so a change in what Marketplace or Home Assistant ask of an integration is found out here first
     - cron: "17 5 * * 1"
   workflow_dispatch:
 
@@ -14,12 +14,12 @@ permissions:
   contents: read
 
 jobs:
-  hacs:
+  marketplace:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
       # nothing ignored, the brand check being met by the brand directory of the integration
-      - name: HACS validation
+      - name: Marketplace validation
         uses: hacs/action@1ebf01c408f29afcb6406bd431bc98fd8cbb15aa
         with:
           category: integration

@@ -1,6 +1,6 @@
 # Appliance Auto Notify
 
-[![Rhizomatics Open Source](https://img.shields.io/badge/rhizomatics%20open%20source-lightseagreen)](https://github.com/rhizomatics) [![managed by hq](https://raw.githubusercontent.com/rhizomatics/hq/main/assets/badge-managed-by-hq.svg)](https://hq.rhizomatics.org.uk/) [![hacs][hacsbadge]][hacs]
+[![Rhizomatics Open Source](https://img.shields.io/badge/rhizomatics%20open%20source-lightseagreen)](https://github.com/rhizomatics) [![managed by hq](https://raw.githubusercontent.com/rhizomatics/hq/main/assets/badge-managed-by-hq.svg)](https://hq.rhizomatics.org.uk/) [![Home Assistant Marketplace][marketplacebadge]][marketplace]
 [![CI](https://github.com/rhizomatics/appliance_autonotify/actions/workflows/ci.yml/badge.svg)](https://github.com/rhizomatics/appliance_autonotify/actions/workflows/ci.yml)
 [![Github Deploy](https://github.com/rhizomatics/appliance_autonotify/actions/workflows/deploy.yml/badge.svg?branch=main)](https://github.com/rhizomatics/appliance_autonotify/actions/workflows/deploy.yml)
 ![Coverage](https://raw.githubusercontent.com/rhizomatics/appliance_autonotify/refs/heads/badges/badges/coverage.svg)
@@ -23,7 +23,7 @@ or [LocalThings](https://github.com/mbillow/localthings), in English only, and L
 - Home Assistant 2026.5 or later
 - An appliance set up with the Home Connect, SmartThings or LocalThings integration, a robot vacuum of any make, or
   one with a power sensor
-- [Supernotify](https://supernotify.rhizomatics.org.uk), installed from HACS, for Live Activities and for anything beyond a plain notification.
+- [Supernotify](https://supernotify.rhizomatics.org.uk), installed from Marketplace, for Live Activities and for anything beyond a plain notification.
   - Optional, however without Supernotify, it only sends a start and an end notification, to every phone with the Home Assistant app unless you choose other notify entities.
   - `v2.14.0` recommended as minimum, though most features will work with earlier releases
 - Home Assistant app installed on an Apple mobile device, minimum iOS 17.2, or on an Android one, where a
@@ -252,5 +252,5 @@ dimmed or always-on, so drops the seconds. This is also a theory, and nothing ha
 - [Remote Logger](https://remote-logger.rhizomatics.org.uk) - OpenTelemetry (OTLP) and Syslog event capture for Home Assistant
 - [Supernotify](https://supernotify.rhizomatics.org.uk) - Unified notification for easy multi-channel messaging, including powerful chime and security camera integration.
 
-[hacs]: https://hacs.xyz
-[hacsbadge]: https://img.shields.io/badge/HACS-Default-blue.svg
+[marketplace]: https://www.home-assistant.io/integrations/marketplace
+[marketplacebadge]: https://img.shields.io/badge/Home%20Assistant-Marketplace-blue.svg

@@ -28,7 +28,7 @@ rules:
 
   brands:
     status: done
-    comment: Icons and logos in custom_components/appliance_autonotify/brand/, checked by the HACS action in CI.
+    comment: Icons and logos in custom_components/appliance_autonotify/brand/, checked by the Marketplace action in CI.
 
   common-modules:
     status: done
