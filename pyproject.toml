@@ -12,7 +12,6 @@ dependencies = [
 dev = [
     "pytest",
     "pytest-cov",
-    "pytest-asyncio",
     "pytest-homeassistant>=2026.11.0",
     "ruff",
     "codespell",
