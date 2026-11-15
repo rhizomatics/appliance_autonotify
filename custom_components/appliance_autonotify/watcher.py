@@ -89,6 +89,7 @@ from .const import (
     ENTITY_DOMAINS,
     FAST_PREHEAT_KEY,
     FAST_PREHEAT_PHASE,
+    FINISH_MOVED,
     FINISH_TIME_KEY,
     LIVE_DEFAULTS,
     LIVE_DETAIL_PROGRAM,
@@ -234,6 +235,8 @@ class ApplianceWatcher:
         self.running: bool = False
         # the progress last sent, rounded down to the step it was sent for
         self.last_progress_mark: int = 0
+        # the finish last sent to the Live Activity, which the appliance may put back as it goes, as a dryer does
+        self.last_finish: datetime | None = None
         # one notification at a time, so a progress update can't overtake the end and reopen the Live Activity
         self._sending: asyncio.Lock = asyncio.Lock()
         self.reminder: float = entry.options.get(CONF_REMINDER, 0)
@@ -428,18 +431,29 @@ class ApplianceWatcher:
     async def _progress_tick(self, now: datetime) -> None:
         await self._progress_now(Context())
 
+    def _finish_moved(self) -> bool:
+        """Whether the appliance has put its finish back or forward since the Live Activity was told it, which would
+        otherwise count down to a time gone by, a finish only now known coming soon enough with what's next to tell"""
+        finish_time = self._finish_time()
+        if finish_time is None or self.last_finish is None:
+            return False
+        return abs((finish_time - self.last_finish).total_seconds()) >= FINISH_MOVED
+
     async def _progress_now(self, context: Context) -> None:
-        progress = self._progress()
-        if not self.running or progress is None:
+        if not self.running:
             return
-        mark = self._mark(progress)
-        if mark <= self.last_progress_mark:
+        progress = self._progress()
+        mark = None if progress is None else self._mark(progress)
+        moved = self._finish_moved()
+        if not moved and (mark is None or mark <= self.last_progress_mark):
             return
         # the first reading only fills in the Live Activity, coming straight after the start notification, as do
-        # the steps between those notified and the smaller ones towards the end
+        # the steps between those notified and the smaller ones towards the end, and a finish put back, which may
+        # take the bar back with it, to climb again from there
         step = PROGRESS_NOTIFY_STEP
-        ordinary = self.notify_progress and mark // step > max(self.last_progress_mark, 0) // step
-        self.last_progress_mark = mark
+        ordinary = mark is not None and self.notify_progress and mark // step > max(self.last_progress_mark, 0) // step
+        if mark is not None:
+            self.last_progress_mark = mark
         live = supernotify_available(self.hass)
         if not live and not ordinary:
             return
@@ -447,7 +461,11 @@ class ApplianceWatcher:
             if not self.running:
                 # the cycle ended while this waited its turn
                 return
-            message = self._progress_message(progress)
+            message = (
+                self._progress_message(progress)
+                if progress is not None
+                else self._text(CONF_START_MESSAGE, DEFAULT_START_MESSAGE)
+            )
             if live and not ordinary:
                 # the bar already shows how far along it is, so there's room to say what it's doing
                 message = self._phase() or message
@@ -473,7 +491,9 @@ class ApplianceWatcher:
         if not supernotify_available(self.hass):
             if ordinary:
                 await self._send_message(message, title, context)
-        elif ordinary:
+            return
+        self.last_finish = self._finish_time()
+        if ordinary:
             # everywhere, opening or updating the Live Activity on phones as it goes
             await self._supernotify(
                 message, title, context, resend=resend, extra_data=self._live_data(), actions=self._tap_actions()
@@ -811,10 +831,15 @@ class ApplianceWatcher:
         finish_time = self._finish_time()
         if finish_time is None:
             return None
-        left = (finish_time - dt_util.utcnow()).total_seconds()
+        now = dt_util.utcnow()
+        left = (finish_time - now).total_seconds()
         total = self._seconds(TOTAL_TIME_KEY)
         if total is None and (elapsed := self._seconds(ELAPSED_TIME_KEY)) is not None:
             total = elapsed + max(left, 0)
+        elif total is not None and self.started_at is not None:
+            # the time it said it would take, unless it's since put its finish back and will take longer, as a dryer
+            # does that finds its load still damp, and keeps the total it first said
+            total = max(total, (now - self.started_at).total_seconds() + max(left, 0))
         if not total or total <= 0:
             return None
         return int(min(max(100 * (1 - left / total), 0), 100))
@@ -1012,7 +1037,8 @@ class HomeConnectWatcher(ApplianceWatcher):
         self.entry.async_on_unload(self._keep_running)
         self.entry.async_on_unload(self._forget_preheated)
         for keys, listener in (
-            ((PROGRESS_KEY,), self._progress_changed),
+            # and its finish, which an appliance may put back, as a dryer does, with no change of its progress
+            ((PROGRESS_KEY, FINISH_TIME_KEY, REMAINING_TIME_KEY), self._progress_changed),
             ((STAGE_KEY,), self._stage_changed),
             ((CAVITY_TEMPERATURE_KEY, TARGET_TEMPERATURE_KEY), self._temperature_changed),
             (PREHEAT_FINISHED_KEYS, self._preheat_finished),

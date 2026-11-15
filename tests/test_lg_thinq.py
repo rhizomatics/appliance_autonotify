@@ -159,6 +159,43 @@ async def test_washer_cycle(hass: HomeAssistant, freezer) -> None:
     assert len(calls) == sent
 
 
+async def test_dryer_putting_its_finish_back(hass: HomeAssistant, freezer) -> None:
+    """As a real one did, on a bedding cycle: its total kept at the 55 minutes it first said, its finish put back 11
+    minutes at a time as the end came near, for an hour and a half longer"""
+    freezer.move_to(NOW)
+    dryer = thinq_device(hass, DRYER_ID, "Dryer", "BDV_TX_BT_LED_6203 (DEVICE_DRYER)")
+    calls = mock_supernotify(hass)
+    hass.states.async_set(dryer["current_state"], "initial")
+    hass.states.async_set(dryer["total"], "55", {"unit_of_measurement": "min"})
+    hass.states.async_set(dryer["remain"], (NOW + timedelta(minutes=55)).isoformat())
+    await setup_appliance(hass, dryer["device_id"])
+    await set_state(hass, dryer["current_state"], "running")
+
+    freezer.tick(timedelta(minutes=50))
+    await pass_time(hass, PROGRESS_TICK)
+    assert calls[-1].data["extra_data"]["progress"] == 90
+    assert calls[-1].data["extra_data"]["when"] == int((NOW + timedelta(minutes=55)).timestamp())
+
+    # the countdown put right, not left at nought, and the bar back to how far along it now is of the longer cycle
+    sent = len(calls)
+    finish = NOW + timedelta(minutes=66)
+    await set_state(hass, dryer["remain"], finish.isoformat())
+    assert len(calls) == sent + 1
+    extra = calls[-1].data["extra_data"]
+    assert extra["when"] == int(finish.timestamp())
+    assert extra["progress"] == 75
+
+    # and from there climbing again, with time
+    freezer.tick(timedelta(minutes=6))
+    await pass_time(hass, PROGRESS_TICK)
+    assert calls[-1].data["extra_data"]["progress"] == 84
+
+    # a remaining time a minute out either way is no change of mind to tell of
+    sent = len(calls)
+    await set_state(hass, dryer["remain"], (finish + timedelta(minutes=1)).isoformat())
+    assert len(calls) == sent
+
+
 async def test_dryer_over_once_it_only_tumbles(hass: HomeAssistant) -> None:
     dryer = thinq_device(hass, DRYER_ID, "Asciugatrice", "RH90V9AV4N (DEVICE_DRYER)")
     calls = mock_supernotify(hass)

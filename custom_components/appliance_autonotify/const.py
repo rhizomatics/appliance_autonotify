@@ -337,6 +337,9 @@ PROGRESS_NOTIFY_STEP: Final[int] = 10
 # from here on the end is in sight and the bar is being watched, so it's kept closer to the appliance
 PROGRESS_FINAL: Final[int] = 90
 PROGRESS_FINAL_STEP: Final[int] = 2
+# seconds the finish can move before the Live Activity's countdown is put right, more than the minute a remaining
+# time rounds to, so an appliance counting down only has its countdown sent again when it changes its mind
+FINISH_MOVED: Final[float] = 120
 
 MOBILE_PUSH_TRANSPORT: Final[str] = "mobile_push"
 # Android notification channel of its own, made with sound on the first notification, since a Live Update in the
