@@ -2,6 +2,13 @@
 title: What's New
 ---
 
+# 0.14.2
+## 🐛 Fixes
+- Live Activity countdown and progress kept up to date when an appliance puts its finish back, as an **LG ThinQ** dryer does when the load is still damp (#27)
+  - The countdown no longer stops at 0:00 while the cycle carries on
+  - Progress measured against the longer cycle, rather than stopping short of the end, for any integration where it's worked out from the time
+  - Any integration reporting a finish time or time remaining, with or without progress
+
 # 0.14.1
 ## ✨ Enhancements
 - **LG ThinQ** washers supported, having been seen through a whole cycle (#27), so set up automatically like any other, with nothing kept of their cycles nor any repair asking how it went
