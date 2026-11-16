@@ -12,11 +12,13 @@ on:
         required: true
         type: string
 
-permissions:
-  contents: write
+# Nothing by default; the job grants what it needs (OpenSSF Scorecard Token-Permissions).
+permissions: {}
 
 jobs:
   publish:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
