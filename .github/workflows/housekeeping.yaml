@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: '30 4 * * *'
 
+# Nothing by default; each job grants only what it needs (OpenSSF Scorecard Token-Permissions).
+permissions: {}
+
 jobs:
   free-disk-space:
     permissions: {}
