@@ -172,7 +172,9 @@ rules:
     comment: |
       diagnostics.py: the entry (notify targets redacted), the integration's profile and status, the
       watcher's entities, every entity of the appliance's devices with its role, options and state,
-      and the trace of its first cycles where its integration is in beta (trace.py).
+      and the trace of its first cycles where its integration is in beta (trace.py). The automatic discovery
+      entry's lists the devices that look like appliances but weren't found to be, with no names or entity ids,
+      for a request to support their integration.
 
   discovery:
     status: done
@@ -207,7 +209,8 @@ rules:
   docs-troubleshooting:
     status: todo
     comment: |
-      "Known Issues" covers two iPhone symptoms. Missing: what to do when nothing is sent
+      "Known Issues" covers two iPhone symptoms, and "Appliance Not Found?" what to do when an appliance
+      isn't discovered (the automatic discovery diagnostics). Missing: what to do when nothing is sent
       (the "Nothing to notify" and "No mobile push delivery found" warnings in watcher.py) or
       an appliance stays not ready ("No cycle state entity found").
 

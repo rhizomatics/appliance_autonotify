@@ -43,6 +43,12 @@ That's all. Every appliance with a cycle Home Assistant reports is set up straig
 
 To stop the notifications for an appliance, disable it rather than delete it, since a deleted appliance is found and set up again.
 
+### Appliance Not Found?
+
+If an appliance with its own integration isn't found, its integration may name its entities or states in a way that isn't known yet. In *Settings*, *Devices & services*, open *Appliance Auto Notify*, and on *Automatic discovery* choose ⋮ then *Download diagnostics*. It lists each device that looks like an appliance but wasn't found to be one, with its make, model, integration, and its entities' keys, options and states. Names, areas and entity ids are left out, since it's meant to be shared. [Open an issue](https://github.com/rhizomatics/appliance_autonotify/issues) asking for the integration to be supported and attach the file.
+
+Meanwhile, an appliance with a smart plug or other power monitor can be added by its power, see [Power Monitored Appliances](#power-monitored-appliances).
+
 ### Removing
 
 1. In *Settings*, *Devices & services*, open *Appliance Auto Notify* and delete *Automatic discovery* first, so the

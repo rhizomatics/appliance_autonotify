@@ -2,6 +2,13 @@
 title: What's New
 ---
 
+# 1.0.0
+## ✨ Enhancements
+- Diagnostics of *Automatic discovery* list the devices that look like appliances but weren't found to be one, with their make, model, integration and their entities' keys, options and states, to attach to an issue asking for their integration to be supported
+  - No names, areas or entity ids, since it's meant to be shared
+## 📚 Documentation
+- *Appliance Not Found?* in README, on what to send when an appliance isn't discovered
+
 # 0.14.3
 ## ✨ Enhancements
 - **LG ThinQ** dryers supported, having been seen through whole cycles on 0.14.2 (#27), so set up automatically like any other, with nothing kept of their cycles nor any repair asking how it went
