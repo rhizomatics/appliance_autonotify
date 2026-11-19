@@ -166,11 +166,11 @@ With the timer, the time left counts down on the Lock Screen of an iPhone in pla
 
 ## Notifications
 
-Nothing is polled: notifications go out as the appliance's own entities change. See [What Gets Sent](docs/how_it_works.md#what-gets-sent) for each notification and Live Activity update, with and without Supernotify.
+Nothing is polled: notifications go out as the appliance's own entities change. Their usual wording, and their buttons, are in the language of Home Assistant where there's a translation (English, Chinese, Dutch, French, German, Hindi, Italian, Polish and Spanish), such as "Spülmaschine ist fertig", and in English for any other. See [What Gets Sent](docs/how_it_works.md#what-gets-sent) for each notification and Live Activity update, with and without Supernotify.
 
 ### Buttons on the End Notification
 
-With Supernotify, the end notification has buttons, in the language of Home Assistant where there's a translation (English, Chinese, Dutch, French, German, Hindi, Italian, Polish and Spanish):
+With Supernotify, the end notification has buttons:
 
 | Button         | What it does                                                                                 |
 | -------------- | -------------------------------------------------------------------------------------------- |

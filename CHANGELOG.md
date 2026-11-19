@@ -4,6 +4,8 @@ title: What's New
 
 # 1.1.0
 ## ✨ Enhancements
+- Notifications in the language of Home Assistant, with their usual wording, progress and pre-heating, as their buttons and maintenance messages already were, which was meant for 1.0.0 but left out of it
+  - In Italian too, so an Italian Home Assistant now says "Lavatrice: ciclo terminato" where it said "Lavatrice is finished", unless the message was changed in the settings
 - Live Activity shows any of the program, the phase and the state, ticked in the settings, all by default, each where the appliance reports it and has something to say
   - The phase is the part of the cycle it's in, such as *Main wash*, *Drying* or an oven *Pre-heating*
   - The state is shown when it's more than running, such as *Paused*, or a robot vacuum *Returning* to its dock, which is now said whether or not the vacuum has a status of its own

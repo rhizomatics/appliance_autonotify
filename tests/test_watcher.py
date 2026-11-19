@@ -1362,6 +1362,22 @@ async def test_buttons_in_the_language_of_home_assistant(hass: HomeAssistant, fr
     ]
 
 
+async def test_messages_in_the_language_of_home_assistant(hass: HomeAssistant) -> None:
+    hass.config.language = "it"
+    appliance = add_appliance(hass)
+    await setup_watcher(hass, appliance, {"targets": ["notify.kitchen_display"], "notify_start": True, "notify_progress": True})
+    calls = async_mock_service(hass, "notify", "send_message")
+
+    await set_state(hass, appliance.cycle, "run")
+    await set_state(hass, appliance.progress, "30")
+    await set_state(hass, appliance.cycle, "finished")
+    assert [c.data["message"] for c in calls] == [
+        "Dishwasher: ciclo avviato",
+        "30% completato",
+        "Dishwasher: ciclo terminato",
+    ]
+
+
 async def test_reminders_stop_when_unloaded(hass: HomeAssistant, freezer) -> None:
     calls = mock_supernotify(hass)
     hass.states.async_set("sensor.washer_power", "0", {"unit_of_measurement": "W"})
