@@ -11,6 +11,7 @@ from homeassistant.const import CONF_DEVICE_ID, CONF_TYPE
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 
+from .compat import all_devices
 from .const import CONF_CUSTOM_TARGET, CONF_POWER_ENTITY, CONF_TARGET, CONF_TARGETS, DOMAIN, TYPE_DISCOVERY
 from .discovery import appliance_profile, companions, cycle_entities, integration_name, role_key
 from .trace import CycleTrace
@@ -106,7 +107,7 @@ def _unmatched(hass: HomeAssistant) -> list[dict[str, Any]]:
     configured = {entry.data.get(CONF_DEVICE_ID) for entry in hass.config_entries.async_entries(DOMAIN)}
     entity_registry = er.async_get(hass)
     found: list[dict[str, Any]] = []
-    for device in dr.async_get(hass).devices:
+    for device in all_devices(dr.async_get(hass)):
         if device.id in matched or device.id in configured or any(domain == DOMAIN for domain, _ in device.identifiers):
             continue
         entities = sorted(er.async_entries_for_device(entity_registry, device.id), key=lambda e: e.entity_id)
