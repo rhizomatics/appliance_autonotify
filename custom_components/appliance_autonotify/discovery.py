@@ -21,12 +21,12 @@ from .const import (
     DERIVED_POWER_PLATFORMS,
     DOMAIN,
     ENTITY_DOMAINS,
-    ROLE_KEY_PREFIXES,
-    ROLE_KEYS,
+    PROGRAM_KEYS,
     STATES_RUN,
     TYPE_DISCOVERY,
     TYPE_VACUUM,
 )
+from .platforms import PlatformProfile, profile_for
 from .words import name_type
 
 if TYPE_CHECKING:
@@ -44,6 +44,8 @@ class Appliance:
     name: str
     # how its cycle is told, None for an appliance of a vendor platform
     type: str | None = None
+    # the integration it comes through
+    platform: str | None = None
 
 
 @dataclass(frozen=True)
@@ -55,11 +57,9 @@ class PowerMonitor:
 
 
 def role_key(entity: er.RegistryEntry) -> str | None:
-    """What an entity does, as the translation key Home Connect gives an entity that does the same"""
-    key = entity.translation_key
-    if key is None or key in ROLE_KEYS:
-        return ROLE_KEYS.get(key or "")
-    return next((role for prefix, role in ROLE_KEY_PREFIXES.items() if key.startswith(prefix)), key)
+    """What an entity does, as the translation key Home Connect gives an entity that does the same, by the names of
+    its own integration before those of every integration"""
+    return profile_for(entity.platform).role_key(entity.translation_key)
 
 
 def is_cycle_entity(entity: er.RegistryEntry) -> bool:
@@ -68,17 +68,28 @@ def is_cycle_entity(entity: er.RegistryEntry) -> bool:
     if entity.disabled or entity.device_id is None or entity.domain != SENSOR_DOMAIN or role_key(entity) != CYCLE_KEY:
         return False
     options = (entity.capabilities or {}).get("options") or []
-    return any(option in STATES_RUN for option in options)
+    profile = profile_for(entity.platform)
+    return any(profile.cycle_state(option) in STATES_RUN for option in options)
 
 
 @callback
 def cycle_entities(hass: HomeAssistant) -> dict[str, er.RegistryEntry]:
     """The cycle state entity of every device that has one, by device"""
+    registry = er.async_get(hass)
     found: dict[str, er.RegistryEntry] = {}
-    for entity in er.async_get(hass).entities.values():
-        if is_cycle_entity(entity) and entity.device_id is not None:
+    for entity in registry.entities.values():
+        if is_cycle_entity(entity) and entity.device_id is not None and _has_needs(registry, entity):
             found.setdefault(entity.device_id, entity)
     return found
+
+
+def _has_needs(registry: er.EntityRegistry, cycle: er.RegistryEntry) -> bool:
+    """Whether the device of a cycle state entity has whatever else its integration needs it to, to be an appliance"""
+    needs = profile_for(cycle.platform).cycle_needs
+    if not needs:
+        return True
+    roles = {role_key(e) for e in er.async_entries_for_device(registry, cycle.device_id or "") if not e.disabled}
+    return all(need in roles for need in needs)
 
 
 @callback
@@ -144,13 +155,75 @@ def find_appliances(hass: HomeAssistant) -> list[Appliance]:
     found: dict[str, Appliance] = {}
     for device_id, cycle in _chosen_devices(hass)[0].items():
         if (device := device_registry.async_get(device_id)) is not None:
-            found[device_id] = Appliance(device_id, device.name_by_user or device.name or cycle.entity_id)
+            found[device_id] = Appliance(
+                device_id, device.name_by_user or device.name or cycle.entity_id, platform=cycle.platform
+            )
     for entity in er.async_get(hass).entities.values():
         if entity.domain != TYPE_VACUUM or entity.device_id is None or entity.disabled:
             continue
         if (device := device_registry.async_get(entity.device_id)) is not None:
-            found[device.id] = Appliance(device.id, device.name_by_user or device.name or entity.entity_id, TYPE_VACUUM)
+            found[device.id] = Appliance(
+                device.id, device.name_by_user or device.name or entity.entity_id, TYPE_VACUUM, entity.platform
+            )
     return list(found.values())
+
+
+@callback
+def appliance_profile(hass: HomeAssistant, device_id: str) -> PlatformProfile:
+    """The profile of the integration an appliance comes through, by its cycle state entity, or its vacuum"""
+    if (cycle := cycle_entities(hass).get(device_id)) is not None:
+        return profile_for(cycle.platform)
+    vacuum = next(
+        (
+            entity
+            for entity in er.async_entries_for_device(er.async_get(hass), device_id)
+            if entity.domain == TYPE_VACUUM and not entity.disabled
+        ),
+        None,
+    )
+    return profile_for(vacuum.platform if vacuum is not None else None)
+
+
+@callback
+def device_type(hass: HomeAssistant, device_id: str, profile: PlatformProfile) -> str | None:
+    """The type of appliance a device is, as its integration names its programs, or failing that, for an integration
+    with several types, its entities, or failing that its model, None where none of them say"""
+    programs: list[str] = []
+    translation_keys: list[str] = []
+    for entity in er.async_entries_for_device(er.async_get(hass), device_id):
+        key = role_key(entity)
+        if key is None or entity.disabled:
+            continue
+        translation_keys.append(entity.translation_key or "")
+        if key in PROGRAM_KEYS and entity.domain in ENTITY_DOMAINS.get(key, ()):
+            programs.extend((entity.capabilities or {}).get("options") or [])
+    if kind := profile.appliance_type(programs, translation_keys):
+        return kind
+    device = dr.async_get(hass).async_get(device_id)
+    model = device.model if isinstance(device, dr.DeviceEntry) and device.model else ""
+    return name_type(hass, model.replace("_", " ")) if model else None
+
+
+@callback
+def appliance_beta(hass: HomeAssistant, device_id: str, profile: PlatformProfile | None = None) -> bool:
+    """Whether an appliance is of a type yet to be seen to work through its integration, by its own name where
+    nothing else says what it is"""
+    profile = profile or appliance_profile(hass, device_id)
+    if not profile.beta:
+        return False
+    kind = device_type(hass, device_id, profile)
+    if kind is None and (device := dr.async_get(hass).async_get(device_id)) is not None:
+        kind = name_type(hass, device.name_by_user or device.name or "")
+    return profile.beta_for(kind)
+
+
+@callback
+def integration_name(hass: HomeAssistant, platform: str | None) -> str:
+    """The name an integration goes by, or its domain where it isn't loaded"""
+    try:
+        return async_get_loaded_integration(hass, platform or "").name
+    except IntegrationNotLoaded:
+        return platform or ""
 
 
 def is_power_sensor(entity: er.RegistryEntry) -> bool:
@@ -228,11 +301,16 @@ def async_discover(hass: HomeAssistant) -> None:
         if flow["context"].get("unique_id") in passed_over:
             hass.config_entries.flow.async_abort(flow["flow_id"])
     for appliance in find_appliances(hass):
-        # appliances already configured, ignored or in progress are dropped by the flow's unique id
+        # appliances already configured, ignored or in progress are dropped by the flow's unique id, and one of an
+        # integration not yet tried on a real appliance is only ever offered, to be added knowing that
         discovery_flow.async_create_flow(
             hass,
             DOMAIN,
-            context={"source": source},
+            context={
+                "source": SOURCE_INTEGRATION_DISCOVERY
+                if appliance_beta(hass, appliance.device_id, profile_for(appliance.platform))
+                else source
+            },
             data={CONF_DEVICE_ID: appliance.device_id, CONF_NAME: appliance.name}
             | ({CONF_TYPE: appliance.type} if appliance.type else {}),
         )

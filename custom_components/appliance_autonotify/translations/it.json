@@ -36,7 +36,7 @@
             },
             "confirm": {
                 "title": "Notifiche per {name}",
-                "description": "Vuoi essere avvisato quando {name} inizia e finisce?\n\n{supernotify}"
+                "description": "Vuoi essere avvisato quando {name} inizia e finisce?\n\n{supernotify}{beta}"
             }
         },
         "abort": {
@@ -230,6 +230,47 @@
                     "description": "Per quanto rimandarla"
                 }
             }
+        }
+    },
+    "issues": {
+        "beta_feedback": {
+            "title": "Com'è andata {name}?",
+            "description": "{name} è collegato tramite {integration}, il cui supporto in Appliance Auto Notify è nuovo ed è stato scritto senza un vero elettrodomestico su cui provarlo. Il primo ciclo è finito: le notifiche di inizio e fine, l'avanzamento e il tempo rimanente sono arrivati quando dovevano?\n\nChe sia andata bene o no, faccelo sapere con *Ulteriori informazioni* e allega la diagnostica di {name}, scaricata dalla sua voce in *Appliance Auto Notify* in *Dispositivi e servizi*. Contiene ciò che l'elettrodomestico ha riportato nei primi cicli, ed è così che il supporto migliora. Ignora questo avviso una volta fatto."
+        },
+        "appliance_removed": {
+            "title": "{name} è stato rimosso",
+            "fix_flow": {
+                "step": {
+                    "confirm": {
+                        "title": "Rimuovere {name}?",
+                        "description": "{name} non è più in Home Assistant, come quando viene rimosso dalla sua integrazione, quindi non c'è più nulla da monitorare. Rimuovilo anche da Appliance Auto Notify, insieme al suo dispositivo, al ciclo conservato tra i riavvii e ai conteggi di manutenzione.\n\nSe tornerà, ad esempio dopo aver aggiunto di nuovo la sua integrazione, ignora questo avviso: verrà monitorato di nuovo appena torna, e questo avviso sparirà da solo."
+                    }
+                }
+            }
+        },
+        "no_targets": {
+            "title": "Nessun destinatario per le notifiche",
+            "description": "{name} aveva una notifica da inviare, ma non c'è dove inviarla: Supernotify non è installato, nessun *Destinatario* è scelto nelle impostazioni dell'elettrodomestico e nessun telefono ha l'app Home Assistant configurata per le notifiche.\n\nInstalla l'app su un telefono ed effettua l'accesso, oppure scegli le entità di notifica in *Destinatari delle notifiche* nelle impostazioni dell'elettrodomestico. Questo avviso sparisce appena viene inviata una notifica."
+        }
+    },
+    "exceptions": {
+        "not_tracked": {
+            "message": "La manutenzione non è monitorata per {entry_id}"
+        },
+        "no_item": {
+            "message": "Nessuna voce di manutenzione {item} per {entry_id}"
+        },
+        "part_life_read": {
+            "message": "{item} è un componente la cui durata viene letta, non contata in cicli"
+        },
+        "no_cycle_entity": {
+            "message": "Nessuna entità dello stato del ciclo trovata per {name}"
+        },
+        "no_vacuum_entity": {
+            "message": "Nessuna entità aspirapolvere trovata per {name}"
+        },
+        "appliance_removed": {
+            "message": "{name} è stato rimosso da Home Assistant"
         }
     }
 }

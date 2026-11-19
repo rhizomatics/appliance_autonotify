@@ -26,6 +26,8 @@ from homeassistant.helpers.selector import (
 
 from .compat import vol
 from .const import (
+    BETA_FOUND,
+    BETA_NOTICE,
     CONF_AUTO_DISCOVER,
     CONF_CUSTOM_TARGET,
     CONF_DASHBOARD,
@@ -77,8 +79,10 @@ from .const import (
     VACUUM_SETTLE,
 )
 from .dashboards import dashboards
-from .discovery import find_appliances, plug_switch
+from .discovery import appliance_beta, appliance_profile, find_appliances, integration_name, plug_switch
+from .platforms import profile_for
 from .supernotify_api import deliveries_by_transport, supernotify_available
+from .words import DATA_WORDS, async_load_words
 
 STEP_POWER = "power"
 STEP_DISCOVERY = "discovery"
@@ -106,6 +110,16 @@ DEFAULT_TEXTS: dict[str, str] = {
 
 def supernotify_status(hass: HomeAssistant) -> str:
     return SUPERNOTIFY_PRESENT if supernotify_available(hass) else SUPERNOTIFY_MISSING
+
+
+def beta_notice(hass: HomeAssistant, device_id: str | None) -> str:
+    """A word that the appliance's integration is yet to be tried on a real appliance, where it is"""
+    if not device_id:
+        return ""
+    profile = appliance_profile(hass, device_id)
+    if not appliance_beta(hass, device_id, profile):
+        return ""
+    return BETA_NOTICE.format(integration=integration_name(hass, profile.platform))
 
 
 def discovery_schema(auto_discover: bool = True) -> vol.Schema:
@@ -268,8 +282,15 @@ class AppliancesConfigFlow(ConfigFlow, domain=DOMAIN):
             self._abort_if_unique_id_configured()
             # the appliances themselves are set up as this entry is, each as its own entry to change or disable
             return self.async_create_entry(title=DISCOVERY_TITLE, data={CONF_TYPE: TYPE_DISCOVERY}, options=user_input)
+        if DATA_WORDS not in self.hass.data:
+            # before the integration is first set up, to know the type of an appliance by its model
+            await async_load_words(self.hass)
         configured = self._async_current_ids()
-        found = [a.name for a in find_appliances(self.hass) if a.device_id not in configured]
+        found = [
+            a.name + (BETA_FOUND if appliance_beta(self.hass, a.device_id, profile_for(a.platform)) else "")
+            for a in find_appliances(self.hass)
+            if a.device_id not in configured
+        ]
         if found:
             found_text = "Appliances found:\n\n" + "\n".join(f"- {name}" for name in found)
         else:
@@ -329,7 +350,11 @@ class AppliancesConfigFlow(ConfigFlow, domain=DOMAIN):
             return self.async_create_entry(title=self._name, data={CONF_DEVICE_ID: self._device_id} | self._type)
         return self.async_show_form(
             step_id="confirm",
-            description_placeholders={"name": self._name, "supernotify": supernotify_status(self.hass)},
+            description_placeholders={
+                "name": self._name,
+                "supernotify": supernotify_status(self.hass),
+                "beta": beta_notice(self.hass, self._device_id),
+            },
         )
 
 

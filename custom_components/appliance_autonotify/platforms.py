@@ -1,0 +1,222 @@
+"""What's known of each integration an appliance can come through.
+
+Integrations are taken to behave alike for the same type of appliance, so an appliance of an integration that isn't
+known here is still found and watched by what its entities do. A profile is only for where an integration names
+things its own way, or has more to it than others, and to say whether it's been tried on a real appliance yet."""
+
+from __future__ import annotations
+
+from collections.abc import Iterable, Mapping
+from dataclasses import dataclass, field
+from typing import Final, Literal
+
+from .const import (
+    APPLIANCE_TYPES,
+    CYCLE_KEY,
+    FINISH_TIME_KEY,
+    KEY_TYPE_PREFIXES,
+    PROGRESS_KEY,
+    REMAINING_TIME_KEY,
+    ROLE_KEY_PREFIXES,
+    ROLE_KEYS,
+    STAGE_KEY,
+    TOTAL_TIME_KEY,
+)
+
+# supported once it's been seen to work with a real appliance in a home, beta when written from its source alone
+type Status = Literal["supported", "beta"]
+STATUS_SUPPORTED: Final[Status] = "supported"
+STATUS_BETA: Final[Status] = "beta"
+
+
+@dataclass(frozen=True, eq=False)
+class PlatformProfile:
+    """An integration, by its domain, as the platform of its entities, None for any not known here"""
+
+    platform: str | None
+    status: Status = STATUS_SUPPORTED
+    # what an entity does, by the translation key the integration gives it, ahead of the ones of every integration
+    role_keys: Mapping[str, str] = field(default_factory=dict)
+    role_key_prefixes: Mapping[str, str] = field(default_factory=dict)
+    # the type of appliance, by how the integration names its programs, or else its entities
+    program_types: Mapping[str, str] = field(default_factory=dict)
+    key_types: Mapping[str, str] = field(default_factory=dict)
+    # the states of a cycle as the integration has them, by the states of every integration they mean, for one
+    # whose cycle state says more than whether it's running, and states it doesn't know left as they are
+    cycle_states: Mapping[str, str] = field(default_factory=dict)
+    # whether the cycle state also says what it's doing within its cycle, for an integration with no stage of its own
+    stage_from_cycle: bool = False
+    # what else an appliance must have for its cycle state to be one, for an integration that gives every device the
+    # same cycle state, a fridge's as much as a washer's
+    cycle_needs: tuple[str, ...] = ()
+    # the types of appliance seen to work, for one in beta, its others still yet to be tried
+    supported_types: frozenset[str] = frozenset()
+    # where to tell of how it went, for one in beta
+    issue_url: str | None = None
+
+    @property
+    def beta(self) -> bool:
+        """Whether the integration is in beta, though some types of appliance through it may have been seen to work"""
+        return self.status == STATUS_BETA
+
+    def beta_for(self, appliance_type: str | None) -> bool:
+        """Whether an appliance of this type, through this integration, is yet to be seen to work"""
+        return self.status == STATUS_BETA and appliance_type not in self.supported_types
+
+    def role_key(self, translation_key: str | None) -> str | None:
+        """What an entity does, as the translation key Home Connect gives an entity that does the same"""
+        if translation_key is None:
+            return None
+        if translation_key in self.role_keys:
+            return self.role_keys[translation_key]
+        if role := _by_prefix(self.role_key_prefixes, translation_key):
+            return role
+        if translation_key in ROLE_KEYS:
+            return ROLE_KEYS[translation_key]
+        return _by_prefix(ROLE_KEY_PREFIXES, translation_key) or translation_key
+
+    def cycle_state(self, state: str) -> str:
+        """A state of the cycle as every integration has it"""
+        return self.cycle_states.get(state, state)
+
+    def appliance_type(self, programs: Iterable[str], translation_keys: Iterable[str]) -> str | None:
+        """The type of appliance by its programs, or failing that, for an integration with several types, its
+        entities, by this integration's names before those of every integration"""
+        programs = list(programs)
+        translation_keys = list(translation_keys)
+        for prefixes, names in (
+            (self.program_types, programs),
+            (APPLIANCE_TYPES, programs),
+            (self.key_types, translation_keys),
+            (KEY_TYPE_PREFIXES, translation_keys),
+        ):
+            if kind := next((kind for prefix, kind in prefixes.items() if any(n.startswith(prefix) for n in names)), None):
+                return kind
+        return None
+
+
+def _by_prefix(prefixes: Mapping[str, str], key: str) -> str | None:
+    return next((role for prefix, role in prefixes.items() if key.startswith(prefix)), None)
+
+
+GENERIC: Final[PlatformProfile] = PlatformProfile(None)
+
+# the states of an LG ThinQ washer, dryer or dishwasher going through its cycle, each of which is its stage too, up to
+# a dryer's wrinkle care, tumbling its load now and then once it's done, which is over by its stage as for others
+THINQ_RUNNING: Final[tuple[str, ...]] = (
+    "running",
+    "detecting",
+    "checking_turbidity",
+    "display_loadsize",
+    "detergent_amount",
+    "dispensing",
+    "prewash",
+    "soaking",
+    "add_drain",
+    "rinsing",
+    "spinning",
+    "softening",
+    "steam_softening",
+    "drying",
+    "night_dry",
+    "cooling",
+    "cool_down",
+    "end_cooling",
+    "refreshing",
+    "steam",
+    "sterilize",
+    "wrinkle_care",
+)
+
+PROFILES: Final[dict[str, PlatformProfile]] = {
+    profile.platform: profile
+    for profile in (
+        PlatformProfile("home_connect"),
+        PlatformProfile("smartthings"),
+        PlatformProfile("localthings"),
+        # Home Connect Local, the same appliances as Home Connect, on the local network rather than through the
+        # cloud, with its entities named for their platform, and its programs named for the BSH keys without the
+        # underscores Home Connect puts between words
+        PlatformProfile(
+            "homeconnect_ws",
+            status=STATUS_BETA,
+            role_keys={
+                "sensor_operation_state": CYCLE_KEY,
+                "sensor_program_progress": PROGRESS_KEY,
+                "sensor_remaining_program_time": REMAINING_TIME_KEY,
+                "sensor_active_program": "active_program",
+                "select_program": "selected_program",
+            },
+            program_types={
+                "laundrycare_washer_program_": "washer",
+                "laundrycare_washerdryer_program_": "washer_dryer",
+                "laundrycare_dryer_program_": "dryer",
+                "consumerproducts_coffeemaker_program_": "coffee_maker",
+                "consumerproducts_cleaningrobot_program_": "cleaning_robot",
+                "heatingventilationairconditioning_airconditioner_program_": "air_conditioner",
+            },
+            issue_url="https://github.com/rhizomatics/appliance_autonotify/issues/28",
+        ),
+        # LG ThinQ, whose one state says both whether a washer, dryer or dishwasher is running and what it's doing,
+        # with when it will finish and how long it takes, but nothing of how far along it is
+        PlatformProfile(
+            "lg_thinq",
+            status=STATUS_BETA,
+            role_keys={
+                "current_state": CYCLE_KEY,
+                "remain": FINISH_TIME_KEY,
+                "total": TOTAL_TIME_KEY,
+                "current_dish_washing_course": "active_program",
+            },
+            cycle_states={
+                **dict.fromkeys(THINQ_RUNNING, "run"),
+                "pause": "pause",
+                "paused": "pause",
+                # waiting for the rinse to be let go on with
+                "rinse_hold": "actionrequired",
+                **dict.fromkeys(("end", "complete", "done", "running_end", "cleaning_is_done"), "finished"),
+                **dict.fromkeys(("power_off", "initial", "initializing", "standby", "sleep"), "inactive"),
+                # switched on and waiting, as an appliance just finished may be
+                "power_on": "ready",
+                **dict.fromkeys(("reserved", "reservation"), "delayedstart"),
+                **dict.fromkeys(("error", "power_fail"), "error"),
+            },
+            stage_from_cycle=True,
+            # a washer and a dryer seen through whole cycles, its dishwasher yet to be
+            supported_types=frozenset({"washer", "dryer"}),
+            issue_url="https://github.com/rhizomatics/appliance_autonotify/issues/27",
+        ),
+        # Miele, whose status every appliance has, with the same states, so an appliance has a cycle only where it has
+        # a program phase too, which fridges, hoods and hobs don't
+        PlatformProfile(
+            "miele",
+            status=STATUS_BETA,
+            role_keys={
+                "status": CYCLE_KEY,
+                "program_phase": STAGE_KEY,
+                "program_id": "active_program",
+                "finish": FINISH_TIME_KEY,
+            },
+            cycle_states={
+                "in_use": "run",
+                "pause": "pause",
+                "rinse_hold": "actionrequired",
+                "program_ended": "finished",
+                "off": "inactive",
+                "on": "ready",
+                "programmed": "ready",
+                "waiting_to_start": "delayedstart",
+                "failure": "error",
+                # stopped part way, so no end to tell of
+                "program_interrupted": "aborting",
+            },
+            cycle_needs=(STAGE_KEY,),
+        ),
+    )
+    if profile.platform is not None
+}
+
+
+def profile_for(platform: str | None) -> PlatformProfile:
+    """The profile of an integration, or the one for any integration not known here"""
+    return PROFILES.get(platform or "", GENERIC)

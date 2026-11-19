@@ -188,8 +188,15 @@ OVEN_MESSAGE: Final[str] = "{program}, {current}{unit}"
 SUPERNOTIFY_PRESENT: Final[str] = "Supernotify is installed, so mobile apps will show a Live Activity for each cycle."
 SUPERNOTIFY_MISSING: Final[str] = (
     "**Supernotify is not installed.** Only a plain start and end notification can be sent, to every phone with the "
-    "Home Assistant app, with no Live Activity. Install Supernotify from HACS for the full experience."
+    "Home Assistant app, with no Live Activity. Install Supernotify from Marketplace for the full experience."
 )
+# an appliance of an integration not yet tried on a real appliance, as it's offered to be added
+BETA_NOTICE: Final[str] = (
+    "\n\n**Support for {integration} is new**, written from the integration's source but not yet tried with a real "
+    "appliance, so notifications may come at the wrong time or not at all. Once its first cycle is over you'll be "
+    "asked how it went."
+)
+BETA_FOUND: Final[str] = " (new, offered to be added)"
 
 # activities of a robot vacuum, as Home Assistant has them for every make
 VACUUM_CLEANING: Final[str] = "cleaning"
@@ -237,6 +244,14 @@ PROGRESS_KEY: Final[str] = "program_progress"
 FINISH_TIME_KEY: Final[str] = "program_finish_time"
 # selects, unlike the others, of the program under way, and of the one chosen, which is all an oven reports
 PROGRAM_KEYS: Final[tuple[str, ...]] = ("active_program", "selected_program")
+# how long is left, as a duration, for an integration that reports no finish time
+REMAINING_TIME_KEY: Final[str] = "remaining_time"
+# how long the cycle takes in all, as a duration, from which its progress is worked out where it reports none
+TOTAL_TIME_KEY: Final[str] = "total_time"
+# or how long it has been going, which with the time left is the same
+ELAPSED_TIME_KEY: Final[str] = "elapsed_time"
+# seconds between updates of progress worked out from the time, there being no change of the appliance's to go by
+PROGRESS_TICK: Final[float] = 60
 # what the appliance is doing within its cycle, such as drying then cooling, which Home Connect doesn't report
 STAGE_KEY: Final[str] = "stage"
 # the same entities as other integrations name them, whichever integration they come from, since it's what an
@@ -262,16 +277,20 @@ TARGET_TEMPERATURE_KEY: Final[str] = "setpoint_temperature"
 CAVITY_TEMPERATURE_KEY: Final[str] = "oven_current_cavity_temperature"
 PREHEAT_FINISHED_KEYS: Final[tuple[str, ...]] = ("preheat_finished", "regular_preheat_finished")
 FAST_PREHEAT_KEY: Final[str] = "fast_pre_heat"
-# domain, by translation key, of each entity of an appliance that's made use of
-ENTITY_DOMAINS: Final[dict[str, str]] = {
-    PROGRESS_KEY: "sensor",
-    STAGE_KEY: "sensor",
-    FINISH_TIME_KEY: "sensor",
-    **dict.fromkeys(PROGRAM_KEYS, "select"),
-    TARGET_TEMPERATURE_KEY: "number",
-    CAVITY_TEMPERATURE_KEY: "sensor",
-    **dict.fromkeys(PREHEAT_FINISHED_KEYS, "sensor"),
-    FAST_PREHEAT_KEY: "switch",
+# domains, by translation key, of each entity of an appliance that's made use of, a program being a select where it
+# can be chosen, and only a sensor where it can't
+ENTITY_DOMAINS: Final[dict[str, tuple[str, ...]]] = {
+    PROGRESS_KEY: ("sensor",),
+    STAGE_KEY: ("sensor",),
+    FINISH_TIME_KEY: ("sensor",),
+    REMAINING_TIME_KEY: ("sensor",),
+    TOTAL_TIME_KEY: ("sensor",),
+    ELAPSED_TIME_KEY: ("sensor",),
+    **dict.fromkeys(PROGRAM_KEYS, ("select", "sensor")),
+    TARGET_TEMPERATURE_KEY: ("number",),
+    CAVITY_TEMPERATURE_KEY: ("sensor",),
+    **dict.fromkeys(PREHEAT_FINISHED_KEYS, ("sensor",)),
+    FAST_PREHEAT_KEY: ("switch",),
 }
 # degrees between Live Activity updates of an oven up to heat, whose temperature never stops wandering
 TEMPERATURE_STEP: Final[float] = 5
@@ -290,9 +309,9 @@ STATES_FINISHED: Final[tuple[str, ...]] = ("finished", "inactive", "stop")
 STATES_SETTLING: Final[tuple[str, ...]] = ("ready", "idle")
 # stages that mean the cycle is over, though the cycle state may stay running a long while after, as a dryer's does
 # while it tumbles its load now and then so it won't crease
-STAGES_FINISHED: Final[tuple[str, ...]] = ("finished", "finish", "wrinkle_prevent")
+STAGES_FINISHED: Final[tuple[str, ...]] = ("finished", "finish", "wrinkle_prevent", "wrinkle_care", "anti_crease")
 # stages that say nothing of what it's doing
-STAGES_NONE: Final[tuple[str, ...]] = ("none", "idle")
+STAGES_NONE: Final[tuple[str, ...]] = ("none", "idle", "not_running")
 # seconds an appliance is left to settle before the cycle is over
 CYCLE_SETTLE: Final[float] = 10
 # seconds after the cycle starts before it's told of, since an integration may report its program and stage a moment
@@ -318,6 +337,9 @@ PROGRESS_NOTIFY_STEP: Final[int] = 10
 # from here on the end is in sight and the bar is being watched, so it's kept closer to the appliance
 PROGRESS_FINAL: Final[int] = 90
 PROGRESS_FINAL_STEP: Final[int] = 2
+# seconds the finish can move before the Live Activity's countdown is put right, more than the minute a remaining
+# time rounds to, so an appliance counting down only has its countdown sent again when it changes its mind
+FINISH_MOVED: Final[float] = 120
 
 MOBILE_PUSH_TRANSPORT: Final[str] = "mobile_push"
 # Android notification channel of its own, made with sound on the first notification, since a Live Update in the
