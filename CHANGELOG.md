@@ -6,11 +6,13 @@ title: What's New
 ## ✨ Enhancements
 - Diagnostics of *Automatic discovery* list the devices that look like appliances but weren't found to be one, with their make, model, integration and their entities' keys, options and states, to attach to an issue asking for their integration to be supported
   - No names, areas or entity ids, since it's meant to be shared
-- An appliance removed from Home Assistant, as when it's removed from its own integration, raises a repair offering to remove it here too, with its device, rather than leaving it retrying setup for good
-  - Gone away again by itself if the appliance is added back
-  - Its device can also be deleted by hand once the appliance is gone
 - A repair when there's nowhere to send notifications, with no Supernotify, no targets chosen and no phone with the app, which was only logged
 - Error messages translated, in English and Italian
+## 🐛 Fixes
+- An appliance removed from Home Assistant, as when it's removed from its own integration, no longer left retrying setup for good, but raises a repair offering to remove it here too, with its device
+  - Gone away again by itself if the appliance is added back
+  - Its device can also be deleted by hand once the appliance is gone
+## 📝 Other changes
 - Gold on the Home Assistant integration quality scale
 ## 📚 Documentation
 - *Appliance Not Found?* in README, on what to send when an appliance isn't discovered
