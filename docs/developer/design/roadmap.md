@@ -12,4 +12,4 @@ The feedback from this first auto notify implementation is intended to be applie
   - See issue [#4]
 - Add spoken message support to advanced, for Supernotify only
 - Rotated messages to alleviate the tedium
-- Maintenance cycle support, see issue [#4]
+- Maintenance cycle support, see issue [#4] *DONE*

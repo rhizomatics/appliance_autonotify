@@ -1,0 +1,276 @@
+{
+    "config": {
+        "flow_title": "{name}",
+        "step": {
+            "user": {
+                "title": "Meldingen van apparaten",
+                "description": "{supernotify}\n\n{found}\n\nHome Connect-apparaten (Bosch, Siemens, Neff) worden automatisch ontdekt. Een vermogensmeter die naar een wasmachine, droger, vaatwasser of oven is genoemd, zoals een slimme stekker met de naam 'Wasmachine', wordt aangeboden als *Ontdekt*, zodat de drempel gecontroleerd kan worden voordat hij wordt toegevoegd. Elk ander apparaat op een vermogensmeter kan handmatig worden ingesteld zodra de installatie klaar is.",
+                "data": {
+                    "auto_discover": "Apparaten automatisch instellen"
+                },
+                "data_description": {
+                    "auto_discover": "Uitschakelen om elk gevonden apparaat aangeboden te krijgen en zelf te kiezen welke worden toegevoegd"
+                }
+            },
+            "power": {
+                "title": "Apparaat met vermogensmeting",
+                "description": "Voor elk apparaat op een slimme stekker of andere vermogensmeter. Het start wanneer het vermogen boven de drempel komt, en eindigt zodra het gedurende de wachttijd op of onder de drempel is gebleven.",
+                "data": {
+                    "name": "Naam van het apparaat",
+                    "power_entity": "Vermogenssensor",
+                    "threshold": "Vermogensdrempel",
+                    "grace_period": "Wachttijd",
+                    "min_duration": "Minimale looptijd",
+                    "switch_entity": "Slimme stekker",
+                    "switch_off_button": "Knop Uitschakelen"
+                },
+                "data_description": {
+                    "name": "Gebruikt in meldingen en om een pictogram te kiezen",
+                    "power_entity": "De sensor die het vermogen meet dat het apparaat verbruikt",
+                    "threshold": "Het apparaat draait zolang het meer dan dit verbruikt",
+                    "grace_period": "Hoe lang het vermogen op of onder de drempel moet blijven voordat de cyclus voorbij is, zodat korte onderbrekingen worden genegeerd",
+                    "min_duration": "Hoe lang het vermogen boven de drempel moet zijn geweest voordat het als cyclus telt, zodat een geopende deur of een ingedrukte knop wordt genegeerd",
+                    "switch_entity": "De schakelaar waarop het apparaat is aangesloten, aangeboden als knop om het uit te schakelen zodra het klaar is",
+                    "switch_off_button": "Een knop Uitschakelen voor de slimme stekker in de eindmelding zetten. Uitschakelen voor een stekker die aan moet blijven."
+                }
+            },
+            "confirm": {
+                "title": "Meldingen voor {name}",
+                "description": "Een melding krijgen wanneer {name} start en klaar is?\n\n{supernotify}{beta}"
+            }
+        },
+        "abort": {
+            "already_configured": "Dit apparaat is al ingesteld",
+            "already_in_progress": "Het instellen van dit apparaat is al bezig"
+        }
+    },
+    "options": {
+        "step": {
+            "discovery": {
+                "title": "Automatische detectie",
+                "description": "Met automatische detectie wordt elk ondersteund apparaat voor je ingesteld, nu en telkens wanneer je er een toevoegt. Apparaten die al zijn ingesteld, blijven zoals ze zijn.",
+                "data": {
+                    "auto_discover": "Apparaten automatisch instellen"
+                },
+                "data_description": {
+                    "auto_discover": "Uitschakelen om elk gevonden apparaat aangeboden te krijgen en zelf te kiezen welke worden toegevoegd"
+                }
+            },
+            "settings": {
+                "title": "Meldingen voor {name}",
+                "description": "Alles hier is optioneel.\n\n{supernotify}",
+                "data": {
+                    "notify_start": "Start melden",
+                    "notify_end": "Einde melden",
+                    "notify_phase": "Fasen melden",
+                    "notify_progress": "Voortgang melden",
+                    "dashboard": "Te openen dashboard",
+                    "live_title": "Titel van de Live Activity",
+                    "live_detail": "Live Activity toont",
+                    "maintenance": "Onderhoud bijhouden"
+                },
+                "data_description": {
+                    "notify_start": "Een melding sturen wanneer het apparaat start. Indien uit wordt de Live Activity toch geopend, stil en alleen op telefoons.",
+                    "notify_end": "Een melding sturen wanneer het apparaat klaar is. Indien uit wordt de Live Activity toch gesloten.",
+                    "notify_phase": "Een melding sturen wanneer een fase van de cyclus voorbij is, zoals een oven die op temperatuur is. Indien uit wordt dit alleen in de Live Activity getoond.",
+                    "dashboard": "Geopend wanneer op een melding of de Live Activity wordt getikt. Leeg laten om de app te openen waar hij was. Ingesteld op een dashboard dat naar het apparaat of het type is genoemd, zoals 'Vaatwasser' of 'Wasmachine', als er een was toen het apparaat werd toegevoegd.",
+                    "notify_progress": "Elke 10% van de cyclus een melding sturen. Indien uit wordt de voortgang alleen getoond op de voortgangsbalk van de Live Activity, die stil wordt bijgewerkt.",
+                    "live_title": "Waarmee de Live Activity wordt getiteld. Het programma is handig naast de naam wanneer de resterende tijd de plaats van het bericht inneemt, zoals op het toegangsscherm van een iPhone. Kies alleen de naam als de programmanamen te lang zijn, of als het apparaat altijd op hetzelfde programma draait.",
+                    "live_detail": "De resterende tijd tonen, als het apparaat meldt wanneer het klaar is, of in plaats daarvan het programma, de status, dus wat het binnen de cyclus doet, zoals drogen of een robotstofzuiger die zich verplaatst, of beide. Het programma kan de hele cyclus zijn of een fase ervan, zoals voorspoelen, en is voor een robotstofzuiger de schoonmaakmodus. Wat het apparaat niet meldt, wordt weggelaten.",
+                    "maintenance": "De cycli bijhouden, en hoeveel levensduur de onderdelen waarover het apparaat rapporteert nog hebben, en wat nodig is op de takenlijst Apparaatonderhoud zetten, met een melding wanneer het zover is. Eenmaal aangeboden in de eindmelding als dit uit staat."
+                },
+                "sections": {
+                    "start": {
+                        "name": "Startbericht",
+                        "description": "Verstuurd wanneer het apparaat start. Maak een vak leeg om terug te gaan naar de gebruikelijke tekst. Zet {program_placeholder} waar het lopende programma moet worden genoemd.",
+                        "data": {
+                            "start_title": "Titel",
+                            "start_message": "Bericht"
+                        }
+                    },
+                    "end": {
+                        "name": "Eindbericht",
+                        "description": "Verstuurd wanneer het apparaat klaar is. Maak een vak leeg om terug te gaan naar de gebruikelijke tekst. Zet {program_placeholder} waar het gedraaide programma moet worden genoemd.",
+                        "data": {
+                            "end_title": "Titel",
+                            "end_message": "Bericht",
+                            "reminder": "Herinnering",
+                            "reminder_repeats": "Herhalingen van de herinnering",
+                            "grace_period": "Wachten op het station"
+                        },
+                        "data_description": {
+                            "reminder": "Minuten waarna het einde opnieuw wordt verstuurd, totdat in de melding op Klaar wordt gedrukt. 0 voor geen. Later herinneren in de melding wacht zo lang, of 30 minuten.",
+                            "reminder_repeats": "Hoe vaak het einde opnieuw wordt verstuurd",
+                            "grace_period": "Seconden dat een robotstofzuiger na het schoonmaken op zijn station moet blijven voordat het schoonmaken voorbij is, voor het geval hij weer vertrekt. Verhoog dit voor een die halverwege teruggaat om zijn dweil te wassen of zijn bak te legen. Als de stofzuiger zijn eigen voortgang meldt, of of hij aan het schoonmaken is, zoals Roborock, wordt dat gevolgd, wat dit ook is."
+                        }
+                    },
+                    "notify": {
+                        "name": "Ontvangers van meldingen",
+                        "description": "Wie en wat een melding krijgt. Laat alles leeg voor de gebruikelijke keuze.",
+                        "data": {
+                            "targets": "Ontvangers",
+                            "target": "Ontvangers",
+                            "custom_target": "Eigen ontvangers",
+                            "deliveries": "Bezorgingen"
+                        },
+                        "data_description": {
+                            "targets": "Notify-entiteiten om naar te sturen. Leeg laten voor elke telefoon met de Home Assistant-app.",
+                            "target": "Wie of wat een melding krijgt, zoals bij elke Supernotify-melding. Leeg laten zodat Supernotify kiest.",
+                            "custom_target": "Ontvangers buiten Home Assistant, zoals e-mailadressen of telefoonnummers.",
+                            "deliveries": "Meldingen beperken tot deze Supernotify-bezorgingen. Leeg laten zodat Supernotify kiest."
+                        }
+                    },
+                    "maintenance_items": {
+                        "name": "Onderhoud",
+                        "description": "Cycli tussen elk onderdeel, wanneer onderhoud wordt bijgehouden. 0 om een onderdeel weg te laten. De telling begint wanneer bijhouden wordt ingeschakeld, en wordt voor een al lopende telling ingesteld met de actie Onderhoud resetten.",
+                        "data": {
+                            "maintenance_drum_clean": "Trommel reinigen",
+                            "maintenance_filter": "Filter reinigen",
+                            "maintenance_lint_filter": "Pluizenfilter reinigen",
+                            "maintenance_machine_clean": "Machine reinigen",
+                            "maintenance_condenser": "Condensor reinigen"
+                        }
+                    }
+                }
+            },
+            "power": {
+                "title": "Vermogensmeting voor {name}",
+                "description": "Het apparaat start wanneer het vermogen boven de drempel komt, en eindigt zodra het gedurende de wachttijd op of onder de drempel is gebleven.",
+                "data": {
+                    "power_entity": "Vermogenssensor",
+                    "threshold": "Vermogensdrempel",
+                    "grace_period": "Wachttijd",
+                    "min_duration": "Minimale looptijd",
+                    "switch_entity": "Slimme stekker",
+                    "switch_off_button": "Knop Uitschakelen"
+                },
+                "data_description": {
+                    "power_entity": "De sensor die het vermogen meet dat het apparaat verbruikt",
+                    "threshold": "Het apparaat draait zolang het meer dan dit verbruikt",
+                    "grace_period": "Hoe lang het vermogen op of onder de drempel moet blijven voordat de cyclus voorbij is, zodat korte onderbrekingen worden genegeerd",
+                    "min_duration": "Hoe lang het vermogen boven de drempel moet zijn geweest voordat het als cyclus telt, zodat een geopende deur of een ingedrukte knop wordt genegeerd",
+                    "switch_entity": "De schakelaar waarop het apparaat is aangesloten, aangeboden als knop om het uit te schakelen zodra het klaar is",
+                    "switch_off_button": "Een knop Uitschakelen voor de slimme stekker in de eindmelding zetten. Uitschakelen voor een stekker die aan moet blijven."
+                }
+            }
+        }
+    },
+    "selector": {
+        "appliance_words": {
+            "options": {
+                "dishwasher": "vaatwasser, vaatwasmachine",
+                "washer": "wasmachine",
+                "washer_dryer": "was-droogcombinatie, wasdroogcombinatie, was-droger",
+                "dryer": "wasdroger, droger, droogtrommel",
+                "oven": "oven",
+                "microwave": "magnetron",
+                "hob": "kookplaat, fornuis",
+                "hood": "afzuigkap",
+                "coffee_maker": "koffie",
+                "cleaning_robot": "stofzuiger",
+                "kettle": "waterkoker"
+            }
+        },
+        "live_title": {
+            "options": {
+                "name_program": "Naam van het apparaat en programma",
+                "program": "Alleen programma",
+                "name": "Alleen naam van het apparaat"
+            }
+        },
+        "live_detail": {
+            "options": {
+                "time_remaining": "Resterende tijd",
+                "program": "Programma",
+                "status": "Status",
+                "program_status": "Programma en status"
+            }
+        }
+    },
+    "entity": {
+        "todo": {
+            "maintenance": {
+                "name": "Apparaatonderhoud"
+            }
+        }
+    },
+    "services": {
+        "reset_maintenance": {
+            "name": "Onderhoud resetten",
+            "description": "Meldt dat onderhoud is gedaan, voor één onderdeel van een apparaat of alle, of stelt de cycli sinds de laatste keer in, zoals bekend van voordat het hier werd bijgehouden. Een onderdeel waarvan het apparaat de levensduur meldt, wordt gereset met de knop van zijn eigen integratie, waar die er een heeft.",
+            "fields": {
+                "config_entry_id": {
+                    "name": "Apparaat",
+                    "description": "Het apparaat, als zijn item in Appliance Auto Notify"
+                },
+                "item": {
+                    "name": "Onderdeel",
+                    "description": "Het onderdeel, zoals drum_clean of de entiteit van een onderdeel, of weglaten voor allemaal"
+                },
+                "cycles": {
+                    "name": "Cycli",
+                    "description": "De cycli sinds de laatste keer, 0 voor nu gedaan"
+                }
+            }
+        },
+        "snooze_maintenance": {
+            "name": "Onderhoud uitstellen",
+            "description": "Stelt onderhoud dat nodig is uit, voor één onderdeel van een apparaat of alle, waarna het weer nodig is.",
+            "fields": {
+                "config_entry_id": {
+                    "name": "Apparaat",
+                    "description": "Het apparaat, als zijn item in Appliance Auto Notify"
+                },
+                "item": {
+                    "name": "Onderdeel",
+                    "description": "Het onderdeel, zoals drum_clean of de entiteit van een onderdeel, of weglaten voor allemaal"
+                },
+                "days": {
+                    "name": "Dagen",
+                    "description": "Hoe lang het wordt uitgesteld"
+                }
+            }
+        }
+    },
+    "issues": {
+        "beta_feedback": {
+            "title": "Hoe deed {name} het?",
+            "description": "{name} komt via {integration}, waarvan de ondersteuning in Appliance Auto Notify nieuw is en zonder echt apparaat om op te proberen is geschreven. De eerste cyclus is voorbij: kwamen de start- en eindmeldingen, de voortgang en de resterende tijd wanneer ze moesten?\n\nOf het nu goed ging of niet, laat het weten via *Meer informatie*, en voeg de diagnostiek van {name} toe, gedownload via zijn item onder *Appliance Auto Notify* in *Apparaten & diensten*. Daarin staat wat het apparaat in zijn eerste cycli meldde, en zo wordt de ondersteuning goed. Negeer dit zodra het gedaan is."
+        },
+        "appliance_removed": {
+            "title": "{name} is verwijderd",
+            "fix_flow": {
+                "step": {
+                    "confirm": {
+                        "title": "{name} verwijderen?",
+                        "description": "{name} staat niet meer in Home Assistant, zoals wanneer het uit zijn eigen integratie is verwijderd, dus er valt niets meer te volgen. Verwijder het ook uit Appliance Auto Notify, met zijn apparaat, de over herstarts bewaarde cyclus en zijn onderhoudstellingen.\n\nAls het terugkomt, bijvoorbeeld na het opnieuw toevoegen van zijn integratie, negeer dit dan: het wordt weer gevolgd zodra het terug is, en dit verdwijnt vanzelf."
+                    }
+                }
+            }
+        },
+        "no_targets": {
+            "title": "Nergens om meldingen naartoe te sturen",
+            "description": "{name} had een melding te versturen, maar er is nergens om die naartoe te sturen: Supernotify is niet geïnstalleerd, er zijn geen *Ontvangers* gekozen in de instellingen van het apparaat, en geen telefoon heeft de Home Assistant-app ingesteld voor meldingen.\n\nInstalleer de app op een telefoon en meld je aan, of kies notify-entiteiten onder *Ontvangers van meldingen* in de instellingen van het apparaat. Dit verdwijnt zodra er een melding is verstuurd."
+        }
+    },
+    "exceptions": {
+        "not_tracked": {
+            "message": "Onderhoud wordt niet bijgehouden voor {entry_id}"
+        },
+        "no_item": {
+            "message": "Geen onderhoudsonderdeel {item} voor {entry_id}"
+        },
+        "part_life_read": {
+            "message": "{item} is een onderdeel waarvan de levensduur wordt uitgelezen, niet geteld in cycli"
+        },
+        "no_cycle_entity": {
+            "message": "Geen entiteit voor de cyclusstatus gevonden voor {name}"
+        },
+        "no_vacuum_entity": {
+            "message": "Geen stofzuigerentiteit gevonden voor {name}"
+        },
+        "appliance_removed": {
+            "message": "{name} is verwijderd uit Home Assistant"
+        }
+    }
+}

@@ -105,6 +105,13 @@ ACTION_SWITCH_OFF: Final[str] = "APPLIANCE_SWITCH_OFF_"
 ACTION_TITLES: Final[dict[str, dict[str, str]]] = {
     "en": {ACTION_FINISHED: "Finished", ACTION_REMIND: "Remind Later", ACTION_SWITCH_OFF: "Switch Off"},
     "it": {ACTION_FINISHED: "Finito", ACTION_REMIND: "Ricordamelo dopo", ACTION_SWITCH_OFF: "Spegni presa"},
+    "de": {ACTION_FINISHED: "Erledigt", ACTION_REMIND: "Später erinnern", ACTION_SWITCH_OFF: "Steckdose aus"},
+    "nl": {ACTION_FINISHED: "Klaar", ACTION_REMIND: "Later herinneren", ACTION_SWITCH_OFF: "Stekker uit"},
+    "es": {ACTION_FINISHED: "Terminado", ACTION_REMIND: "Recordar más tarde", ACTION_SWITCH_OFF: "Apagar enchufe"},
+    "fr": {ACTION_FINISHED: "Terminé", ACTION_REMIND: "Me rappeler plus tard", ACTION_SWITCH_OFF: "Éteindre la prise"},
+    "pl": {ACTION_FINISHED: "Gotowe", ACTION_REMIND: "Przypomnij później", ACTION_SWITCH_OFF: "Wyłącz gniazdko"},
+    "zh": {ACTION_FINISHED: "已完成", ACTION_REMIND: "稍后提醒", ACTION_SWITCH_OFF: "关闭插座"},
+    "hi": {ACTION_FINISHED: "पूरा हुआ", ACTION_REMIND: "बाद में याद दिलाएं", ACTION_SWITCH_OFF: "प्लग बंद करें"},
 }
 MOBILE_ACTION_EVENT: Final[str] = "mobile_app_notification_action"
 # action buttons Android shows on a notification, any after those being left out
@@ -139,6 +146,25 @@ ACTION_TRACK_MAINTENANCE: Final[str] = "APPLIANCE_TRACK_MAINTENANCE_"
 MAINTENANCE_ACTION_TITLES: Final[dict[str, dict[str, str]]] = {
     "en": {ACTION_MAINTAINED: "Done", ACTION_MAINTENANCE_LATER: "In a Month", ACTION_TRACK_MAINTENANCE: "Track Maintenance"},
     "it": {ACTION_MAINTAINED: "Fatto", ACTION_MAINTENANCE_LATER: "Tra un mese", ACTION_TRACK_MAINTENANCE: "Segui manutenzione"},
+    "de": {
+        ACTION_MAINTAINED: "Erledigt",
+        ACTION_MAINTENANCE_LATER: "In einem Monat",
+        ACTION_TRACK_MAINTENANCE: "Wartung verfolgen",
+    },
+    "nl": {
+        ACTION_MAINTAINED: "Gedaan",
+        ACTION_MAINTENANCE_LATER: "Over een maand",
+        ACTION_TRACK_MAINTENANCE: "Onderhoud bijhouden",
+    },
+    "es": {ACTION_MAINTAINED: "Hecho", ACTION_MAINTENANCE_LATER: "En un mes", ACTION_TRACK_MAINTENANCE: "Seguir mantenimiento"},
+    "fr": {ACTION_MAINTAINED: "Fait", ACTION_MAINTENANCE_LATER: "Dans un mois", ACTION_TRACK_MAINTENANCE: "Suivre l'entretien"},
+    "pl": {
+        ACTION_MAINTAINED: "Zrobione",
+        ACTION_MAINTENANCE_LATER: "Za miesiąc",
+        ACTION_TRACK_MAINTENANCE: "Śledź konserwację",
+    },
+    "zh": {ACTION_MAINTAINED: "已完成", ACTION_MAINTENANCE_LATER: "一个月后", ACTION_TRACK_MAINTENANCE: "跟踪维护"},
+    "hi": {ACTION_MAINTAINED: "हो गया", ACTION_MAINTENANCE_LATER: "एक महीने में", ACTION_TRACK_MAINTENANCE: "रखरखाव ट्रैक करें"},
 }
 # the name of each item, and what its notification says, by the language of Home Assistant as for the buttons
 MAINTENANCE_NAMES: Final[dict[str, dict[str, str]]] = {
@@ -156,6 +182,55 @@ MAINTENANCE_NAMES: Final[dict[str, dict[str, str]]] = {
         "machine_clean": "Pulizia della macchina",
         "condenser": "Pulizia del condensatore",
     },
+    "de": {
+        "drum_clean": "Trommelreinigung",
+        "filter": "Filterreinigung",
+        "lint_filter": "Flusensiebreinigung",
+        "machine_clean": "Maschinenreinigung",
+        "condenser": "Kondensatorreinigung",
+    },
+    "nl": {
+        "drum_clean": "Trommel reinigen",
+        "filter": "Filter reinigen",
+        "lint_filter": "Pluizenfilter reinigen",
+        "machine_clean": "Machine reinigen",
+        "condenser": "Condensor reinigen",
+    },
+    "es": {
+        "drum_clean": "Limpieza del tambor",
+        "filter": "Limpieza del filtro",
+        "lint_filter": "Limpieza del filtro de pelusa",
+        "machine_clean": "Limpieza de la máquina",
+        "condenser": "Limpieza del condensador",
+    },
+    "fr": {
+        "drum_clean": "Nettoyage du tambour",
+        "filter": "Nettoyage du filtre",
+        "lint_filter": "Nettoyage du filtre à peluches",
+        "machine_clean": "Nettoyage de la machine",
+        "condenser": "Nettoyage du condenseur",
+    },
+    "pl": {
+        "drum_clean": "Czyszczenie bębna",
+        "filter": "Czyszczenie filtra",
+        "lint_filter": "Czyszczenie filtra kłaczków",
+        "machine_clean": "Czyszczenie urządzenia",
+        "condenser": "Czyszczenie skraplacza",
+    },
+    "zh": {
+        "drum_clean": "滚筒清洁",
+        "filter": "过滤器清洁",
+        "lint_filter": "绒毛过滤器清洁",
+        "machine_clean": "机器清洁",
+        "condenser": "冷凝器清洁",
+    },
+    "hi": {
+        "drum_clean": "ड्रम की सफ़ाई",
+        "filter": "फ़िल्टर की सफ़ाई",
+        "lint_filter": "लिंट फ़िल्टर की सफ़ाई",
+        "machine_clean": "मशीन की सफ़ाई",
+        "condenser": "कंडेंसर की सफ़ाई",
+    },
 }
 MAINTENANCE_MESSAGES: Final[dict[str, dict[str, str]]] = {
     "en": {
@@ -168,6 +243,41 @@ MAINTENANCE_MESSAGES: Final[dict[str, dict[str, str]]] = {
         "cycles": "{item}, {cycles} cicli dall'ultima",
         "lifespan": "{item} al {value}%",
     },
+    "de": {
+        "cycle": "{item}, 1 Zyklus seit dem letzten Mal",
+        "cycles": "{item}, {cycles} Zyklen seit dem letzten Mal",
+        "lifespan": "{item} bei {value}%",
+    },
+    "nl": {
+        "cycle": "{item}, 1 cyclus sinds de vorige keer",
+        "cycles": "{item}, {cycles} cycli sinds de vorige keer",
+        "lifespan": "{item} op {value}%",
+    },
+    "es": {
+        "cycle": "{item}, 1 ciclo desde la última vez",
+        "cycles": "{item}, {cycles} ciclos desde la última vez",
+        "lifespan": "{item} al {value}%",
+    },
+    "fr": {
+        "cycle": "{item}, 1 cycle depuis la dernière fois",
+        "cycles": "{item}, {cycles} cycles depuis la dernière fois",
+        "lifespan": "{item} à {value} %",
+    },
+    "pl": {
+        "cycle": "{item}, 1 cykl od ostatniego razu",
+        "cycles": "{item}, liczba cykli od ostatniego razu: {cycles}",
+        "lifespan": "{item}: {value}%",
+    },
+    "zh": {
+        "cycle": "{item}，距上次已 1 个周期",
+        "cycles": "{item}，距上次已 {cycles} 个周期",
+        "lifespan": "{item} 剩余 {value}%",
+    },
+    "hi": {
+        "cycle": "{item}, पिछली बार से 1 चक्र",
+        "cycles": "{item}, पिछली बार से {cycles} चक्र",
+        "lifespan": "{item} {value}% पर",
+    },
 }
 
 # the text of the Android status bar chip, which shows it in full only up to about 7 characters
@@ -178,7 +288,17 @@ PREHEAT_MESSAGE: Final[str] = "{phase}, {current} of {target}{unit}"
 PREHEATED_MESSAGE: Final[str] = "{name} is pre-heated"
 # a robot vacuum that has stopped where it is, stuck or lifted, and won't go on by itself, by the language of Home
 # Assistant as for the buttons, English for any other
-STUCK_MESSAGES: Final[dict[str, str]] = {"en": "{name} needs help", "it": "{name} ha bisogno di aiuto"}
+STUCK_MESSAGES: Final[dict[str, str]] = {
+    "en": "{name} needs help",
+    "it": "{name} ha bisogno di aiuto",
+    "de": "{name} braucht Hilfe",
+    "nl": "{name} heeft hulp nodig",
+    "es": "{name} necesita ayuda",
+    "fr": "{name} a besoin d'aide",
+    "pl": "{name} potrzebuje pomocy",
+    "zh": "{name} 需要帮助",
+    "hi": "{name} को मदद चाहिए",
+}
 # the title of a Live Activity with a timer, which iOS shows on the Lock Screen in place of the message
 LIVE_TITLE: Final[str] = "{title} · {phase}"
 # the program and the status together, as the Live Activity shows them

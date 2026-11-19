@@ -1,0 +1,276 @@
+{
+    "config": {
+        "flow_title": "{name}",
+        "step": {
+            "user": {
+                "title": "家电通知",
+                "description": "{supernotify}\n\n{found}\n\nHome Connect（博世、西门子、Neff）家电会被自动发现。以洗衣机、烘干机、洗碗机或烤箱命名的功率计，例如名为“洗衣机”的智能插座，会显示为*已发现*，以便在添加前检查阈值。安装完成后，任何其他接在功率计上的家电都可以手动设置。",
+                "data": {
+                    "auto_discover": "自动设置家电"
+                },
+                "data_description": {
+                    "auto_discover": "关闭后，每个发现的家电都会提示给你，由你选择添加哪些"
+                }
+            },
+            "power": {
+                "title": "按功率监测的家电",
+                "description": "适用于接在智能插座或其他功率计上的任何家电。功率超过阈值时开始，在宽限期内一直保持在阈值或以下时结束。",
+                "data": {
+                    "name": "家电名称",
+                    "power_entity": "功率传感器",
+                    "threshold": "功率阈值",
+                    "grace_period": "宽限期",
+                    "min_duration": "最短运行时间",
+                    "switch_entity": "智能插座",
+                    "switch_off_button": "“关闭”按钮"
+                },
+                "data_description": {
+                    "name": "用于通知，以及选择图标",
+                    "power_entity": "测量家电所耗功率的传感器",
+                    "threshold": "家电耗电高于此值时视为正在运行",
+                    "grace_period": "功率需在阈值或以下保持多久，周期才算结束，以忽略短暂的下降",
+                    "min_duration": "功率需在阈值以上保持多久才算一个周期，以忽略开门或按键",
+                    "switch_entity": "家电所接的开关，结束后提供一个按钮来关闭它",
+                    "switch_off_button": "在结束通知中放置智能插座的“关闭”按钮。对于需要保持通电的插座请关闭此项。"
+                }
+            },
+            "confirm": {
+                "title": "{name} 的通知",
+                "description": "在 {name} 开始和结束时通知你？\n\n{supernotify}{beta}"
+            }
+        },
+        "abort": {
+            "already_configured": "此家电已设置",
+            "already_in_progress": "此家电的设置已在进行中"
+        }
+    },
+    "options": {
+        "step": {
+            "discovery": {
+                "title": "自动发现",
+                "description": "开启自动发现后，每个受支持的家电都会为你设置好，现在以及以后每次添加新家电时都是如此。已设置的家电保持不变。",
+                "data": {
+                    "auto_discover": "自动设置家电"
+                },
+                "data_description": {
+                    "auto_discover": "关闭后，每个发现的家电都会提示给你，由你选择添加哪些"
+                }
+            },
+            "settings": {
+                "title": "{name} 的通知",
+                "description": "这里的所有设置都是可选的。\n\n{supernotify}",
+                "data": {
+                    "notify_start": "通知开始",
+                    "notify_end": "通知结束",
+                    "notify_phase": "通知阶段",
+                    "notify_progress": "通知进度",
+                    "dashboard": "要打开的仪表盘",
+                    "live_title": "实时活动标题",
+                    "live_detail": "实时活动显示",
+                    "maintenance": "跟踪维护"
+                },
+                "data_description": {
+                    "notify_start": "家电开始时发送通知。关闭时，实时活动仍会打开，静默且仅在手机上。",
+                    "notify_end": "家电结束时发送通知。关闭时，实时活动仍会关闭。",
+                    "notify_phase": "周期中的某个阶段结束时发送通知，例如烤箱预热完成。关闭时，只在实时活动中显示。",
+                    "dashboard": "点按通知或实时活动时打开。留空则打开应用上次所在的位置。如果添加家电时存在以家电或其类型命名的仪表盘，例如“洗碗机”或“洗衣机”，则会设为该仪表盘。",
+                    "notify_progress": "周期每完成 10% 发送一次通知。关闭时，进度只显示在实时活动的进度条上，进度条会静默更新。",
+                    "live_title": "实时活动的标题。当剩余时间取代消息的位置时（例如在 iPhone 锁定屏幕上），在名称旁显示程序很有用。如果程序名称太长，或家电总是使用同一个程序，请只选择名称。",
+                    "live_detail": "显示剩余时间（如果家电报告何时完成），或改为显示程序、状态（即它在周期中正在做什么，例如烘干或扫地机器人重新定位），或两者都显示。程序可以是整个周期，也可以是其中的一个阶段，例如预冲洗；对于扫地机器人，则是其清洁模式。家电未报告的内容会被省略。",
+                    "maintenance": "记录周期数，以及家电所报告部件的剩余寿命，并将到期事项放到“家电维护”待办清单上，到期时发送通知。若关闭，会在结束通知中提示一次。"
+                },
+                "sections": {
+                    "start": {
+                        "name": "开始消息",
+                        "description": "家电开始时发送。清空文本框可恢复默认措辞。在需要显示当前程序的位置填入 {program_placeholder}。",
+                        "data": {
+                            "start_title": "标题",
+                            "start_message": "消息"
+                        }
+                    },
+                    "end": {
+                        "name": "结束消息",
+                        "description": "家电结束时发送。清空文本框可恢复默认措辞。在需要显示已运行程序的位置填入 {program_placeholder}。",
+                        "data": {
+                            "end_title": "标题",
+                            "end_message": "消息",
+                            "reminder": "提醒",
+                            "reminder_repeats": "提醒次数",
+                            "grace_period": "在基座上等待"
+                        },
+                        "data_description": {
+                            "reminder": "多少分钟后再次发送结束消息，直到在通知上按下“已完成”。0 表示不提醒。通知上的“稍后提醒”会等待这么久，或 30 分钟。",
+                            "reminder_repeats": "结束消息再次发送的次数",
+                            "grace_period": "扫地机器人清洁后回到基座，需要停留多少秒，清洁才算结束，以防它再次出发。对于中途回去清洗拖布或倒垃圾的机器人，请调高此值。如果吸尘器会报告自己的进度或是否正在清洁（如 Roborock），则以此为准，与此值无关。"
+                        }
+                    },
+                    "notify": {
+                        "name": "通知目标",
+                        "description": "通知谁以及什么。全部留空则使用默认选择。",
+                        "data": {
+                            "targets": "目标",
+                            "target": "目标",
+                            "custom_target": "自定义目标",
+                            "deliveries": "投递方式"
+                        },
+                        "data_description": {
+                            "targets": "要发送到的通知实体。留空则发送到每部装有 Home Assistant 应用的手机。",
+                            "target": "通知谁或什么，与任何 Supernotify 通知相同。留空则由 Supernotify 选择。",
+                            "custom_target": "Home Assistant 之外的目标，例如电子邮件地址或电话号码。",
+                            "deliveries": "仅通过这些 Supernotify 投递方式发送通知。留空则由 Supernotify 选择。"
+                        }
+                    },
+                    "maintenance_items": {
+                        "name": "维护",
+                        "description": "跟踪维护时，每项之间的周期数。0 表示不包含该项。开启跟踪时开始计数；对于已在进行中的项，可用“重置维护”操作设置。",
+                        "data": {
+                            "maintenance_drum_clean": "滚筒清洁",
+                            "maintenance_filter": "过滤器清洁",
+                            "maintenance_lint_filter": "绒毛过滤器清洁",
+                            "maintenance_machine_clean": "机器清洁",
+                            "maintenance_condenser": "冷凝器清洁"
+                        }
+                    }
+                }
+            },
+            "power": {
+                "title": "{name} 的功率监测",
+                "description": "家电功率超过阈值时开始，在宽限期内一直保持在阈值或以下时结束。",
+                "data": {
+                    "power_entity": "功率传感器",
+                    "threshold": "功率阈值",
+                    "grace_period": "宽限期",
+                    "min_duration": "最短运行时间",
+                    "switch_entity": "智能插座",
+                    "switch_off_button": "“关闭”按钮"
+                },
+                "data_description": {
+                    "power_entity": "测量家电所耗功率的传感器",
+                    "threshold": "家电耗电高于此值时视为正在运行",
+                    "grace_period": "功率需在阈值或以下保持多久，周期才算结束，以忽略短暂的下降",
+                    "min_duration": "功率需在阈值以上保持多久才算一个周期，以忽略开门或按键",
+                    "switch_entity": "家电所接的开关，结束后提供一个按钮来关闭它",
+                    "switch_off_button": "在结束通知中放置智能插座的“关闭”按钮。对于需要保持通电的插座请关闭此项。"
+                }
+            }
+        }
+    },
+    "selector": {
+        "appliance_words": {
+            "options": {
+                "dishwasher": "洗碗机",
+                "washer": "洗衣机",
+                "washer_dryer": "洗烘一体机, 洗干一体机",
+                "dryer": "烘干机, 干衣机",
+                "oven": "烤箱",
+                "microwave": "微波炉",
+                "hob": "电磁炉, 燃气灶, 灶台",
+                "hood": "油烟机",
+                "coffee_maker": "咖啡",
+                "cleaning_robot": "吸尘器, 扫地机",
+                "kettle": "电水壶, 热水壶, 烧水壶"
+            }
+        },
+        "live_title": {
+            "options": {
+                "name_program": "家电名称和程序",
+                "program": "仅程序",
+                "name": "仅家电名称"
+            }
+        },
+        "live_detail": {
+            "options": {
+                "time_remaining": "剩余时间",
+                "program": "程序",
+                "status": "状态",
+                "program_status": "程序和状态"
+            }
+        }
+    },
+    "entity": {
+        "todo": {
+            "maintenance": {
+                "name": "家电维护"
+            }
+        }
+    },
+    "services": {
+        "reset_maintenance": {
+            "name": "重置维护",
+            "description": "表示已完成维护，可针对家电的某一项或全部；或设置自上次维护以来的周期数（在此处跟踪之前已知的数值）。家电报告寿命的部件，如其集成有自己的重置按钮，则用该按钮重置。",
+            "fields": {
+                "config_entry_id": {
+                    "name": "家电",
+                    "description": "家电，即其 Appliance Auto Notify 条目"
+                },
+                "item": {
+                    "name": "项目",
+                    "description": "项目，例如 drum_clean 或某个部件的实体，省略则为全部"
+                },
+                "cycles": {
+                    "name": "周期",
+                    "description": "自上次维护以来的周期数，0 表示刚刚完成"
+                }
+            }
+        },
+        "snooze_maintenance": {
+            "name": "推迟维护",
+            "description": "推迟到期的维护，可针对家电的某一项或全部，之后会再次到期。",
+            "fields": {
+                "config_entry_id": {
+                    "name": "家电",
+                    "description": "家电，即其 Appliance Auto Notify 条目"
+                },
+                "item": {
+                    "name": "项目",
+                    "description": "项目，例如 drum_clean 或某个部件的实体，省略则为全部"
+                },
+                "days": {
+                    "name": "天数",
+                    "description": "推迟多久"
+                }
+            }
+        }
+    },
+    "issues": {
+        "beta_feedback": {
+            "title": "{name} 表现如何？",
+            "description": "{name} 通过 {integration} 接入，Appliance Auto Notify 对它的支持是新的，编写时没有真实家电可以试用。它的第一个周期已经结束：开始和结束通知、进度和剩余时间是否按时出现？\n\n无论顺利与否，请通过*了解更多*告诉我们，并附上 {name} 的诊断信息，可在*设备与服务*中 *Appliance Auto Notify* 下它的条目里下载。其中记录了家电在最初几个周期中报告的内容，这正是完善支持的方式。完成后可忽略此提示。"
+        },
+        "appliance_removed": {
+            "title": "{name} 已被移除",
+            "fix_flow": {
+                "step": {
+                    "confirm": {
+                        "title": "移除 {name}？",
+                        "description": "{name} 已不在 Home Assistant 中（例如已从其自身的集成中移除），因此已没有可监视的内容。也将它从 Appliance Auto Notify 中移除，连同其设备、跨重启保留的周期以及维护计数。\n\n如果它会回来，例如重新添加其集成后，请忽略此提示：它回来后会再次被监视，此提示也会自动消失。"
+                    }
+                }
+            }
+        },
+        "no_targets": {
+            "title": "没有可发送通知的目标",
+            "description": "{name} 有一条通知要发送，但无处可发：未安装 Supernotify，家电设置中未选择*目标*，也没有手机设置了用于通知的 Home Assistant 应用。\n\n请在手机上安装应用并登录，或在家电设置的*通知目标*中选择通知实体。发送一条通知后，此提示会消失。"
+        }
+    },
+    "exceptions": {
+        "not_tracked": {
+            "message": "未跟踪 {entry_id} 的维护"
+        },
+        "no_item": {
+            "message": "{entry_id} 没有维护项目 {item}"
+        },
+        "part_life_read": {
+            "message": "{item} 是读取寿命的部件，不按周期计数"
+        },
+        "no_cycle_entity": {
+            "message": "未找到 {name} 的周期状态实体"
+        },
+        "no_vacuum_entity": {
+            "message": "未找到 {name} 的吸尘器实体"
+        },
+        "appliance_removed": {
+            "message": "{name} 已从 Home Assistant 中移除"
+        }
+    }
+}

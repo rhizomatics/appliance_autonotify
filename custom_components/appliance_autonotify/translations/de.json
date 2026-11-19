@@ -1,0 +1,276 @@
+{
+    "config": {
+        "flow_title": "{name}",
+        "step": {
+            "user": {
+                "title": "Gerätebenachrichtigungen",
+                "description": "{supernotify}\n\n{found}\n\nHome-Connect-Geräte (Bosch, Siemens, Neff) werden automatisch erkannt. Ein Leistungsmesser, der nach einer Waschmaschine, einem Trockner, einem Geschirrspüler oder einem Backofen benannt ist, etwa eine smarte Steckdose namens „Waschmaschine“, wird unter *Entdeckt* angeboten, damit der Schwellenwert vor dem Hinzufügen geprüft werden kann. Jedes andere Gerät an einem Leistungsmesser kann nach Abschluss der Installation manuell eingerichtet werden.",
+                "data": {
+                    "auto_discover": "Geräte automatisch einrichten"
+                },
+                "data_description": {
+                    "auto_discover": "Ausschalten, um jedes gefundene Gerät angeboten zu bekommen und selbst zu wählen, welche hinzugefügt werden"
+                }
+            },
+            "power": {
+                "title": "Gerät mit Leistungsmessung",
+                "description": "Für jedes Gerät an einer smarten Steckdose oder einem anderen Leistungsmesser. Es startet, wenn die Leistung über den Schwellenwert steigt, und endet, sobald sie für die Karenzzeit auf oder unter ihm geblieben ist.",
+                "data": {
+                    "name": "Gerätename",
+                    "power_entity": "Leistungssensor",
+                    "threshold": "Leistungsschwelle",
+                    "grace_period": "Karenzzeit",
+                    "min_duration": "Mindestlaufzeit",
+                    "switch_entity": "Smarte Steckdose",
+                    "switch_off_button": "Ausschalt-Schaltfläche"
+                },
+                "data_description": {
+                    "name": "Wird in Benachrichtigungen verwendet und um ein Symbol zu wählen",
+                    "power_entity": "Der Sensor, der die vom Gerät aufgenommene Leistung misst",
+                    "threshold": "Das Gerät läuft, solange es mehr als diesen Wert aufnimmt",
+                    "grace_period": "Wie lange die Leistung auf oder unter dem Schwellenwert bleiben muss, bevor der Zyklus vorbei ist, damit kurze Einbrüche ignoriert werden",
+                    "min_duration": "Wie lange die Leistung über dem Schwellenwert gelegen haben muss, bevor es als Zyklus zählt, damit eine geöffnete Tür oder ein gedrückter Knopf ignoriert wird",
+                    "switch_entity": "Der Schalter, an dem das Gerät angeschlossen ist, angeboten als Schaltfläche, um es nach dem Ende auszuschalten",
+                    "switch_off_button": "Eine Ausschalt-Schaltfläche für die smarte Steckdose in die Endbenachrichtigung aufnehmen. Ausschalten für eine Steckdose, die eingeschaltet bleiben soll."
+                }
+            },
+            "confirm": {
+                "title": "Benachrichtigungen für {name}",
+                "description": "Benachrichtigen, wenn {name} startet und fertig ist?\n\n{supernotify}{beta}"
+            }
+        },
+        "abort": {
+            "already_configured": "Dieses Gerät ist bereits eingerichtet",
+            "already_in_progress": "Die Einrichtung dieses Geräts läuft bereits"
+        }
+    },
+    "options": {
+        "step": {
+            "discovery": {
+                "title": "Automatische Erkennung",
+                "description": "Mit der automatischen Erkennung wird jedes unterstützte Gerät für dich eingerichtet, jetzt und immer, wenn du ein weiteres hinzufügst. Bereits eingerichtete Geräte bleiben, wie sie sind.",
+                "data": {
+                    "auto_discover": "Geräte automatisch einrichten"
+                },
+                "data_description": {
+                    "auto_discover": "Ausschalten, um jedes gefundene Gerät angeboten zu bekommen und selbst zu wählen, welche hinzugefügt werden"
+                }
+            },
+            "settings": {
+                "title": "Benachrichtigungen für {name}",
+                "description": "Alles hier ist optional.\n\n{supernotify}",
+                "data": {
+                    "notify_start": "Start melden",
+                    "notify_end": "Ende melden",
+                    "notify_phase": "Phasen melden",
+                    "notify_progress": "Fortschritt melden",
+                    "dashboard": "Zu öffnendes Dashboard",
+                    "live_title": "Titel der Live-Aktivität",
+                    "live_detail": "Live-Aktivität zeigt",
+                    "maintenance": "Wartung verfolgen"
+                },
+                "data_description": {
+                    "notify_start": "Eine Benachrichtigung senden, wenn das Gerät startet. Wenn aus, wird die Live-Aktivität trotzdem geöffnet, still und nur auf Telefonen.",
+                    "notify_end": "Eine Benachrichtigung senden, wenn das Gerät fertig ist. Wenn aus, wird die Live-Aktivität trotzdem geschlossen.",
+                    "notify_phase": "Eine Benachrichtigung senden, wenn eine Phase des Zyklus vorbei ist, etwa wenn ein Backofen aufgeheizt ist. Wenn aus, wird sie nur in der Live-Aktivität angezeigt.",
+                    "dashboard": "Wird geöffnet, wenn auf eine Benachrichtigung oder die Live-Aktivität getippt wird. Leer lassen, um die App dort zu öffnen, wo sie war. Wird auf ein Dashboard gesetzt, das nach dem Gerät oder seinem Typ benannt ist, etwa „Geschirrspüler“ oder „Waschmaschine“, falls es beim Hinzufügen des Geräts eines gab.",
+                    "notify_progress": "Alle 10 % des Zyklus eine Benachrichtigung senden. Wenn aus, wird der Fortschritt nur im Fortschrittsbalken der Live-Aktivität angezeigt, der still aktualisiert wird.",
+                    "live_title": "Womit die Live-Aktivität betitelt wird. Das Programm ist neben dem Namen nützlich, wenn die Restzeit den Platz der Nachricht einnimmt, wie auf dem Sperrbildschirm eines iPhones. Wähle nur den Namen, wenn die Programmnamen zu lang sind oder das Gerät immer im selben Programm läuft.",
+                    "live_detail": "Die Restzeit anzeigen, wenn das Gerät meldet, wann es fertig ist, oder stattdessen das Programm, den Status, also was es innerhalb seines Zyklus gerade tut, etwa Trocknen oder ein Saugroboter, der sich neu positioniert, oder beides. Das Programm kann der ganze Zyklus sein oder eine Phase davon, etwa ein Vorspülen, und ist bei einem Saugroboter sein Reinigungsmodus. Was das Gerät nicht meldet, wird weggelassen.",
+                    "maintenance": "Die Zyklen zählen, und wie viel Lebensdauer die Teile noch haben, über die das Gerät berichtet, und alles Fällige auf die To-do-Liste Gerätewartung setzen, mit einer Benachrichtigung, wenn es fällig wird. Wird einmal in der Endbenachrichtigung angeboten, wenn ausgeschaltet."
+                },
+                "sections": {
+                    "start": {
+                        "name": "Startnachricht",
+                        "description": "Wird gesendet, wenn das Gerät startet. Leere ein Feld, um zum üblichen Wortlaut zurückzukehren. Setze {program_placeholder} dort ein, wo das laufende Programm genannt werden soll.",
+                        "data": {
+                            "start_title": "Titel",
+                            "start_message": "Nachricht"
+                        }
+                    },
+                    "end": {
+                        "name": "Endnachricht",
+                        "description": "Wird gesendet, wenn das Gerät fertig ist. Leere ein Feld, um zum üblichen Wortlaut zurückzukehren. Setze {program_placeholder} dort ein, wo das gelaufene Programm genannt werden soll.",
+                        "data": {
+                            "end_title": "Titel",
+                            "end_message": "Nachricht",
+                            "reminder": "Erinnerung",
+                            "reminder_repeats": "Wiederholungen der Erinnerung",
+                            "grace_period": "Wartezeit an der Station"
+                        },
+                        "data_description": {
+                            "reminder": "Minuten, nach denen das Ende erneut gesendet wird, bis in der Benachrichtigung Erledigt gedrückt wird. 0 für keine. Später erinnern in der Benachrichtigung wartet so lange, oder 30 Minuten.",
+                            "reminder_repeats": "Wie oft das Ende erneut gesendet wird",
+                            "grace_period": "Sekunden, die ein Saugroboter nach dem Reinigen an seiner Station bleiben muss, bevor die Reinigung vorbei ist, falls er wieder losfährt. Erhöhen für einen, der zwischendurch zurückfährt, um seinen Wischmopp zu waschen oder seinen Behälter zu leeren. Wenn der Sauger seinen eigenen Fortschritt meldet oder ob er reinigt, wie Roborock, wird stattdessen dem gefolgt, unabhängig von diesem Wert."
+                        }
+                    },
+                    "notify": {
+                        "name": "Benachrichtigungsziele",
+                        "description": "Wer und was benachrichtigt wird. Alles leer lassen für die übliche Wahl.",
+                        "data": {
+                            "targets": "Ziele",
+                            "target": "Ziele",
+                            "custom_target": "Eigene Ziele",
+                            "deliveries": "Zustellungen"
+                        },
+                        "data_description": {
+                            "targets": "Notify-Entitäten, an die gesendet wird. Leer lassen für jedes Telefon mit der Home Assistant App.",
+                            "target": "Wer oder was benachrichtigt wird, wie bei jeder Supernotify-Benachrichtigung. Leer lassen, damit Supernotify wählt.",
+                            "custom_target": "Ziele außerhalb von Home Assistant, etwa E-Mail-Adressen oder Telefonnummern.",
+                            "deliveries": "Benachrichtigungen auf diese Supernotify-Zustellungen beschränken. Leer lassen, damit Supernotify wählt."
+                        }
+                    },
+                    "maintenance_items": {
+                        "name": "Wartung",
+                        "description": "Zyklen zwischen jedem Punkt, wenn die Wartung verfolgt wird. 0, um einen Punkt wegzulassen. Die Zählung beginnt, wenn die Verfolgung eingeschaltet wird, und wird mit der Aktion Wartung zurücksetzen für einen bereits laufenden gesetzt.",
+                        "data": {
+                            "maintenance_drum_clean": "Trommelreinigung",
+                            "maintenance_filter": "Filterreinigung",
+                            "maintenance_lint_filter": "Flusensiebreinigung",
+                            "maintenance_machine_clean": "Maschinenreinigung",
+                            "maintenance_condenser": "Kondensatorreinigung"
+                        }
+                    }
+                }
+            },
+            "power": {
+                "title": "Leistungsmessung für {name}",
+                "description": "Das Gerät startet, wenn seine Leistung über den Schwellenwert steigt, und endet, sobald sie für die Karenzzeit auf oder unter ihm geblieben ist.",
+                "data": {
+                    "power_entity": "Leistungssensor",
+                    "threshold": "Leistungsschwelle",
+                    "grace_period": "Karenzzeit",
+                    "min_duration": "Mindestlaufzeit",
+                    "switch_entity": "Smarte Steckdose",
+                    "switch_off_button": "Ausschalt-Schaltfläche"
+                },
+                "data_description": {
+                    "power_entity": "Der Sensor, der die vom Gerät aufgenommene Leistung misst",
+                    "threshold": "Das Gerät läuft, solange es mehr als diesen Wert aufnimmt",
+                    "grace_period": "Wie lange die Leistung auf oder unter dem Schwellenwert bleiben muss, bevor der Zyklus vorbei ist, damit kurze Einbrüche ignoriert werden",
+                    "min_duration": "Wie lange die Leistung über dem Schwellenwert gelegen haben muss, bevor es als Zyklus zählt, damit eine geöffnete Tür oder ein gedrückter Knopf ignoriert wird",
+                    "switch_entity": "Der Schalter, an dem das Gerät angeschlossen ist, angeboten als Schaltfläche, um es nach dem Ende auszuschalten",
+                    "switch_off_button": "Eine Ausschalt-Schaltfläche für die smarte Steckdose in die Endbenachrichtigung aufnehmen. Ausschalten für eine Steckdose, die eingeschaltet bleiben soll."
+                }
+            }
+        }
+    },
+    "selector": {
+        "appliance_words": {
+            "options": {
+                "dishwasher": "geschirrspüler, geschirrspueler, spülmaschine, spuelmaschine",
+                "washer": "waschmaschine",
+                "washer_dryer": "waschtrockner",
+                "dryer": "wäschetrockner, waeschetrockner, trockner",
+                "oven": "backofen, ofen",
+                "microwave": "mikrowelle",
+                "hob": "kochfeld, herd",
+                "hood": "dunstabzugshaube, dunstabzug, abzugshaube",
+                "coffee_maker": "kaffee",
+                "cleaning_robot": "staubsauger, saugroboter",
+                "kettle": "wasserkocher"
+            }
+        },
+        "live_title": {
+            "options": {
+                "name_program": "Gerätename und Programm",
+                "program": "Nur Programm",
+                "name": "Nur Gerätename"
+            }
+        },
+        "live_detail": {
+            "options": {
+                "time_remaining": "Restzeit",
+                "program": "Programm",
+                "status": "Status",
+                "program_status": "Programm und Status"
+            }
+        }
+    },
+    "entity": {
+        "todo": {
+            "maintenance": {
+                "name": "Gerätewartung"
+            }
+        }
+    },
+    "services": {
+        "reset_maintenance": {
+            "name": "Wartung zurücksetzen",
+            "description": "Meldet, dass die Wartung erledigt ist, für einen Punkt eines Geräts oder alle, oder setzt die Zyklen seit der letzten Erledigung, wie sie von vor der Verfolgung hier bekannt sind. Ein Teil, dessen Lebensdauer das Gerät meldet, wird mit der Schaltfläche seiner eigenen Integration zurückgesetzt, wo es eine gibt.",
+            "fields": {
+                "config_entry_id": {
+                    "name": "Gerät",
+                    "description": "Das Gerät, als sein Eintrag in Appliance Auto Notify"
+                },
+                "item": {
+                    "name": "Punkt",
+                    "description": "Der Punkt, etwa drum_clean oder die Entität eines Teils, oder weglassen für alle"
+                },
+                "cycles": {
+                    "name": "Zyklen",
+                    "description": "Die Zyklen seit der letzten Erledigung, 0 für jetzt erledigt"
+                }
+            }
+        },
+        "snooze_maintenance": {
+            "name": "Wartung aufschieben",
+            "description": "Schiebt fällige Wartung auf, für einen Punkt eines Geräts oder alle, danach ist sie wieder fällig.",
+            "fields": {
+                "config_entry_id": {
+                    "name": "Gerät",
+                    "description": "Das Gerät, als sein Eintrag in Appliance Auto Notify"
+                },
+                "item": {
+                    "name": "Punkt",
+                    "description": "Der Punkt, etwa drum_clean oder die Entität eines Teils, oder weglassen für alle"
+                },
+                "days": {
+                    "name": "Tage",
+                    "description": "Wie lange sie aufgeschoben wird"
+                }
+            }
+        }
+    },
+    "issues": {
+        "beta_feedback": {
+            "title": "Wie lief es mit {name}?",
+            "description": "{name} kommt über {integration}, deren Unterstützung in Appliance Auto Notify neu ist und ohne ein echtes Gerät zum Ausprobieren geschrieben wurde. Der erste Zyklus ist vorbei: Kamen die Start- und Endbenachrichtigungen, der Fortschritt und die Restzeit, wann sie sollten?\n\nOb es gut lief oder nicht, sag es bitte über *Mehr erfahren* und hänge die Diagnosedaten von {name} an, heruntergeladen aus seinem Eintrag unter *Appliance Auto Notify* in *Geräte & Dienste*. Sie enthalten, was das Gerät in seinen ersten Zyklen gemeldet hat, und so wird die Unterstützung richtig. Ignoriere dies, sobald erledigt."
+        },
+        "appliance_removed": {
+            "title": "{name} wurde entfernt",
+            "fix_flow": {
+                "step": {
+                    "confirm": {
+                        "title": "{name} entfernen?",
+                        "description": "{name} ist nicht mehr in Home Assistant, etwa weil es aus seiner eigenen Integration entfernt wurde, also gibt es nichts mehr zu beobachten. Entferne es auch aus Appliance Auto Notify, mit seinem Gerät, dem über Neustarts behaltenen Zyklus und seinen Wartungszählern.\n\nWenn es zurückkommt, etwa nach erneutem Hinzufügen seiner Integration, ignoriere dies stattdessen: Es wird wieder beobachtet, sobald es zurück ist, und dies verschwindet von selbst."
+                    }
+                }
+            }
+        },
+        "no_targets": {
+            "title": "Kein Ziel für Benachrichtigungen",
+            "description": "{name} hatte eine Benachrichtigung zu senden, aber es gibt kein Ziel dafür: Supernotify ist nicht installiert, in den Einstellungen des Geräts sind keine *Ziele* gewählt, und kein Telefon hat die Home Assistant App für Benachrichtigungen eingerichtet.\n\nInstalliere die App auf einem Telefon und melde dich an, oder wähle Notify-Entitäten unter *Benachrichtigungsziele* in den Einstellungen des Geräts. Dies verschwindet, sobald eine Benachrichtigung gesendet wurde."
+        }
+    },
+    "exceptions": {
+        "not_tracked": {
+            "message": "Die Wartung wird für {entry_id} nicht verfolgt"
+        },
+        "no_item": {
+            "message": "Kein Wartungspunkt {item} für {entry_id}"
+        },
+        "part_life_read": {
+            "message": "{item} ist ein Teil, dessen Lebensdauer gelesen und nicht in Zyklen gezählt wird"
+        },
+        "no_cycle_entity": {
+            "message": "Keine Zyklusstatus-Entität für {name} gefunden"
+        },
+        "no_vacuum_entity": {
+            "message": "Keine Staubsauger-Entität für {name} gefunden"
+        },
+        "appliance_removed": {
+            "message": "{name} wurde aus Home Assistant entfernt"
+        }
+    }
+}

@@ -1,0 +1,276 @@
+{
+    "config": {
+        "flow_title": "{name}",
+        "step": {
+            "user": {
+                "title": "Notificaciones de electrodomésticos",
+                "description": "{supernotify}\n\n{found}\n\nLos electrodomésticos Home Connect (Bosch, Siemens, Neff) se descubren automáticamente. Un medidor de consumo con el nombre de una lavadora, secadora, lavavajillas u horno, como un enchufe inteligente llamado «Lavadora», se ofrece como *Descubierto*, para revisar el umbral antes de añadirlo. Cualquier otro electrodoméstico con un medidor de consumo se puede configurar manualmente una vez terminada la instalación.",
+                "data": {
+                    "auto_discover": "Configurar electrodomésticos automáticamente"
+                },
+                "data_description": {
+                    "auto_discover": "Desactívalo para que se te ofrezca cada electrodoméstico encontrado y elegir cuáles añadir"
+                }
+            },
+            "power": {
+                "title": "Electrodoméstico con medición de consumo",
+                "description": "Para cualquier electrodoméstico en un enchufe inteligente u otro medidor de consumo. Empieza cuando su consumo supera el umbral, y termina cuando se ha mantenido en el umbral o por debajo durante el periodo de gracia.",
+                "data": {
+                    "name": "Nombre del electrodoméstico",
+                    "power_entity": "Sensor de potencia",
+                    "threshold": "Umbral de potencia",
+                    "grace_period": "Periodo de gracia",
+                    "min_duration": "Tiempo mínimo de funcionamiento",
+                    "switch_entity": "Enchufe inteligente",
+                    "switch_off_button": "Botón Apagar"
+                },
+                "data_description": {
+                    "name": "Se usa en las notificaciones y para elegir un icono",
+                    "power_entity": "El sensor que mide la potencia que consume el electrodoméstico",
+                    "threshold": "El electrodoméstico está en marcha mientras consume más que esto",
+                    "grace_period": "Cuánto tiempo debe mantenerse la potencia en el umbral o por debajo antes de que el ciclo termine, para ignorar caídas breves",
+                    "min_duration": "Cuánto tiempo debe haber estado la potencia por encima del umbral antes de contar como un ciclo, para ignorar una puerta abierta o un botón pulsado",
+                    "switch_entity": "El interruptor al que está enchufado el electrodoméstico, ofrecido como botón para apagarlo cuando haya terminado",
+                    "switch_off_button": "Poner un botón Apagar para el enchufe inteligente en la notificación de fin. Desactívalo para un enchufe que deba quedarse encendido."
+                }
+            },
+            "confirm": {
+                "title": "Notificaciones de {name}",
+                "description": "¿Avisar cuando {name} empiece y termine?\n\n{supernotify}{beta}"
+            }
+        },
+        "abort": {
+            "already_configured": "Este electrodoméstico ya está configurado",
+            "already_in_progress": "La configuración de este electrodoméstico ya está en curso"
+        }
+    },
+    "options": {
+        "step": {
+            "discovery": {
+                "title": "Descubrimiento automático",
+                "description": "Con el descubrimiento automático, cada electrodoméstico compatible se configura por ti, ahora y cada vez que añadas otro. Los electrodomésticos ya configurados se quedan como están.",
+                "data": {
+                    "auto_discover": "Configurar electrodomésticos automáticamente"
+                },
+                "data_description": {
+                    "auto_discover": "Desactívalo para que se te ofrezca cada electrodoméstico encontrado y elegir cuáles añadir"
+                }
+            },
+            "settings": {
+                "title": "Notificaciones de {name}",
+                "description": "Todo aquí es opcional.\n\n{supernotify}",
+                "data": {
+                    "notify_start": "Avisar del inicio",
+                    "notify_end": "Avisar del fin",
+                    "notify_phase": "Avisar de las fases",
+                    "notify_progress": "Avisar del progreso",
+                    "dashboard": "Panel que se abre",
+                    "live_title": "Título de la Actividad en vivo",
+                    "live_detail": "La Actividad en vivo muestra",
+                    "maintenance": "Seguir el mantenimiento"
+                },
+                "data_description": {
+                    "notify_start": "Enviar una notificación cuando el electrodoméstico empiece. Si está desactivado, la Actividad en vivo se abre igualmente, en silencio y solo en teléfonos.",
+                    "notify_end": "Enviar una notificación cuando el electrodoméstico termine. Si está desactivado, la Actividad en vivo se cierra igualmente.",
+                    "notify_phase": "Enviar una notificación cuando termine una fase del ciclo, como un horno que alcanza la temperatura. Si está desactivado, solo se muestra en la Actividad en vivo.",
+                    "dashboard": "Se abre al tocar una notificación o la Actividad en vivo. Déjalo vacío para abrir la app donde estaba. Se elige un panel con el nombre del electrodoméstico o de su tipo, como «Lavavajillas» o «Lavadora», si había uno cuando se añadió el electrodoméstico.",
+                    "notify_progress": "Enviar una notificación cada 10 % del ciclo. Si está desactivado, el progreso solo se muestra en la barra de progreso de la Actividad en vivo, que se actualiza en silencio.",
+                    "live_title": "El título de la Actividad en vivo. El programa es útil junto al nombre cuando el tiempo restante ocupa el lugar del mensaje, como en la pantalla bloqueada de un iPhone. Elige solo el nombre si los nombres de los programas son demasiado largos, o si el electrodoméstico siempre usa el mismo programa.",
+                    "live_detail": "Mostrar el tiempo restante, cuando el electrodoméstico informa de cuándo terminará, o en su lugar el programa, el estado, es decir, lo que está haciendo dentro de su ciclo, como secar o un robot aspirador que se reubica, o ambos. El programa puede ser el ciclo entero o una fase, como un prelavado, y en un robot aspirador es su modo de limpieza. Lo que el electrodoméstico no informe se omite.",
+                    "maintenance": "Llevar la cuenta de los ciclos, y de cuánta vida les queda a las piezas de las que informa el electrodoméstico, y poner lo que toque en la lista de tareas Mantenimiento de electrodomésticos, con una notificación cuando toque. Se ofrece una vez en la notificación de fin si está desactivado."
+                },
+                "sections": {
+                    "start": {
+                        "name": "Mensaje de inicio",
+                        "description": "Se envía cuando el electrodoméstico empieza. Vacía un campo para volver al texto habitual. Pon {program_placeholder} donde deba nombrarse el programa en curso.",
+                        "data": {
+                            "start_title": "Título",
+                            "start_message": "Mensaje"
+                        }
+                    },
+                    "end": {
+                        "name": "Mensaje de fin",
+                        "description": "Se envía cuando el electrodoméstico termina. Vacía un campo para volver al texto habitual. Pon {program_placeholder} donde deba nombrarse el programa que se ejecutó.",
+                        "data": {
+                            "end_title": "Título",
+                            "end_message": "Mensaje",
+                            "reminder": "Recordatorio",
+                            "reminder_repeats": "Repeticiones del recordatorio",
+                            "grace_period": "Espera en la base"
+                        },
+                        "data_description": {
+                            "reminder": "Minutos tras los que se vuelve a enviar el fin, hasta que se pulse Terminado en la notificación. 0 para ninguno. Recordar más tarde en la notificación espera este tiempo, o 30 minutos.",
+                            "reminder_repeats": "Cuántas veces se vuelve a enviar el fin",
+                            "grace_period": "Segundos que un robot aspirador debe quedarse en su base, de vuelta de limpiar, antes de que la limpieza termine, por si vuelve a salir. Auméntalo para uno que vuelve a mitad de camino para lavar la mopa o vaciar el depósito. Si el aspirador informa de su propio progreso, o de si está limpiando, como hace Roborock, se sigue eso, sea cual sea este valor."
+                        }
+                    },
+                    "notify": {
+                        "name": "Destinatarios de las notificaciones",
+                        "description": "A quién y a qué se notifica. Déjalo todo vacío para la elección habitual.",
+                        "data": {
+                            "targets": "Destinatarios",
+                            "target": "Destinatarios",
+                            "custom_target": "Destinatarios personalizados",
+                            "deliveries": "Entregas"
+                        },
+                        "data_description": {
+                            "targets": "Entidades notify a las que enviar. Déjalo vacío para todos los teléfonos con la app de Home Assistant.",
+                            "target": "A quién o a qué notificar, como en cualquier notificación de Supernotify. Déjalo vacío para que elija Supernotify.",
+                            "custom_target": "Destinatarios fuera de Home Assistant, como direcciones de correo o números de teléfono.",
+                            "deliveries": "Limitar las notificaciones a estas entregas de Supernotify. Déjalo vacío para que elija Supernotify."
+                        }
+                    },
+                    "maintenance_items": {
+                        "name": "Mantenimiento",
+                        "description": "Ciclos entre cada tarea, cuando se sigue el mantenimiento. 0 para omitir una tarea. La cuenta empieza al activar el seguimiento, y se ajusta con la acción Restablecer mantenimiento para una ya en curso.",
+                        "data": {
+                            "maintenance_drum_clean": "Limpieza del tambor",
+                            "maintenance_filter": "Limpieza del filtro",
+                            "maintenance_lint_filter": "Limpieza del filtro de pelusa",
+                            "maintenance_machine_clean": "Limpieza de la máquina",
+                            "maintenance_condenser": "Limpieza del condensador"
+                        }
+                    }
+                }
+            },
+            "power": {
+                "title": "Medición de consumo de {name}",
+                "description": "El electrodoméstico empieza cuando su consumo supera el umbral, y termina cuando se ha mantenido en el umbral o por debajo durante el periodo de gracia.",
+                "data": {
+                    "power_entity": "Sensor de potencia",
+                    "threshold": "Umbral de potencia",
+                    "grace_period": "Periodo de gracia",
+                    "min_duration": "Tiempo mínimo de funcionamiento",
+                    "switch_entity": "Enchufe inteligente",
+                    "switch_off_button": "Botón Apagar"
+                },
+                "data_description": {
+                    "power_entity": "El sensor que mide la potencia que consume el electrodoméstico",
+                    "threshold": "El electrodoméstico está en marcha mientras consume más que esto",
+                    "grace_period": "Cuánto tiempo debe mantenerse la potencia en el umbral o por debajo antes de que el ciclo termine, para ignorar caídas breves",
+                    "min_duration": "Cuánto tiempo debe haber estado la potencia por encima del umbral antes de contar como un ciclo, para ignorar una puerta abierta o un botón pulsado",
+                    "switch_entity": "El interruptor al que está enchufado el electrodoméstico, ofrecido como botón para apagarlo cuando haya terminado",
+                    "switch_off_button": "Poner un botón Apagar para el enchufe inteligente en la notificación de fin. Desactívalo para un enchufe que deba quedarse encendido."
+                }
+            }
+        }
+    },
+    "selector": {
+        "appliance_words": {
+            "options": {
+                "dishwasher": "lavavajillas, lavaplatos",
+                "washer": "lavadora",
+                "washer_dryer": "lavadora secadora, lavadora-secadora, lavasecadora",
+                "dryer": "secadora",
+                "oven": "horno",
+                "microwave": "microondas",
+                "hob": "placa de cocción, vitrocerámica, vitroceramica, placa de inducción",
+                "hood": "campana, extractor",
+                "coffee_maker": "café, cafe, cafetera",
+                "cleaning_robot": "aspiradora, aspirador",
+                "kettle": "hervidor"
+            }
+        },
+        "live_title": {
+            "options": {
+                "name_program": "Nombre del electrodoméstico y programa",
+                "program": "Solo el programa",
+                "name": "Solo el nombre del electrodoméstico"
+            }
+        },
+        "live_detail": {
+            "options": {
+                "time_remaining": "Tiempo restante",
+                "program": "Programa",
+                "status": "Estado",
+                "program_status": "Programa y estado"
+            }
+        }
+    },
+    "entity": {
+        "todo": {
+            "maintenance": {
+                "name": "Mantenimiento de electrodomésticos"
+            }
+        }
+    },
+    "services": {
+        "reset_maintenance": {
+            "name": "Restablecer mantenimiento",
+            "description": "Indica que se ha hecho el mantenimiento, de una tarea de un electrodoméstico o de todas, o fija los ciclos desde la última vez, tal como se sabían antes de seguirlo aquí. Una pieza cuya vida informa el electrodoméstico se restablece con el botón de su propia integración, si tiene uno.",
+            "fields": {
+                "config_entry_id": {
+                    "name": "Electrodoméstico",
+                    "description": "El electrodoméstico, como su entrada de Appliance Auto Notify"
+                },
+                "item": {
+                    "name": "Tarea",
+                    "description": "La tarea, como drum_clean o la entidad de una pieza, u omítela para todas"
+                },
+                "cycles": {
+                    "name": "Ciclos",
+                    "description": "Los ciclos desde la última vez, 0 para hecho ahora"
+                }
+            }
+        },
+        "snooze_maintenance": {
+            "name": "Posponer mantenimiento",
+            "description": "Pospone el mantenimiento pendiente, de una tarea de un electrodoméstico o de todas, tras lo cual vuelve a estar pendiente.",
+            "fields": {
+                "config_entry_id": {
+                    "name": "Electrodoméstico",
+                    "description": "El electrodoméstico, como su entrada de Appliance Auto Notify"
+                },
+                "item": {
+                    "name": "Tarea",
+                    "description": "La tarea, como drum_clean o la entidad de una pieza, u omítela para todas"
+                },
+                "days": {
+                    "name": "Días",
+                    "description": "Cuánto tiempo posponerlo"
+                }
+            }
+        }
+    },
+    "issues": {
+        "beta_feedback": {
+            "title": "¿Qué tal fue {name}?",
+            "description": "{name} llega a través de {integration}, cuya compatibilidad en Appliance Auto Notify es nueva y se escribió sin un electrodoméstico real con el que probarla. Su primer ciclo ha terminado: ¿llegaron las notificaciones de inicio y fin, el progreso y el tiempo restante cuando debían?\n\nTanto si fue bien como si no, cuéntalo con *Más información* y adjunta el diagnóstico de {name}, descargado desde su entrada en *Appliance Auto Notify* en *Dispositivos y servicios*. Contiene lo que el electrodoméstico informó en sus primeros ciclos, que es como la compatibilidad queda bien. Ignora esto una vez hecho."
+        },
+        "appliance_removed": {
+            "title": "{name} se ha eliminado",
+            "fix_flow": {
+                "step": {
+                    "confirm": {
+                        "title": "¿Eliminar {name}?",
+                        "description": "{name} ya no está en Home Assistant, como cuando se elimina de su propia integración, así que no queda nada que vigilar. Elimínalo también de Appliance Auto Notify, con su dispositivo, el ciclo guardado entre reinicios y sus cuentas de mantenimiento.\n\nSi va a volver, por ejemplo tras volver a añadir su integración, ignora esto: se vigilará de nuevo cuando vuelva, y esto desaparecerá solo."
+                    }
+                }
+            }
+        },
+        "no_targets": {
+            "title": "No hay adónde enviar las notificaciones",
+            "description": "{name} tenía una notificación que enviar, pero no hay adónde enviarla: Supernotify no está instalado, no hay *Destinatarios* elegidos en los ajustes del electrodoméstico y ningún teléfono tiene la app de Home Assistant configurada para notificaciones.\n\nInstala la app en un teléfono e inicia sesión, o elige entidades notify en *Destinatarios de las notificaciones* en los ajustes del electrodoméstico. Esto desaparece en cuanto se envía una notificación."
+        }
+    },
+    "exceptions": {
+        "not_tracked": {
+            "message": "No se sigue el mantenimiento de {entry_id}"
+        },
+        "no_item": {
+            "message": "No hay tarea de mantenimiento {item} para {entry_id}"
+        },
+        "part_life_read": {
+            "message": "{item} es una pieza cuya vida se lee, no se cuenta en ciclos"
+        },
+        "no_cycle_entity": {
+            "message": "No se encontró ninguna entidad del estado del ciclo para {name}"
+        },
+        "no_vacuum_entity": {
+            "message": "No se encontró ninguna entidad de aspirador para {name}"
+        },
+        "appliance_removed": {
+            "message": "{name} se ha eliminado de Home Assistant"
+        }
+    }
+}
