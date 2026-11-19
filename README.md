@@ -43,6 +43,12 @@ That's all. Every appliance with a cycle Home Assistant reports is set up straig
 
 To stop the notifications for an appliance, disable it rather than delete it, since a deleted appliance is found and set up again.
 
+### Appliance Not Found?
+
+If an appliance with its own integration isn't found, its integration may name its entities or states in a way that isn't known yet. In *Settings*, *Devices & services*, open *Appliance Auto Notify*, and on *Automatic discovery* choose ⋮ then *Download diagnostics*. It lists each device that looks like an appliance but wasn't found to be one, with its make, model, integration, and its entities' keys, options and states. Names, areas and entity ids are left out, since it's meant to be shared. [Open an issue](https://github.com/rhizomatics/appliance_autonotify/issues) asking for the integration to be supported and attach the file.
+
+Meanwhile, an appliance with a smart plug or other power monitor can be added by its power, see [Power Monitored Appliances](#power-monitored-appliances).
+
 ### Removing
 
 1. In *Settings*, *Devices & services*, open *Appliance Auto Notify* and delete *Automatic discovery* first, so the
@@ -219,6 +225,31 @@ The icon of a notification follows the type of appliance: dishwasher, washer, dr
 - Some integrations, such as Ecovacs, report a robot vacuum docked within a second of setting off and keep to that while it cleans, so being docked that soon is only believed after 3 hours with nothing else heard, which is when one stopped just as it set off is told to be finished
 - An oven still warming up when Home Assistant restarts is still shown as pre-heating, and told of once up to heat, unless it got there while Home Assistant was off. One switched on while Home Assistant was off isn't shown as pre-heating, since there's no knowing whether it has been up to heat, only with its program and temperature
 - An oven with no timer set reports its progress as 100%, so that is what the bar shows once it's up to heat
+
+## Troubleshooting
+
+Appliance Auto Notify logs a warning, starting `APPLIANCES`, whenever something stops a notification being sent. Look in *Settings*, *System*, *Logs*, and search for `APPLIANCES`.
+
+### Appliance not found
+
+See [Appliance Not Found?](#appliance-not-found), and download the diagnostics of *Automatic discovery* to attach to an issue.
+
+### Appliance stuck on *Retrying setup*
+
+An appliance's entry is set up only once its cycle state sensor is there, or a robot vacuum's vacuum entity. Until then the entry shows *Retrying setup*, and the log says `No cycle state entity found` or `No vacuum entity found`. This is normal for a minute or two while Home Assistant starts and the appliance's own integration connects, so it sorts itself out. If it doesn't:
+
+- Check that the appliance's own integration is loaded and its device is online
+- Check that its status sensor, such as *Operation state* or *Current status*, hasn't been disabled. A disabled entity is ignored
+- If the appliance has been removed from its integration and added again, it may now be a new device. Delete the old appliance entry, so the new device is found
+
+### Nothing sent
+
+Notifications go through [Supernotify](https://supernotify.rhizomatics.org.uk) if it's installed, and through the notify entities of the Home Assistant app if not.
+
+- `Nothing to notify for …, choose targets in its settings`: without Supernotify, no *Targets* are chosen and no phone has the Home Assistant app set up for notifications. Install the app on a phone and sign in, or choose notify entities under *Notification targets* in the appliance's settings
+- `No mobile push delivery found for …, Live Activity not updated`: Supernotify has no mobile push delivery, or none left after the *Deliveries* chosen in the appliance's settings, so the Live Activity can't be updated. Add a mobile push delivery to Supernotify, or include it in *Deliveries*
+- `Supernotify notification failed for …`: Supernotify raised an error, which follows in the log. Check its configuration
+- If there's no warning, check that *Notify start* or *Notify end* is on as wanted. With them off, only the Live Activity is updated, silently, and only on phones
 
 ## Known Issues
 
