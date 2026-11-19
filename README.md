@@ -14,7 +14,7 @@ When a dishwasher, washing machine, oven or other appliance starts a cycle, you'
 and time remaining while it runs, and you're told when it finishes.
 
 It works with Bosch, Neff and Siemens appliances connected with the Home Assistant [Home Connect](https://www.home-assistant.io/integrations/home_connect/) integration, robot vacuums using the [Vacuum Integration](https://www.home-assistant.io/integrations/vacuum/) and Samsung washers, dryers and dishwashers through [SmartThings](https://www.home-assistant.io/integrations/smartthings/)
-or [LocalThings](https://github.com/mbillow/localthings), in English only, and LG washers through [LG ThinQ](https://www.home-assistant.io/integrations/lg_thinq/). Support for [Home Connect Local](https://github.com/chris-mc1/homeconnect_local_hass), LG dryers and dishwashers through LG ThinQ, and [Miele](https://www.home-assistant.io/integrations/miele/) is new, see [New Integrations](docs/how_it_works.md#new-integrations). Any other appliance can be added by hand if it has a power monitor, such as a smart plug.
+or [LocalThings](https://github.com/mbillow/localthings), in English only, and LG washers and dryers through [LG ThinQ](https://www.home-assistant.io/integrations/lg_thinq/). Support for [Home Connect Local](https://github.com/chris-mc1/homeconnect_local_hass), LG dishwashers through LG ThinQ, and [Miele](https://www.home-assistant.io/integrations/miele/) is new, see [New Integrations](docs/how_it_works.md#new-integrations). Any other appliance can be added by hand if it has a power monitor, such as a smart plug.
 
 ![Pizza Time](https://appliance-autonotify.rhizomatics.org.uk/assets/images/pizza_time.png)
 
