@@ -8,34 +8,16 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-  release:
-    # edited too, so the zip is rebuilt when a release is moved to a new tag
-    types: [published, edited]
+  # releases are published, with their zip, by release.yml
+
+# Nothing by default; each job grants only what it needs (OpenSSF Scorecard Token-Permissions).
+permissions: {}
 
 jobs:
-  release-zip:
-    # separate from build so HACS can download the zip as soon as possible
-    if: github.event_name == 'release'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-    - uses: actions/checkout@v7.0.1
-    - name: Package release zip
-      run: |
-        cd custom_components/appliance_autonotify
-        zip -r "${{ github.workspace }}/appliance_autonotify.zip" . -x "__pycache__/*" "*/__pycache__/*"
-    - name: Upload release zip asset
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: gh release upload "${{ github.event.release.tag_name }}" appliance_autonotify.zip --clobber
-
   build:
-    # an edited release only needs its zip rebuilt
-    if: github.event.action != 'edited'
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
       pull-requests: read
 
     strategy:
@@ -44,19 +26,19 @@ jobs:
         python-version: ["3.14"]
 
     steps:
-    - uses: actions/checkout@v7.0.1
-    - name: HACS Action
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+    - name: Marketplace Action
       uses: "hacs/action@1ebf01c408f29afcb6406bd431bc98fd8cbb15aa"
       with:
         category: "integration"
-    - name: HACS Hassfest
+    - name: Marketplace Hassfest
       uses: "home-assistant/actions/hassfest@86d4564712fa02543c808e3a693dd04f9d3f8361"
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v7
+      uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install uv
-      uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2
     - name: Install dependencies
       run: uv sync
     - name: Ruff lint
@@ -67,14 +49,52 @@ jobs:
       run: |
         uv run pytest . --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov=custom_components.appliance_autonotify --cov-report=xml --cov-report=html
     - name: Generate badges
-      # the tests of a pull request aren't those of main, and a release has nothing new to show
+      # the tests of a pull request aren't those of main
       if: github.event_name == 'push'
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         uv run genbadge coverage -i coverage.xml -o badges/coverage.svg
         uv run genbadge tests -i junit/test-results-${{ matrix.python-version }}.xml -o badges/tests.svg
+    - name: Upload badges
+      if: github.event_name == 'push'
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: badges
+        path: badges
 
+    - name: Upload pytest test results
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: pytest-results-${{ matrix.python-version }}
+        path: junit/test-results-${{ matrix.python-version }}.xml
+        # Use always() to always run this step to publish test results when there are test failures
+      if: ${{ always() }}
+
+    - name: ProperDocs
+      run:  |
+        uv sync --dev --group docs
+        sudo apt-get install pngquant
+        uv run properdocs build
+    - name: Upload docs site
+      # only main is published, a pull request just proves the docs build
+      if: github.event_name == 'push'
+      uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+      with:
+        path: site
+
+  badges:
+    # pushing to the badges branch is the one write the build needs, so it's kept to this job, run only for main
+    if: github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      with:
+        name: badges
+        path: badges
+    - name: Push badges
+      run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         TEMP_DIR=$(mktemp -d)
@@ -93,26 +113,6 @@ jobs:
           echo "No changes to badges"
         fi
 
-    - name: Upload pytest test results
-      uses: actions/upload-artifact@v7
-      with:
-        name: pytest-results-${{ matrix.python-version }}
-        path: junit/test-results-${{ matrix.python-version }}.xml
-        # Use always() to always run this step to publish test results when there are test failures
-      if: ${{ always() }}
-
-    - name: ProperDocs
-      run:  |
-        uv sync --dev --group docs
-        sudo apt-get install pngquant
-        uv run properdocs build
-    - name: Upload docs site
-      # only main is published, a pull request or release just proves the docs build
-      if: github.event_name == 'push'
-      uses: actions/upload-pages-artifact@v5
-      with:
-        path: site
-
   deploy-docs:
     # Pages is set to deploy from GitHub Actions, so the site goes up as an artifact rather than a gh-pages branch
     if: github.event_name == 'push'
@@ -127,4 +127,4 @@ jobs:
     steps:
     - name: Deploy to GitHub Pages
       id: deployment
-      uses: actions/deploy-pages@v5
+      uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

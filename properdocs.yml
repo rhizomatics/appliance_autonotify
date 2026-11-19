@@ -55,7 +55,7 @@ plugins:
       base_url: https://appliance-autonotify.rhizomatics.org.uk/
       preprocess: docgen/llms_preprocess.py
       markdown_description: >-
-        Appliances AutoNotify is a Home Assistant custom integration (installed via HACS) that
+        Appliances AutoNotify is a Home Assistant custom integration (installed via Marketplace) that
         sends automatic notifications for household appliances, with no automations or YAML: a
         notification when a cycle starts, a Live Activity with progress and time remaining while
         it runs, and a notification when it finishes. Appliances are discovered from the Home
@@ -64,7 +64,8 @@ plugins:
       full_output: llms-full.txt
       sections:
         Start here:
-          - index.md: What it does, requirements, installation, settings, what gets sent, known limits and issues
+          - index.md: What it does, requirements, installation, settings, notifications, known limits and issues
+          - how_it_works.md: What gets sent when, how appliances are found through any integration, new integrations in beta, and the appliance's device
         Optional:
           - changelog.md: Release history
         # developer pages left out - coverage reports are no use to an agent
@@ -93,6 +94,8 @@ extra_javascript:
 hooks:
   # records the site directory for the llmstxt preprocess
   - docgen/llms_preprocess.py
+  # the README's links to other pages, as from the repository root, made right for the home page
+  - docgen/readme_links.py
 
 
 markdown_extensions:

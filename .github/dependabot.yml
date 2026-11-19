@@ -33,8 +33,9 @@ updates:
        # Inherited from Home Assistant / its test harness: follow the platform, don't bump.
     ignore:
       - dependency-name: homeassistant
-      - dependency-name: pytest-homeassistant-custom-component
+      - dependency-name: pytest-homeassistant
       - dependency-name: pytest
+      - dependency-name: pytest-asyncio
       - dependency-name: zeroconf
     groups:
       # Trusted: auto-merged by admin-dependabot-automerge.yml once checks pass.

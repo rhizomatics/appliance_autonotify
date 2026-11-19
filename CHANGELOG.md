@@ -2,8 +2,62 @@
 title: What's New
 ---
 
+# 1.0.0
+## ✨ Enhancements
+- Diagnostics of *Automatic discovery* list the devices that look like appliances but weren't found to be one, with their make, model, integration and their entities' keys, options and states, to attach to an issue asking for their integration to be supported
+  - No names, areas or entity ids, since it's meant to be shared
+- A repair when there's nowhere to send notifications, with no Supernotify, no targets chosen and no phone with the app, which was only logged
+- Error messages translated, in English and Italian
+## 🐛 Fixes
+- An appliance removed from Home Assistant, as when it's removed from its own integration, no longer left retrying setup for good, but raises a repair offering to remove it here too, with its device
+  - Gone away again by itself if the appliance is added back
+  - Its device can also be deleted by hand once the appliance is gone
+## 📝 Other changes
+- Gold on the Home Assistant integration quality scale
+## 📚 Documentation
+- *Appliance Not Found?* in README, on what to send when an appliance isn't discovered
+- *Troubleshooting* in README, for an appliance stuck on *Retrying setup*, and for each warning logged when nothing is sent
+
+# 0.14.3
+## ✨ Enhancements
+- **LG ThinQ** dryers supported, having been seen through whole cycles on 0.14.2 (#27), so set up automatically like any other, with nothing kept of their cycles nor any repair asking how it went
+  - Dishwashers still new, offered as *Discovered*, till one has been tried
+
+# 0.14.2
+## 🐛 Fixes
+- Live Activity countdown and progress kept up to date when an appliance puts its finish back, as an **LG ThinQ** dryer does when the load is still damp (#27)
+  - The countdown no longer stops at 0:00 while the cycle carries on
+  - Progress measured against the longer cycle, rather than stopping short of the end, for any integration where it's worked out from the time
+  - Any integration reporting a finish time or time remaining, with or without progress
+
+# 0.14.1
+## ✨ Enhancements
+- **LG ThinQ** washers supported, having been seen through a whole cycle (#27), so set up automatically like any other, with nothing kept of their cycles nor any repair asking how it went
+  - Dryers and dishwashers still new, offered as *Discovered*, till one of each has been tried
+  - A new integration can be supported for some types of appliance before others
+
 # 0.14.0
-- Maintenance reminders for appliances
+## ✨ Enhancements
+- Maintenance reminders for appliances, optional, cycle based for cleaning and parts replacement
+- **Home Connect Local** appliances discovered, as a new integration (#28)
+  - Preferred to Home Connect where an appliance is on both, as it's on the local network
+  - A countdown from the time remaining, for any integration that reports a duration rather than a finish time
+  - A program reported as a sensor rather than a select, for any integration
+- **LG ThinQ** washers, dryers and dishwashers discovered, as a new integration (#27)
+  - Its one state taken for both the cycle and what it's doing within it
+  - Progress worked out from the time the cycle takes and the time left, for any integration that reports those but no progress
+  - The type of appliance from the device's model, for any integration that names its models for the type
+- **Miele** washers, dryers, dishwashers and ovens discovered, as a new integration
+  - Only appliances with a program phase, since fridges, hoods and hobs have the same status
+  - Progress worked out from the time taken and the time left, for any integration that reports those
+  - *Anti-crease* ends the cycle, as *Wrinkle prevent* does
+  - Robot vacuums show their program phase, such as *Returning*, as their status
+## 📝 Other changes
+- Diagnostics download for each appliance, with its entities as its integration has them
+- Groundwork for more integrations:
+ - An appliance of an integration whose support is new is offered rather than set up automatically, its first cycles are recorded for its diagnostics, and once one has finished a repair asks how it went
+## 📚 Documentation
+- New *How it Works* section with the more technical detail from README
 
 # 0.13.0
 ## ✨ Enhancements
