@@ -8,6 +8,7 @@ title: What's New
   - No names, areas or entity ids, since it's meant to be shared
 ## 📚 Documentation
 - *Appliance Not Found?* in README, on what to send when an appliance isn't discovered
+- *Troubleshooting* in README, for an appliance stuck on *Retrying setup*, and for each warning logged when nothing is sent
 
 # 0.14.3
 ## ✨ Enhancements

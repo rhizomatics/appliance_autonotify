@@ -12,6 +12,7 @@
 # Changelog
 # 2026-11-03: first file. Silver met once docs-removal-instructions is done (same change).
 # 2026-11-08: maintenance, with the integration's first entity (a to-do list) and two actions.
+# 2026-11-19: docs-troubleshooting done (README "Troubleshooting") for 1.0.0.
 
 rules:
   # ==================
@@ -207,12 +208,11 @@ rules:
     comment: README.md "Settings" and docs/how_it_works.md "What Gets Sent".
 
   docs-troubleshooting:
-    status: todo
+    status: done
     comment: |
-      "Known Issues" covers two iPhone symptoms, and "Appliance Not Found?" what to do when an appliance
-      isn't discovered (the automatic discovery diagnostics). Missing: what to do when nothing is sent
-      (the "Nothing to notify" and "No mobile push delivery found" warnings in watcher.py) or
-      an appliance stays not ready ("No cycle state entity found").
+      README.md "Troubleshooting": an appliance not found (with "Appliance Not Found?" and the automatic
+      discovery diagnostics), stuck on Retrying setup ("No cycle state entity found"), and nothing sent
+      (each warning watcher.py logs). "Known Issues" covers two iPhone symptoms.
 
   docs-use-cases:
     status: done

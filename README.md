@@ -226,6 +226,31 @@ The icon of a notification follows the type of appliance: dishwasher, washer, dr
 - An oven still warming up when Home Assistant restarts is still shown as pre-heating, and told of once up to heat, unless it got there while Home Assistant was off. One switched on while Home Assistant was off isn't shown as pre-heating, since there's no knowing whether it has been up to heat, only with its program and temperature
 - An oven with no timer set reports its progress as 100%, so that is what the bar shows once it's up to heat
 
+## Troubleshooting
+
+Appliance Auto Notify logs a warning, starting `APPLIANCES`, whenever something stops a notification being sent. Look in *Settings*, *System*, *Logs*, and search for `APPLIANCES`.
+
+### Appliance not found
+
+See [Appliance Not Found?](#appliance-not-found), and download the diagnostics of *Automatic discovery* to attach to an issue.
+
+### Appliance stuck on *Retrying setup*
+
+An appliance's entry is set up only once its cycle state sensor is there, or a robot vacuum's vacuum entity. Until then the entry shows *Retrying setup*, and the log says `No cycle state entity found` or `No vacuum entity found`. This is normal for a minute or two while Home Assistant starts and the appliance's own integration connects, so it sorts itself out. If it doesn't:
+
+- Check that the appliance's own integration is loaded and its device is online
+- Check that its status sensor, such as *Operation state* or *Current status*, hasn't been disabled. A disabled entity is ignored
+- If the appliance has been removed from its integration and added again, it may now be a new device. Delete the old appliance entry, so the new device is found
+
+### Nothing sent
+
+Notifications go through [Supernotify](https://supernotify.rhizomatics.org.uk) if it's installed, and through the notify entities of the Home Assistant app if not.
+
+- `Nothing to notify for …, choose targets in its settings`: without Supernotify, no *Targets* are chosen and no phone has the Home Assistant app set up for notifications. Install the app on a phone and sign in, or choose notify entities under *Notification targets* in the appliance's settings
+- `No mobile push delivery found for …, Live Activity not updated`: Supernotify has no mobile push delivery, or none left after the *Deliveries* chosen in the appliance's settings, so the Live Activity can't be updated. Add a mobile push delivery to Supernotify, or include it in *Deliveries*
+- `Supernotify notification failed for …`: Supernotify raised an error, which follows in the log. Check its configuration
+- If there's no warning, check that *Notify start* or *Notify end* is on as wanted. With them off, only the Live Activity is updated, silently, and only on phones
+
 ## Known Issues
 
 Both of these have been seen on an iPhone, and neither has a confirmed cause yet.
