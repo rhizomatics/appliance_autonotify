@@ -182,8 +182,8 @@ PROFILES: Final[dict[str, PlatformProfile]] = {
                 **dict.fromkeys(("error", "power_fail"), "error"),
             },
             stage_from_cycle=True,
-            # a washer seen through a whole cycle, its dryer and dishwasher yet to be
-            supported_types=frozenset({"washer"}),
+            # a washer and a dryer seen through whole cycles, its dishwasher yet to be
+            supported_types=frozenset({"washer", "dryer"}),
             issue_url="https://github.com/rhizomatics/appliance_autonotify/issues/27",
         ),
         # Miele, whose status every appliance has, with the same states, so an appliance has a cycle only where it has

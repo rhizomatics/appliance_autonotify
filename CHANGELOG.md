@@ -2,6 +2,11 @@
 title: What's New
 ---
 
+# 0.14.3
+## ✨ Enhancements
+- **LG ThinQ** dryers supported, having been seen through whole cycles on 0.14.2 (#27), so set up automatically like any other, with nothing kept of their cycles nor any repair asking how it went
+  - Dishwashers still new, offered as *Discovered*, till one has been tried
+
 # 0.14.2
 ## 🐛 Fixes
 - Live Activity countdown and progress kept up to date when an appliance puts its finish back, as an **LG ThinQ** dryer does when the load is still damp (#27)
