@@ -9,7 +9,8 @@ title: What's New
 - A repair when there's nowhere to send notifications, with no Supernotify, no targets chosen and no phone with the app, which was only logged
 - Error messages translated, in English and Italian
 - Translated into Chinese (Simplified), Dutch, French, German, Hindi, Polish and Spanish, as well as English and Italian
-  - Settings, repairs, error messages, and the buttons and maintenance messages of notifications
+  - Settings, repairs, error messages, and notifications, with their usual wording, progress, pre-heating, buttons and maintenance messages
+  - In Italian too, so an Italian Home Assistant now says "Lavatrice: ciclo terminato" where it said "Lavatrice is finished", unless the message was changed in the settings
   - A smart plug named for an appliance in the language of Home Assistant, such as *Waschmaschine* or *洗衣机*, is found as one in English is
 ## 🐛 Fixes
 - An appliance removed from Home Assistant, as when it's removed from its own integration, no longer left retrying setup for good, but raises a repair offering to remove it here too, with its device

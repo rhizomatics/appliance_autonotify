@@ -54,9 +54,9 @@ async def test_appliance_removed_from_its_integration_offered_to_be_removed(hass
     entry = await setup_watcher(hass, appliance)
     assert entry.state is ConfigEntryState.LOADED
     # the entry's own device, from when devices were linked, or the appliance's before
-    own = next(iter(dr.async_entries_for_config_entry(dr.async_get(hass), entry.entry_id)), None)
-    own = own or dr.async_get(hass).async_get(appliance.device_id)
-    assert own is not None
+    linked = next(iter(dr.async_entries_for_config_entry(dr.async_get(hass), entry.entry_id)), None)
+    own = linked or dr.async_get(hass).async_get(appliance.device_id)
+    assert isinstance(own, dr.DeviceEntry)
     # not while it's there, since it would only be made again
     assert not await async_remove_config_entry_device(hass, entry, own)
 

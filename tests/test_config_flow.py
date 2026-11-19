@@ -222,6 +222,26 @@ async def test_power_flow(hass: HomeAssistant) -> None:
     assert entry.runtime_data.switch_entity_id is None
 
 
+async def test_settings_text_as_it_comes_in_the_language_of_home_assistant(hass: HomeAssistant) -> None:
+    hass.config.language = "de"
+    hass.states.async_set("sensor.washer_power", "0", {"unit_of_measurement": "W"})
+    power = {"power_entity": "sensor.washer_power", "threshold": 5, "grace_period": 60, "min_duration": 60}
+    entry = MockConfigEntry(domain=DOMAIN, title="Waschmaschine", data={"type": "power"}, options=power)
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    assert suggested(result)["start_message"] == "Waschmaschine gestartet"
+    assert suggested(result)["end_message"] == "Waschmaschine ist fertig"
+    # left as it comes, so not a setting
+    result = await hass.config_entries.options.async_configure(
+        result["flow_id"], {"start": {}, "end": {"end_message": "Waschmaschine ist fertig"}, "notify": {}}
+    )
+    result = await hass.config_entries.options.async_configure(result["flow_id"], power)
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    await hass.async_block_till_done()
+    assert "end_message" not in entry.options
+
+
 def add_power_monitor(
     hass: HomeAssistant,
     name: str,

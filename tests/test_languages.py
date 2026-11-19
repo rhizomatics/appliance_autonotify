@@ -4,6 +4,7 @@ texts kept in code by language"""
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -14,11 +15,13 @@ from custom_components.appliance_autonotify.const import (
     MAINTENANCE_ACTION_TITLES,
     MAINTENANCE_MESSAGES,
     MAINTENANCE_NAMES,
+    NOTIFICATION_TEXTS,
     STUCK_MESSAGES,
 )
 from custom_components.appliance_autonotify.words import async_load_words, name_type
 
 TRANSLATIONS = Path(__file__).parent.parent / "custom_components" / "appliance_autonotify" / "translations"
+PLACEHOLDER = re.compile(r"\{(\w+)\}")
 LANGUAGES = sorted(path.stem for path in TRANSLATIONS.glob("*.json"))
 
 
@@ -56,11 +59,28 @@ def test_texts_in_code_for_every_language() -> None:
     """A table in code for each language with translations, by the language without its script or region, as looked
     up from Home Assistant's"""
     languages = {language.split("-")[0] for language in LANGUAGES}
-    for table in (ACTION_TITLES, MAINTENANCE_ACTION_TITLES, MAINTENANCE_NAMES, MAINTENANCE_MESSAGES, STUCK_MESSAGES):
+    tables = (
+        ACTION_TITLES,
+        MAINTENANCE_ACTION_TITLES,
+        MAINTENANCE_NAMES,
+        MAINTENANCE_MESSAGES,
+        STUCK_MESSAGES,
+        NOTIFICATION_TEXTS,
+    )
+    for table in tables:
         assert set(table) == languages
         for texts in table.values():
             if isinstance(texts, dict):
                 assert set(texts) == set(table["en"])
+
+
+def test_notification_texts_keep_their_placeholders() -> None:
+    for language, texts in NOTIFICATION_TEXTS.items():
+        for key, text in texts.items():
+            assert set(PLACEHOLDER.findall(text)) == set(PLACEHOLDER.findall(NOTIFICATION_TEXTS["en"][key])), (
+                language,
+                key,
+            )
 
 
 def test_maintenance_names_match_the_settings() -> None:
