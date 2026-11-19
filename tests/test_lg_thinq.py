@@ -1,5 +1,6 @@
 """LG washers, dryers and dishwashers through LG ThinQ, whose one state says both whether the cycle is running and what
-it's doing, with how far along it is worked out from the time, in beta till it's been tried with a real appliance"""
+it's doing, with how far along it is worked out from the time, a washer seen to work, a dryer or dishwasher in beta till
+it's been tried with a real appliance"""
 
 from __future__ import annotations
 
@@ -20,6 +21,7 @@ from .test_watcher import ended, pass_time, set_state
 
 WASHER_ID = "c6ee0c7f-1d4a-4b6e-9a51-washer000001"
 DRYER_ID = "c6ee0c7f-1d4a-4b6e-9a51-dryer0000001"
+DISHWASHER_ID = "c6ee0c7f-1d4a-4b6e-9a51-dishwasher01"
 # the states the integration lists for a washer's or dryer's current status, those for any device of the type
 STATES = [
     "add_drain", "cancel", "change_condition", "cooling", "detecting", "drying", "end", "error", "firmware",
@@ -51,6 +53,9 @@ def washer(hass: HomeAssistant) -> dict[str, str]:
 def test_states_as_every_integration_has_them() -> None:
     profile = profile_for("lg_thinq")
     assert profile.beta
+    assert not profile.beta_for("washer")
+    assert not profile.beta_for("dryer")
+    assert profile.beta_for("dishwasher")
     assert profile.issue_url is not None
     assert profile.issue_url.endswith("/issues/27")
     assert profile.stage_from_cycle
@@ -67,15 +72,34 @@ def test_states_as_every_integration_has_them() -> None:
     assert GENERIC.cycle_state("rinsing") == "rinsing"
 
 
-async def test_washer_offered_as_new(hass: HomeAssistant) -> None:
+async def test_washer_set_up_and_dishwasher_offered_as_new(hass: HomeAssistant) -> None:
+    """A washer has been seen to work, so it's set up like any other, while a dishwasher is only offered"""
     laundry = washer(hass)
-    assert [appliance.device_id for appliance in find_appliances(hass)] == [laundry["device_id"]]
+    dishes = thinq_device(hass, DISHWASHER_ID, "Lavastoviglie", "DF425HSS (DEVICE_DISH_WASHER)")
+    assert {appliance.device_id for appliance in find_appliances(hass)} == {laundry["device_id"], dishes["device_id"]}
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
-    assert placeholders(result)["found"] == f"Appliances found:\n\n- Laundry{BETA_FOUND}"
+    found = placeholders(result)["found"]
+    assert "- Laundry\n" in f"{found}\n"
+    assert f"- Lavastoviglie{BETA_FOUND}" in found
     await hass.config_entries.flow.async_configure(result["flow_id"], {"auto_discover": True})
     await hass.async_block_till_done()
     [flow] = hass.config_entries.flow.async_progress_by_handler(DOMAIN)
     assert flow["context"]["source"] == SOURCE_INTEGRATION_DISCOVERY
+    assert flow["context"]["unique_id"] == dishes["device_id"]
+    assert laundry["device_id"] in {entry.data.get("device_id") for entry in hass.config_entries.async_entries(DOMAIN)}
+
+
+async def test_only_a_type_in_beta_is_traced(hass: HomeAssistant) -> None:
+    laundry = washer(hass)
+    dishes = thinq_device(hass, DISHWASHER_ID, "Lavastoviglie", "DF425HSS (DEVICE_DISH_WASHER)")
+    hass.states.async_set(laundry["current_state"], "power_off")
+    hass.states.async_set(dishes["current_state"], "power_off")
+    washer_entry = await setup_appliance(hass, laundry["device_id"])
+    dishwasher_entry = await setup_appliance(hass, dishes["device_id"])
+    assert not washer_entry.runtime_data.beta
+    assert washer_entry.runtime_data.trace is None
+    assert dishwasher_entry.runtime_data.beta
+    assert dishwasher_entry.runtime_data.trace is not None
 
 
 async def test_same_states_of_another_integration_are_no_cycle(hass: HomeAssistant) -> None:
@@ -133,6 +157,43 @@ async def test_washer_cycle(hass: HomeAssistant, freezer) -> None:
     sent = len(calls)
     await set_state(hass, laundry["current_state"], "power_off")
     await pass_time(hass, PROGRESS_TICK)
+    assert len(calls) == sent
+
+
+async def test_dryer_putting_its_finish_back(hass: HomeAssistant, freezer) -> None:
+    """As a real one did, on a bedding cycle: its total kept at the 55 minutes it first said, its finish put back 11
+    minutes at a time as the end came near, for an hour and a half longer"""
+    freezer.move_to(NOW)
+    dryer = thinq_device(hass, DRYER_ID, "Dryer", "BDV_TX_BT_LED_6203 (DEVICE_DRYER)")
+    calls = mock_supernotify(hass)
+    hass.states.async_set(dryer["current_state"], "initial")
+    hass.states.async_set(dryer["total"], "55", {"unit_of_measurement": "min"})
+    hass.states.async_set(dryer["remain"], (NOW + timedelta(minutes=55)).isoformat())
+    await setup_appliance(hass, dryer["device_id"])
+    await set_state(hass, dryer["current_state"], "running")
+
+    freezer.tick(timedelta(minutes=50))
+    await pass_time(hass, PROGRESS_TICK)
+    assert calls[-1].data["extra_data"]["progress"] == 90
+    assert calls[-1].data["extra_data"]["when"] == int((NOW + timedelta(minutes=55)).timestamp())
+
+    # the countdown put right, not left at nought, and the bar back to how far along it now is of the longer cycle
+    sent = len(calls)
+    finish = NOW + timedelta(minutes=66)
+    await set_state(hass, dryer["remain"], finish.isoformat())
+    assert len(calls) == sent + 1
+    extra = calls[-1].data["extra_data"]
+    assert extra["when"] == int(finish.timestamp())
+    assert extra["progress"] == 75
+
+    # and from there climbing again, with time
+    freezer.tick(timedelta(minutes=6))
+    await pass_time(hass, PROGRESS_TICK)
+    assert calls[-1].data["extra_data"]["progress"] == 84
+
+    # a remaining time a minute out either way is no change of mind to tell of
+    sent = len(calls)
+    await set_state(hass, dryer["remain"], (finish + timedelta(minutes=1)).isoformat())
     assert len(calls) == sent
 
 

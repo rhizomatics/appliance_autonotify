@@ -42,6 +42,16 @@ def test_known_integrations_are_supported() -> None:
         assert not profile_for(platform).beta
 
 
+def test_types_seen_to_work_are_out_of_beta() -> None:
+    partly = PlatformProfile("partly", status="beta", supported_types=frozenset({"washer"}))
+    assert partly.beta
+    assert not partly.beta_for("washer")
+    assert partly.beta_for("dryer")
+    assert partly.beta_for(None)
+    assert VENDOR.beta_for("washer")
+    assert not GENERIC.beta_for(None)
+
+
 def test_an_integration_own_names_come_first() -> None:
     assert VENDOR.beta
     # its own name for what LocalThings calls the stage

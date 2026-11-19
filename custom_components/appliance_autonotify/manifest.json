@@ -25,7 +25,7 @@
     "integration_type": "service",
     "iot_class": "calculated",
     "issue_tracker": "https://github.com/rhizomatics/appliance_autonotify/issues",
-    "quality_scale": "silver",
+    "quality_scale": "gold",
     "requirements": [],
-    "version": "0.14.0"
+    "version": "1.0.0"
 }

@@ -79,9 +79,10 @@ from .const import (
     VACUUM_SETTLE,
 )
 from .dashboards import dashboards
-from .discovery import appliance_profile, find_appliances, integration_name, plug_switch
+from .discovery import appliance_beta, appliance_profile, find_appliances, integration_name, plug_switch
 from .platforms import profile_for
 from .supernotify_api import deliveries_by_transport, supernotify_available
+from .words import DATA_WORDS, async_load_words
 
 STEP_POWER = "power"
 STEP_DISCOVERY = "discovery"
@@ -113,8 +114,10 @@ def supernotify_status(hass: HomeAssistant) -> str:
 
 def beta_notice(hass: HomeAssistant, device_id: str | None) -> str:
     """A word that the appliance's integration is yet to be tried on a real appliance, where it is"""
-    profile = appliance_profile(hass, device_id) if device_id else None
-    if profile is None or not profile.beta:
+    if not device_id:
+        return ""
+    profile = appliance_profile(hass, device_id)
+    if not appliance_beta(hass, device_id, profile):
         return ""
     return BETA_NOTICE.format(integration=integration_name(hass, profile.platform))
 
@@ -279,9 +282,12 @@ class AppliancesConfigFlow(ConfigFlow, domain=DOMAIN):
             self._abort_if_unique_id_configured()
             # the appliances themselves are set up as this entry is, each as its own entry to change or disable
             return self.async_create_entry(title=DISCOVERY_TITLE, data={CONF_TYPE: TYPE_DISCOVERY}, options=user_input)
+        if DATA_WORDS not in self.hass.data:
+            # before the integration is first set up, to know the type of an appliance by its model
+            await async_load_words(self.hass)
         configured = self._async_current_ids()
         found = [
-            a.name + (BETA_FOUND if profile_for(a.platform).beta else "")
+            a.name + (BETA_FOUND if appliance_beta(self.hass, a.device_id, profile_for(a.platform)) else "")
             for a in find_appliances(self.hass)
             if a.device_id not in configured
         ]

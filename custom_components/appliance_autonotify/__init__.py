@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from homeassistant.const import CONF_TYPE, EVENT_HOMEASSISTANT_STOP, Platform
 from homeassistant.core import ServiceCall, callback
-from homeassistant.exceptions import ServiceValidationError
+from homeassistant.exceptions import ConfigEntryNotReady, ServiceValidationError
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.storage import Store
 
@@ -29,6 +29,13 @@ from .dashboards import matching_dashboard
 from .device import async_register_device
 from .discovery import async_discover, async_start_discovery
 from .maintenance import DATA_MAINTENANCE, MaintenanceTracker
+from .repairs import (
+    appliance_gone,
+    appliance_registered,
+    async_forget_removed,
+    async_report_removed,
+    async_watch_removals,
+)
 from .trace import TRACE_STORE, TRACE_STORE_VERSION, async_forget_feedback
 from .watcher import ApplianceWatcher, HomeConnectWatcher, PowerWatcher, VacuumWatcher
 from .words import async_load_words
@@ -36,6 +43,7 @@ from .words import async_load_words
 if TYPE_CHECKING:
     from homeassistant.config_entries import ConfigEntry
     from homeassistant.core import HomeAssistant
+    from homeassistant.helpers import device_registry as dr
     from homeassistant.helpers.typing import ConfigType
 
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
@@ -70,6 +78,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, tracker.async_stop)
     _register_services(hass, tracker)
     async_start_discovery(hass)
+    async_watch_removals(hass)
     return True
 
 
@@ -81,15 +90,23 @@ def _register_services(hass: HomeAssistant, tracker: MaintenanceTracker) -> None
         entry_id: str = call.data[ATTR_CONFIG_ENTRY_ID]
         key: str | None = call.data.get(ATTR_ITEM)
         if not tracker.tracked(entry_id):
-            raise ServiceValidationError(f"Maintenance isn't tracked for {entry_id}")
+            raise ServiceValidationError(
+                translation_domain=DOMAIN, translation_key="not_tracked", translation_placeholders={"entry_id": entry_id}
+            )
         if key is not None and tracker.item(entry_id, key) is None:
-            raise ServiceValidationError(f"No maintenance item {key} for {entry_id}")
+            raise ServiceValidationError(
+                translation_domain=DOMAIN,
+                translation_key="no_item",
+                translation_placeholders={"item": key, "entry_id": entry_id},
+            )
         return entry_id, key
 
     async def reset(call: ServiceCall) -> None:
         entry_id, key = tracked(call)
         if call.data[ATTR_CYCLES] and key is not None and (item := tracker.item(entry_id, key)) and item.every is None:
-            raise ServiceValidationError(f"{key} is a part whose life is read, not counted in cycles")
+            raise ServiceValidationError(
+                translation_domain=DOMAIN, translation_key="part_life_read", translation_placeholders={"item": key}
+            )
         if call.data[ATTR_CYCLES]:
             tracker.async_set_cycles(entry_id, key, call.data[ATTR_CYCLES])
         else:
@@ -125,14 +142,22 @@ async def async_setup_entry(hass: HomeAssistant, entry: AppliancesConfigEntry) -
         async_discover(hass)
         await hass.config_entries.async_forward_entry_setups(entry, DISCOVERY_PLATFORMS)
         return True
+    if appliance_registered(hass, entry):
+        async_forget_removed(hass, entry.entry_id)
+    elif entry.data.get(CONF_TYPE) != TYPE_POWER:
+        # removed while Home Assistant was off, so kept retrying only in case it's added back, with a repair to say so
+        async_report_removed(hass, entry)
+        raise ConfigEntryNotReady(
+            translation_domain=DOMAIN, translation_key="appliance_removed", translation_placeholders={"name": entry.title}
+        )
     watchers: dict[str | None, type[ApplianceWatcher]] = {TYPE_POWER: PowerWatcher, TYPE_VACUUM: VacuumWatcher}
     watcher = watchers.get(entry.data.get(CONF_TYPE), HomeConnectWatcher)(hass, entry)
     # a cycle under way before Home Assistant restarted, to carry on with as it starts
     await watcher.async_load()
     watcher.async_start()
     await watcher.async_start_trace()
-    if not watcher.profile.beta:
-        # its integration has since been seen to work, so there's nothing more to ask
+    if not watcher.beta:
+        # its type of appliance has since been seen to work through its integration, so there's nothing more to ask
         async_forget_feedback(hass, entry.entry_id)
     watcher.async_listen_for_actions()
     watcher.async_start_maintenance()
@@ -165,6 +190,15 @@ async def async_remove_entry(hass: HomeAssistant, entry: AppliancesConfigEntry) 
     # and of its first cycles, with the question of how they went
     await Store(hass, TRACE_STORE_VERSION, TRACE_STORE.format(entry_id=entry.entry_id)).async_remove()
     async_forget_feedback(hass, entry.entry_id)
+    async_forget_removed(hass, entry.entry_id)
     # what was counted goes with the appliance
     if (tracker := hass.data.get(DATA_MAINTENANCE)) is not None:
         tracker.async_forget(entry.entry_id)
+
+
+async def async_remove_config_entry_device(
+    hass: HomeAssistant, entry: AppliancesConfigEntry, device_entry: dr.DeviceEntry
+) -> bool:
+    """An appliance's device can be deleted by hand once the appliance is gone from Home Assistant, and not before,
+    since it would only be made again"""
+    return appliance_gone(hass, entry)

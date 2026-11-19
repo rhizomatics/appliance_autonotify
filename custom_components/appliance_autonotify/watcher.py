@@ -89,6 +89,7 @@ from .const import (
     ENTITY_DOMAINS,
     FAST_PREHEAT_KEY,
     FAST_PREHEAT_PHASE,
+    FINISH_MOVED,
     FINISH_TIME_KEY,
     LIVE_DEFAULTS,
     LIVE_DETAIL_PROGRAM,
@@ -162,9 +163,10 @@ from .const import (
     VACUUM_STATUS_KEYS,
 )
 from .dashboards import dashboard_url
-from .discovery import companions, cycle_entities, integration_name, is_cycle_entity, role_key
+from .discovery import companions, cycle_entities, device_type, integration_name, is_cycle_entity, role_key
 from .maintenance import DATA_MAINTENANCE, MaintenanceItem, MaintenanceTracker, maintenance_items, translated
 from .platforms import GENERIC, PlatformProfile, profile_for
+from .repairs import async_forget_no_targets, async_report_no_targets
 from .supernotify_api import deliveries_by_transport, supernotify_available
 from .trace import CycleTrace, async_ask_feedback
 from .words import name_type
@@ -234,6 +236,8 @@ class ApplianceWatcher:
         self.running: bool = False
         # the progress last sent, rounded down to the step it was sent for
         self.last_progress_mark: int = 0
+        # the finish last sent to the Live Activity, which the appliance may put back as it goes, as a dryer does
+        self.last_finish: datetime | None = None
         # one notification at a time, so a progress update can't overtake the end and reopen the Live Activity
         self._sending: asyncio.Lock = asyncio.Lock()
         self.reminder: float = entry.options.get(CONF_REMINDER, 0)
@@ -336,9 +340,15 @@ class ApplianceWatcher:
     def async_start(self) -> None:
         raise NotImplementedError
 
+    @property
+    def beta(self) -> bool:
+        """Whether its type of appliance is yet to be seen to work through its integration"""
+        return self.profile.beta_for(self.appliance_type)
+
     async def async_start_trace(self) -> None:
-        """Keep what an appliance of an integration in beta does through its first cycles"""
-        if not self.profile.beta:
+        """Keep what an appliance of a type yet to be seen to work through its integration does through its first
+        cycles"""
+        if not self.beta:
             return
         trace = CycleTrace(self.hass, self.entry.entry_id)
         await trace.async_load()
@@ -422,18 +432,29 @@ class ApplianceWatcher:
     async def _progress_tick(self, now: datetime) -> None:
         await self._progress_now(Context())
 
+    def _finish_moved(self) -> bool:
+        """Whether the appliance has put its finish back or forward since the Live Activity was told it, which would
+        otherwise count down to a time gone by, a finish only now known coming soon enough with what's next to tell"""
+        finish_time = self._finish_time()
+        if finish_time is None or self.last_finish is None:
+            return False
+        return abs((finish_time - self.last_finish).total_seconds()) >= FINISH_MOVED
+
     async def _progress_now(self, context: Context) -> None:
-        progress = self._progress()
-        if not self.running or progress is None:
+        if not self.running:
             return
-        mark = self._mark(progress)
-        if mark <= self.last_progress_mark:
+        progress = self._progress()
+        mark = None if progress is None else self._mark(progress)
+        moved = self._finish_moved()
+        if not moved and (mark is None or mark <= self.last_progress_mark):
             return
         # the first reading only fills in the Live Activity, coming straight after the start notification, as do
-        # the steps between those notified and the smaller ones towards the end
+        # the steps between those notified and the smaller ones towards the end, and a finish put back, which may
+        # take the bar back with it, to climb again from there
         step = PROGRESS_NOTIFY_STEP
-        ordinary = self.notify_progress and mark // step > max(self.last_progress_mark, 0) // step
-        self.last_progress_mark = mark
+        ordinary = mark is not None and self.notify_progress and mark // step > max(self.last_progress_mark, 0) // step
+        if mark is not None:
+            self.last_progress_mark = mark
         live = supernotify_available(self.hass)
         if not live and not ordinary:
             return
@@ -441,7 +462,11 @@ class ApplianceWatcher:
             if not self.running:
                 # the cycle ended while this waited its turn
                 return
-            message = self._progress_message(progress)
+            message = (
+                self._progress_message(progress)
+                if progress is not None
+                else self._text(CONF_START_MESSAGE, DEFAULT_START_MESSAGE)
+            )
             if live and not ordinary:
                 # the bar already shows how far along it is, so there's room to say what it's doing
                 message = self._phase() or message
@@ -467,7 +492,9 @@ class ApplianceWatcher:
         if not supernotify_available(self.hass):
             if ordinary:
                 await self._send_message(message, title, context)
-        elif ordinary:
+            return
+        self.last_finish = self._finish_time()
+        if ordinary:
             # everywhere, opening or updating the Live Activity on phones as it goes
             await self._supernotify(
                 message, title, context, resend=resend, extra_data=self._live_data(), actions=self._tap_actions()
@@ -805,10 +832,15 @@ class ApplianceWatcher:
         finish_time = self._finish_time()
         if finish_time is None:
             return None
-        left = (finish_time - dt_util.utcnow()).total_seconds()
+        now = dt_util.utcnow()
+        left = (finish_time - now).total_seconds()
         total = self._seconds(TOTAL_TIME_KEY)
         if total is None and (elapsed := self._seconds(ELAPSED_TIME_KEY)) is not None:
             total = elapsed + max(left, 0)
+        elif total is not None and self.started_at is not None:
+            # the time it said it would take, unless it's since put its finish back and will take longer, as a dryer
+            # does that finds its load still damp, and keeps the total it first said
+            total = max(total, (now - self.started_at).total_seconds() + max(left, 0))
         if not total or total <= 0:
             return None
         return int(min(max(100 * (1 - left / total), 0), 100))
@@ -913,7 +945,9 @@ class ApplianceWatcher:
         ]
         if not targets:
             _LOGGER.warning("APPLIANCES Nothing to notify for %s, choose targets in its settings", self.name)
+            async_report_no_targets(self.hass, self.name)
             return
+        async_forget_no_targets(self.hass)
         try:
             await self.hass.services.async_call(
                 "notify",
@@ -949,22 +983,19 @@ class HomeConnectWatcher(ApplianceWatcher):
         device = dr.async_get(self.hass).async_get(device_id)
         if device is not None:
             self.name = device.name_by_user or device.name or self.name
-        programs: list[str] = []
-        translation_keys: list[str] = []
         entity_registry = er.async_get(self.hass)
         for entity in er.async_entries_for_device(entity_registry, device_id):
             key = role_key(entity)
             if key is None or entity.disabled:
                 continue
-            translation_keys.append(entity.translation_key or "")
             if is_cycle_entity(entity):
                 self.cycle_entity_id = entity.entity_id
             elif entity.domain in ENTITY_DOMAINS.get(key, ()):
                 self.entity_ids[key] = entity.entity_id
-                if key in PROGRAM_KEYS:
-                    programs.extend((entity.capabilities or {}).get("options") or [])
         if self.cycle_entity_id is None:
-            raise ConfigEntryNotReady(f"No cycle state entity found for {self.name}")
+            raise ConfigEntryNotReady(
+                translation_domain=DOMAIN, translation_key="no_cycle_entity", translation_placeholders={"name": self.name}
+            )
         # the same appliance through another integration, heard from only while this one can't be
         cycles = cycle_entities(self.hass)
         for companion in companions(self.hass, device_id, cycles):
@@ -973,8 +1004,6 @@ class HomeConnectWatcher(ApplianceWatcher):
                 key = role_key(entity)
                 if key is not None and not entity.disabled and entity.domain in ENTITY_DOMAINS.get(key, ()):
                     self.fallback_ids.setdefault(key, entity.entity_id)
-        # the type of appliance isn't kept anywhere to be read, but its programs are named for it, or failing that,
-        # for an integration with several types, its entities
         cycle = entity_registry.async_get(self.cycle_entity_id)
         self.profile = profile_for(cycle.platform if cycle else None)
         for entity_id in (self.cycle_entity_id, self.fallback_cycle_entity_id):
@@ -982,11 +1011,8 @@ class HomeConnectWatcher(ApplianceWatcher):
                 self._cycle_profiles[entity_id] = profile_for(registered.platform)
         if self.profile.stage_from_cycle:
             self.entity_ids.setdefault(STAGE_KEY, self.cycle_entity_id)
-        # or failing that its model, as an integration names it for its type
-        model = device.model if isinstance(device, dr.DeviceEntry) and device.model else ""
-        appliance_type = self.profile.appliance_type(programs, translation_keys) or name_type(
-            self.hass, model.replace("_", " ")
-        )
+        # the type of appliance isn't kept anywhere to be read, but its programs, entities or model are named for it
+        appliance_type = device_type(self.hass, device_id, self.profile)
         self.appliance_type = appliance_type or name_type(self.hass, self.name)
         self.icon = TYPE_ICONS.get(appliance_type or "", self._name_icon())
         # the one phase there is to know of is an oven warming up, Home Connect reporting none for anything else
@@ -1016,7 +1042,8 @@ class HomeConnectWatcher(ApplianceWatcher):
         self.entry.async_on_unload(self._keep_running)
         self.entry.async_on_unload(self._forget_preheated)
         for keys, listener in (
-            ((PROGRESS_KEY,), self._progress_changed),
+            # and its finish, which an appliance may put back, as a dryer does, with no change of its progress
+            ((PROGRESS_KEY, FINISH_TIME_KEY, REMAINING_TIME_KEY), self._progress_changed),
             ((STAGE_KEY,), self._stage_changed),
             ((CAVITY_TEMPERATURE_KEY, TARGET_TEMPERATURE_KEY), self._temperature_changed),
             (PREHEAT_FINISHED_KEYS, self._preheat_finished),
@@ -1480,7 +1507,9 @@ class VacuumWatcher(ApplianceWatcher):
             None,
         )
         if self.cycle_entity_id is None:
-            raise ConfigEntryNotReady(f"No vacuum entity found for {self.name}")
+            raise ConfigEntryNotReady(
+                translation_domain=DOMAIN, translation_key="no_vacuum_entity", translation_placeholders={"name": self.name}
+            )
         vacuum = er.async_get(self.hass).async_get(self.cycle_entity_id)
         self.profile = profile_for(vacuum.platform if vacuum is not None else None)
         self.appliance_type = "cleaning_robot"

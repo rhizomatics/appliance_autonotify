@@ -24,4 +24,14 @@ else:
 # only there once a device belongs to a single config entry
 LINKED_DEVICES: bool = hasattr(dr.DeviceRegistry, "async_get_device_by_identifier")
 
-__all__ = ["LINKED_DEVICES", "vol"]
+
+def all_devices(registry: dr.DeviceRegistry) -> list[dr.DeviceEntry]:
+    """Every device, which iterating the registry's devices gives in later releases, where before it gave their ids, the
+    mapping now deprecated"""
+    return [
+        device if isinstance(device, dr.DeviceEntry) else registry.devices[device]  # type: ignore[index,unused-ignore]
+        for device in registry.devices
+    ]
+
+
+__all__ = ["LINKED_DEVICES", "all_devices", "vol"]

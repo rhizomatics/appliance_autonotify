@@ -12,7 +12,6 @@ dependencies = [
 dev = [
     "pytest",
     "pytest-cov",
-    "pytest-asyncio",
     "pytest-homeassistant>=2026.11.0",
     "ruff",
     "codespell",
@@ -47,7 +46,7 @@ docs=[
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-# the version Home Assistant and HACS read is the only one kept
+# the version Home Assistant and Marketplace read is the only one kept
 [tool.hatch.version]
 path = "custom_components/appliance_autonotify/manifest.json"
 pattern = '"version": "(?P<version>[^"]+)"'

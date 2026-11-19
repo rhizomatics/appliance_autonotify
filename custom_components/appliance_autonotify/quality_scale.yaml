@@ -12,6 +12,8 @@
 # Changelog
 # 2026-11-03: first file. Silver met once docs-removal-instructions is done (same change).
 # 2026-11-08: maintenance, with the integration's first entity (a to-do list) and two actions.
+# 2026-11-19: docs-troubleshooting done (README "Troubleshooting") for 1.0.0.
+# 2026-11-19: exception-translations, repair-issues and stale-devices done, so Gold is met, for 1.0.0.
 
 rules:
   # ==================
@@ -28,7 +30,7 @@ rules:
 
   brands:
     status: done
-    comment: Icons and logos in custom_components/appliance_autonotify/brand/, checked by the HACS action in CI.
+    comment: Icons and logos in custom_components/appliance_autonotify/brand/, checked by the Marketplace action in CI.
 
   common-modules:
     status: done
@@ -172,7 +174,9 @@ rules:
     comment: |
       diagnostics.py: the entry (notify targets redacted), the integration's profile and status, the
       watcher's entities, every entity of the appliance's devices with its role, options and state,
-      and the trace of its first cycles where its integration is in beta (trace.py).
+      and the trace of its first cycles where its integration is in beta (trace.py). The automatic discovery
+      entry's lists the devices that look like appliances but weren't found to be, with no names or entity ids,
+      for a request to support their integration.
 
   discovery:
     status: done
@@ -205,11 +209,11 @@ rules:
     comment: README.md "Settings" and docs/how_it_works.md "What Gets Sent".
 
   docs-troubleshooting:
-    status: todo
+    status: done
     comment: |
-      "Known Issues" covers two iPhone symptoms. Missing: what to do when nothing is sent
-      (the "Nothing to notify" and "No mobile push delivery found" warnings in watcher.py) or
-      an appliance stays not ready ("No cycle state entity found").
+      README.md "Troubleshooting": an appliance not found (with "Appliance Not Found?" and the automatic
+      discovery diagnostics), stuck on Retrying setup ("No cycle state entity found"), and nothing sent
+      (each warning watcher.py logs). "Known Issues" covers two iPhone symptoms.
 
   docs-use-cases:
     status: done
@@ -236,10 +240,10 @@ rules:
     comment: "The to-do list is named through translations (entity.todo.maintenance)."
 
   exception-translations:
-    status: todo
+    status: done
     comment: |
-      ConfigEntryNotReady messages in watcher.py ("No cycle state entity found",
-      "No vacuum entity found") are literal strings; translations/en.json has no "exceptions".
+      Every ServiceValidationError (__init__.py maintenance actions) and ConfigEntryNotReady (__init__.py,
+      watcher.py) is raised with translation_domain and translation_key, in "exceptions" of en.json and it.json.
 
   icon-translations:
     status: done
@@ -252,17 +256,19 @@ rules:
       change, including a power monitored appliance's sensor, is in the options flow.
 
   repair-issues:
-    status: todo
+    status: done
     comment: |
-      One so far: beta_feedback (trace.py), asking how the first cycle went of an appliance whose
-      integration is in beta. Candidates: no notify targets and no Supernotify (watcher.py logs
-      "Nothing to notify"), and the appliance's device or power sensor removed. Both are only logged today.
+      beta_feedback (trace.py), asking how the first cycle went of an appliance whose integration is in
+      beta; appliance_removed (repairs.py), fixable, removing the entry of an appliance whose device or
+      power sensor is gone; no_targets (repairs.py), with nowhere to send notifications, cleared once one is sent.
 
   stale-devices:
-    status: todo
+    status: done
     comment: |
-      Not verified: what happens to an entry and its device when the appliance's own device or
-      power sensor is removed from Home Assistant.
+      repairs.py follows device and entity registry removals: an appliance whose device or power sensor
+      is removed, or was while Home Assistant was off, raises appliance_removed, whose fix removes the
+      entry and its device; restored, the repair clears and it's watched again. async_remove_config_entry_device
+      (__init__.py) lets the device be deleted by hand once the appliance is gone.
 
   # ==================
   # PLATINUM TIER

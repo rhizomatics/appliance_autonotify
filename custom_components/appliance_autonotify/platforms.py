@@ -49,12 +49,19 @@ class PlatformProfile:
     # what else an appliance must have for its cycle state to be one, for an integration that gives every device the
     # same cycle state, a fridge's as much as a washer's
     cycle_needs: tuple[str, ...] = ()
+    # the types of appliance seen to work, for one in beta, its others still yet to be tried
+    supported_types: frozenset[str] = frozenset()
     # where to tell of how it went, for one in beta
     issue_url: str | None = None
 
     @property
     def beta(self) -> bool:
+        """Whether the integration is in beta, though some types of appliance through it may have been seen to work"""
         return self.status == STATUS_BETA
+
+    def beta_for(self, appliance_type: str | None) -> bool:
+        """Whether an appliance of this type, through this integration, is yet to be seen to work"""
+        return self.status == STATUS_BETA and appliance_type not in self.supported_types
 
     def role_key(self, translation_key: str | None) -> str | None:
         """What an entity does, as the translation key Home Connect gives an entity that does the same"""
@@ -175,6 +182,8 @@ PROFILES: Final[dict[str, PlatformProfile]] = {
                 **dict.fromkeys(("error", "power_fail"), "error"),
             },
             stage_from_cycle=True,
+            # a washer and a dryer seen through whole cycles, its dishwasher yet to be
+            supported_types=frozenset({"washer", "dryer"}),
             issue_url="https://github.com/rhizomatics/appliance_autonotify/issues/27",
         ),
         # Miele, whose status every appliance has, with the same states, so an appliance has a cycle only where it has

@@ -236,6 +236,41 @@
         "beta_feedback": {
             "title": "How did {name} do?",
             "description": "{name} comes through {integration}, whose support in Appliance Auto Notify is new and was written without a real appliance to try it on. Its first cycle is over: did the start and end notifications, progress and time left come when they should?\n\nWhether it went well or not, please say so with *Learn more*, and attach the diagnostics of {name}, downloaded from its entry under *Appliance Auto Notify* in *Devices & services*. They hold what the appliance reported through its first cycles, which is how support gets right. Ignore this once done."
+        },
+        "appliance_removed": {
+            "title": "{name} has been removed",
+            "fix_flow": {
+                "step": {
+                    "confirm": {
+                        "title": "Remove {name}?",
+                        "description": "{name} is no longer in Home Assistant, as when it's removed from its own integration, so there's nothing left to watch. Remove it from Appliance Auto Notify too, with its device, the cycle kept through restarts and its maintenance counts.\n\nIf it's coming back, such as after re-adding its integration, ignore this instead: it's watched again once it's back, and this goes away by itself."
+                    }
+                }
+            }
+        },
+        "no_targets": {
+            "title": "Nowhere to send notifications",
+            "description": "{name} had a notification to send, but there's nowhere to send it: Supernotify isn't installed, no *Targets* are chosen in the appliance's settings, and no phone has the Home Assistant app set up for notifications.\n\nInstall the app on a phone and sign in, or choose notify entities under *Notification targets* in the appliance's settings. This goes away once a notification is sent."
+        }
+    },
+    "exceptions": {
+        "not_tracked": {
+            "message": "Maintenance isn't tracked for {entry_id}"
+        },
+        "no_item": {
+            "message": "No maintenance item {item} for {entry_id}"
+        },
+        "part_life_read": {
+            "message": "{item} is a part whose life is read, not counted in cycles"
+        },
+        "no_cycle_entity": {
+            "message": "No cycle state entity found for {name}"
+        },
+        "no_vacuum_entity": {
+            "message": "No vacuum entity found for {name}"
+        },
+        "appliance_removed": {
+            "message": "{name} has been removed from Home Assistant"
         }
     }
 }
