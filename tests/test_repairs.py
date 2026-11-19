@@ -14,6 +14,7 @@ from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers import issue_registry as ir
 
 from custom_components.appliance_autonotify import async_remove_config_entry_device
+from custom_components.appliance_autonotify.compat import LINKED_DEVICES
 from custom_components.appliance_autonotify.const import DOMAIN
 from custom_components.appliance_autonotify.repairs import (
     NO_TARGETS_ISSUE,
@@ -52,7 +53,10 @@ async def test_appliance_removed_from_its_integration_offered_to_be_removed(hass
     hass.states.async_set(appliance.cycle, "inactive")
     entry = await setup_watcher(hass, appliance)
     assert entry.state is ConfigEntryState.LOADED
-    [own] = dr.async_entries_for_config_entry(dr.async_get(hass), entry.entry_id)
+    # the entry's own device, from when devices were linked, or the appliance's before
+    own = next(iter(dr.async_entries_for_config_entry(dr.async_get(hass), entry.entry_id)), None)
+    own = own or dr.async_get(hass).async_get(appliance.device_id)
+    assert own is not None
     # not while it's there, since it would only be made again
     assert not await async_remove_config_entry_device(hass, entry, own)
 
@@ -70,7 +74,8 @@ async def test_appliance_removed_from_its_integration_offered_to_be_removed(hass
     assert hass.config_entries.async_get_entry(entry.entry_id) is None
     assert issue(hass, removed_issue_id(entry.entry_id)) is None
     # its device with it
-    assert dr.async_get(hass).async_get(own.id) is None
+    if LINKED_DEVICES:
+        assert dr.async_get(hass).async_get(own.id) is None
 
 
 async def test_appliance_back_once_its_integration_restores_it(hass: HomeAssistant) -> None:
@@ -80,7 +85,8 @@ async def test_appliance_back_once_its_integration_restores_it(hass: HomeAssista
     device_registry = dr.async_get(hass)
     device = device_registry.async_get(appliance.device_id)
     assert device is not None
-    source = device.config_entry_id
+    # one entry to a device from when devices were linked, any number before
+    source = device.config_entry_id if LINKED_DEVICES else next(iter(device.config_entries))
 
     device_registry.async_remove_device(appliance.device_id)
     await hass.async_block_till_done()
@@ -90,6 +96,12 @@ async def test_appliance_back_once_its_integration_restores_it(hass: HomeAssista
     restored = device_registry.async_get_or_create(config_entry_id=source, identifiers=device.identifiers)
     assert restored.id == appliance.device_id
     await hass.async_block_till_done()
+    if LINKED_DEVICES:
+        # told of as it's restored
+        assert issue(hass, removed_issue_id(entry.entry_id)) is None
+    else:
+        # restored with nothing said of it before, so found when setup is next retried
+        await hass.config_entries.async_reload(entry.entry_id)
     assert issue(hass, removed_issue_id(entry.entry_id)) is None
 
 
