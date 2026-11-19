@@ -13,6 +13,7 @@
 # 2026-11-03: first file. Silver met once docs-removal-instructions is done (same change).
 # 2026-11-08: maintenance, with the integration's first entity (a to-do list) and two actions.
 # 2026-11-19: docs-troubleshooting done (README "Troubleshooting") for 1.0.0.
+# 2026-11-19: exception-translations, repair-issues and stale-devices done, so Gold is met, for 1.0.0.
 
 rules:
   # ==================
@@ -239,10 +240,10 @@ rules:
     comment: "The to-do list is named through translations (entity.todo.maintenance)."
 
   exception-translations:
-    status: todo
+    status: done
     comment: |
-      ConfigEntryNotReady messages in watcher.py ("No cycle state entity found",
-      "No vacuum entity found") are literal strings; translations/en.json has no "exceptions".
+      Every ServiceValidationError (__init__.py maintenance actions) and ConfigEntryNotReady (__init__.py,
+      watcher.py) is raised with translation_domain and translation_key, in "exceptions" of en.json and it.json.
 
   icon-translations:
     status: done
@@ -255,17 +256,19 @@ rules:
       change, including a power monitored appliance's sensor, is in the options flow.
 
   repair-issues:
-    status: todo
+    status: done
     comment: |
-      One so far: beta_feedback (trace.py), asking how the first cycle went of an appliance whose
-      integration is in beta. Candidates: no notify targets and no Supernotify (watcher.py logs
-      "Nothing to notify"), and the appliance's device or power sensor removed. Both are only logged today.
+      beta_feedback (trace.py), asking how the first cycle went of an appliance whose integration is in
+      beta; appliance_removed (repairs.py), fixable, removing the entry of an appliance whose device or
+      power sensor is gone; no_targets (repairs.py), with nowhere to send notifications, cleared once one is sent.
 
   stale-devices:
-    status: todo
+    status: done
     comment: |
-      Not verified: what happens to an entry and its device when the appliance's own device or
-      power sensor is removed from Home Assistant.
+      repairs.py follows device and entity registry removals: an appliance whose device or power sensor
+      is removed, or was while Home Assistant was off, raises appliance_removed, whose fix removes the
+      entry and its device; restored, the repair clears and it's watched again. async_remove_config_entry_device
+      (__init__.py) lets the device be deleted by hand once the appliance is gone.
 
   # ==================
   # PLATINUM TIER
