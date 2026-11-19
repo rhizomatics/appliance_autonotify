@@ -240,13 +240,13 @@ An appliance's entry is set up only once its cycle state sensor is there, or a r
 
 - Check that the appliance's own integration is loaded and its device is online
 - Check that its status sensor, such as *Operation state* or *Current status*, hasn't been disabled. A disabled entity is ignored
-- If the appliance has been removed from its integration and added again, it may now be a new device. Delete the old appliance entry, so the new device is found
+- If the appliance has been removed from its integration, a repair in *Settings*, *System*, *Repairs* offers to remove it here too. If it's been added again as a new device, remove the old one, so the new device is found
 
 ### Nothing sent
 
 Notifications go through [Supernotify](https://supernotify.rhizomatics.org.uk) if it's installed, and through the notify entities of the Home Assistant app if not.
 
-- `Nothing to notify for …, choose targets in its settings`: without Supernotify, no *Targets* are chosen and no phone has the Home Assistant app set up for notifications. Install the app on a phone and sign in, or choose notify entities under *Notification targets* in the appliance's settings
+- `Nothing to notify for …, choose targets in its settings`, also raised as a repair: without Supernotify, no *Targets* are chosen and no phone has the Home Assistant app set up for notifications. Install the app on a phone and sign in, or choose notify entities under *Notification targets* in the appliance's settings
 - `No mobile push delivery found for …, Live Activity not updated`: Supernotify has no mobile push delivery, or none left after the *Deliveries* chosen in the appliance's settings, so the Live Activity can't be updated. Add a mobile push delivery to Supernotify, or include it in *Deliveries*
 - `Supernotify notification failed for …`: Supernotify raised an error, which follows in the log. Check its configuration
 - If there's no warning, check that *Notify start* or *Notify end* is on as wanted. With them off, only the Live Activity is updated, silently, and only on phones

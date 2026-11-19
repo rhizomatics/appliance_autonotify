@@ -166,6 +166,7 @@ from .dashboards import dashboard_url
 from .discovery import companions, cycle_entities, device_type, integration_name, is_cycle_entity, role_key
 from .maintenance import DATA_MAINTENANCE, MaintenanceItem, MaintenanceTracker, maintenance_items, translated
 from .platforms import GENERIC, PlatformProfile, profile_for
+from .repairs import async_forget_no_targets, async_report_no_targets
 from .supernotify_api import deliveries_by_transport, supernotify_available
 from .trace import CycleTrace, async_ask_feedback
 from .words import name_type
@@ -944,7 +945,9 @@ class ApplianceWatcher:
         ]
         if not targets:
             _LOGGER.warning("APPLIANCES Nothing to notify for %s, choose targets in its settings", self.name)
+            async_report_no_targets(self.hass, self.name)
             return
+        async_forget_no_targets(self.hass)
         try:
             await self.hass.services.async_call(
                 "notify",
@@ -990,7 +993,9 @@ class HomeConnectWatcher(ApplianceWatcher):
             elif entity.domain in ENTITY_DOMAINS.get(key, ()):
                 self.entity_ids[key] = entity.entity_id
         if self.cycle_entity_id is None:
-            raise ConfigEntryNotReady(f"No cycle state entity found for {self.name}")
+            raise ConfigEntryNotReady(
+                translation_domain=DOMAIN, translation_key="no_cycle_entity", translation_placeholders={"name": self.name}
+            )
         # the same appliance through another integration, heard from only while this one can't be
         cycles = cycle_entities(self.hass)
         for companion in companions(self.hass, device_id, cycles):
@@ -1502,7 +1507,9 @@ class VacuumWatcher(ApplianceWatcher):
             None,
         )
         if self.cycle_entity_id is None:
-            raise ConfigEntryNotReady(f"No vacuum entity found for {self.name}")
+            raise ConfigEntryNotReady(
+                translation_domain=DOMAIN, translation_key="no_vacuum_entity", translation_placeholders={"name": self.name}
+            )
         vacuum = er.async_get(self.hass).async_get(self.cycle_entity_id)
         self.profile = profile_for(vacuum.platform if vacuum is not None else None)
         self.appliance_type = "cleaning_robot"
