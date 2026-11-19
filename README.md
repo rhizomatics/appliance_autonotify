@@ -91,7 +91,7 @@ An appliance with no supported integration can be added if a sensor measures the
 1. On the integration's page, choose *Add service*
 2. Give the appliance a name, and choose its power sensor
 
-A power monitor named for a washing machine, dryer, dishwasher or oven, in English or in the language of Home Assistant, such as a smart plug called *Washing machine* or *Lavatrice*, is found by itself and offered as *Discovered*, with its sensor and plug already filled in. It's never set up without asking, even with *Set up appliances automatically* on, since a name is only a guess, and the threshold is worth checking first. Estimated or derived power sensors, such as Powercalc's, are left out.
+A power monitor named for a washing machine, dryer, dishwasher or oven, in English or in the language of Home Assistant, such as a smart plug called *Washing machine*, *Waschmaschine* or *Lavatrice*, is found by itself and offered as *Discovered*, with its sensor and plug already filled in. It's never set up without asking, even with *Set up appliances automatically* on, since a name is only a guess, and the threshold is worth checking first. Estimated or derived power sensors, such as Powercalc's, are left out.
 
 | Setting         | Default    | What it does                                                                              |
 | --------------- | ---------- | ----------------------------------------------------------------------------------------- |
@@ -145,7 +145,7 @@ Nothing is polled: notifications go out as the appliance's own entities change. 
 
 ### Buttons on the End Notification
 
-With Supernotify, the end notification has buttons, in the language of Home Assistant where there's a translation (English and Italian so far):
+With Supernotify, the end notification has buttons, in the language of Home Assistant where there's a translation (English, Chinese, Dutch, French, German, Hindi, Italian, Polish and Spanish):
 
 | Button         | What it does                                                                                 |
 | -------------- | -------------------------------------------------------------------------------------------- |

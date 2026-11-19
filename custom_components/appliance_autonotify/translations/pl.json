@@ -1,0 +1,276 @@
+{
+    "config": {
+        "flow_title": "{name}",
+        "step": {
+            "user": {
+                "title": "Powiadomienia z urządzeń AGD",
+                "description": "{supernotify}\n\n{found}\n\nUrządzenia Home Connect (Bosch, Siemens, Neff) są wykrywane automatycznie. Miernik mocy nazwany jak pralka, suszarka, zmywarka lub piekarnik, na przykład inteligentne gniazdko o nazwie „Pralka”, jest proponowany jako *Wykryte*, aby przed dodaniem sprawdzić próg. Każde inne urządzenie podłączone do miernika mocy można skonfigurować ręcznie po zakończeniu instalacji.",
+                "data": {
+                    "auto_discover": "Konfiguruj urządzenia automatycznie"
+                },
+                "data_description": {
+                    "auto_discover": "Wyłącz, aby każde znalezione urządzenie było proponowane, i samodzielnie wybieraj, które dodać"
+                }
+            },
+            "power": {
+                "title": "Urządzenie z pomiarem mocy",
+                "description": "Dla każdego urządzenia podłączonego do inteligentnego gniazdka lub innego miernika mocy. Startuje, gdy jego moc przekroczy próg, i kończy się, gdy przez czas karencji pozostaje na progu lub poniżej.",
+                "data": {
+                    "name": "Nazwa urządzenia",
+                    "power_entity": "Czujnik mocy",
+                    "threshold": "Próg mocy",
+                    "grace_period": "Czas karencji",
+                    "min_duration": "Minimalny czas pracy",
+                    "switch_entity": "Inteligentne gniazdko",
+                    "switch_off_button": "Przycisk Wyłącz"
+                },
+                "data_description": {
+                    "name": "Używana w powiadomieniach i do wyboru ikony",
+                    "power_entity": "Czujnik mierzący moc pobieraną przez urządzenie",
+                    "threshold": "Urządzenie pracuje, dopóki pobiera więcej niż ta wartość",
+                    "grace_period": "Jak długo moc musi pozostać na progu lub poniżej, zanim cykl się zakończy, aby krótkie spadki były ignorowane",
+                    "min_duration": "Jak długo moc musi być powyżej progu, zanim zostanie uznana za cykl, aby otwarcie drzwiczek lub naciśnięcie przycisku było ignorowane",
+                    "switch_entity": "Przełącznik, do którego podłączone jest urządzenie, proponowany jako przycisk do wyłączenia go po zakończeniu",
+                    "switch_off_button": "Dodaj przycisk Wyłącz dla inteligentnego gniazdka do powiadomienia o zakończeniu. Wyłącz dla gniazdka, które ma pozostać włączone."
+                }
+            },
+            "confirm": {
+                "title": "Powiadomienia dla {name}",
+                "description": "Powiadamiać, gdy {name} startuje i kończy pracę?\n\n{supernotify}{beta}"
+            }
+        },
+        "abort": {
+            "already_configured": "To urządzenie jest już skonfigurowane",
+            "already_in_progress": "Konfiguracja tego urządzenia już trwa"
+        }
+    },
+    "options": {
+        "step": {
+            "discovery": {
+                "title": "Automatyczne wykrywanie",
+                "description": "Dzięki automatycznemu wykrywaniu każde obsługiwane urządzenie jest konfigurowane za Ciebie, teraz i za każdym razem, gdy dodasz kolejne. Urządzenia już skonfigurowane pozostają bez zmian.",
+                "data": {
+                    "auto_discover": "Konfiguruj urządzenia automatycznie"
+                },
+                "data_description": {
+                    "auto_discover": "Wyłącz, aby każde znalezione urządzenie było proponowane, i samodzielnie wybieraj, które dodać"
+                }
+            },
+            "settings": {
+                "title": "Powiadomienia dla {name}",
+                "description": "Wszystko tutaj jest opcjonalne.\n\n{supernotify}",
+                "data": {
+                    "notify_start": "Powiadamiaj o starcie",
+                    "notify_end": "Powiadamiaj o zakończeniu",
+                    "notify_phase": "Powiadamiaj o fazach",
+                    "notify_progress": "Powiadamiaj o postępie",
+                    "dashboard": "Dashboard do otwarcia",
+                    "live_title": "Tytuł Aktywności na żywo",
+                    "live_detail": "Aktywność na żywo pokazuje",
+                    "maintenance": "Śledź konserwację"
+                },
+                "data_description": {
+                    "notify_start": "Wyślij powiadomienie, gdy urządzenie startuje. Gdy wyłączone, Aktywność na żywo i tak jest otwierana, po cichu i tylko na telefonach.",
+                    "notify_end": "Wyślij powiadomienie, gdy urządzenie kończy pracę. Gdy wyłączone, Aktywność na żywo i tak jest zamykana.",
+                    "notify_phase": "Wyślij powiadomienie, gdy kończy się faza cyklu, na przykład gdy piekarnik się nagrzeje. Gdy wyłączone, jest to pokazywane tylko w Aktywności na żywo.",
+                    "dashboard": "Otwierany po stuknięciu powiadomienia lub Aktywności na żywo. Pozostaw puste, aby otworzyć aplikację tam, gdzie była. Ustawiany na dashboard nazwany jak urządzenie lub jego typ, na przykład „Zmywarka” lub „Pralka”, jeśli taki istniał w chwili dodania urządzenia.",
+                    "notify_progress": "Wysyłaj powiadomienie co 10% cyklu. Gdy wyłączone, postęp jest pokazywany tylko na pasku postępu Aktywności na żywo, aktualizowanym po cichu.",
+                    "live_title": "Tytuł Aktywności na żywo. Program przydaje się obok nazwy, gdy pozostały czas zajmuje miejsce wiadomości, jak na ekranie blokady iPhone'a. Wybierz samą nazwę, jeśli nazwy programów są za długie albo urządzenie zawsze pracuje w tym samym programie.",
+                    "live_detail": "Pokazuj pozostały czas, gdy urządzenie podaje, kiedy skończy, albo zamiast niego program, stan, czyli co robi w ramach cyklu, na przykład suszenie lub robot sprzątający zmieniający położenie, albo oba. Program może być całym cyklem lub jego fazą, na przykład płukaniem wstępnym, a dla robota sprzątającego jest to tryb sprzątania. To, czego urządzenie nie podaje, jest pomijane.",
+                    "maintenance": "Licz cykle i to, ile życia zostało częściom, o których urządzenie informuje, i umieszczaj wszystko, co jest do zrobienia, na liście zadań Konserwacja urządzeń, z powiadomieniem, gdy nadejdzie termin. Proponowane raz w powiadomieniu o zakończeniu, jeśli wyłączone."
+                },
+                "sections": {
+                    "start": {
+                        "name": "Wiadomość o starcie",
+                        "description": "Wysyłana, gdy urządzenie startuje. Wyczyść pole, aby wrócić do zwykłego brzmienia. Wstaw {program_placeholder} tam, gdzie ma być podany trwający program.",
+                        "data": {
+                            "start_title": "Tytuł",
+                            "start_message": "Wiadomość"
+                        }
+                    },
+                    "end": {
+                        "name": "Wiadomość o zakończeniu",
+                        "description": "Wysyłana, gdy urządzenie kończy pracę. Wyczyść pole, aby wrócić do zwykłego brzmienia. Wstaw {program_placeholder} tam, gdzie ma być podany wykonany program.",
+                        "data": {
+                            "end_title": "Tytuł",
+                            "end_message": "Wiadomość",
+                            "reminder": "Przypomnienie",
+                            "reminder_repeats": "Powtórzenia przypomnienia",
+                            "grace_period": "Czekanie na stacji"
+                        },
+                        "data_description": {
+                            "reminder": "Minuty, po których zakończenie jest wysyłane ponownie, dopóki w powiadomieniu nie zostanie naciśnięte Gotowe. 0, aby wyłączyć. Przypomnij później w powiadomieniu czeka tyle czasu, lub 30 minut.",
+                            "reminder_repeats": "Ile razy zakończenie jest wysyłane ponownie",
+                            "grace_period": "Sekundy, przez które robot sprzątający musi pozostać na stacji po powrocie ze sprzątania, zanim sprzątanie się zakończy, na wypadek gdyby znów ruszył. Zwiększ dla robota, który wraca w trakcie, aby umyć mop lub opróżnić pojemnik. Jeśli odkurzacz podaje własny postęp lub to, czy sprząta, jak Roborock, brane jest pod uwagę to, niezależnie od tej wartości."
+                        }
+                    },
+                    "notify": {
+                        "name": "Odbiorcy powiadomień",
+                        "description": "Kto i co jest powiadamiane. Pozostaw wszystko puste dla zwykłego wyboru.",
+                        "data": {
+                            "targets": "Odbiorcy",
+                            "target": "Odbiorcy",
+                            "custom_target": "Własni odbiorcy",
+                            "deliveries": "Dostarczenia"
+                        },
+                        "data_description": {
+                            "targets": "Encje notify, do których wysyłać. Pozostaw puste dla każdego telefonu z aplikacją Home Assistant.",
+                            "target": "Kogo lub co powiadamiać, jak w każdym powiadomieniu Supernotify. Pozostaw puste, aby wybrał Supernotify.",
+                            "custom_target": "Odbiorcy spoza Home Assistant, na przykład adresy e-mail lub numery telefonów.",
+                            "deliveries": "Ogranicz powiadomienia do tych dostarczeń Supernotify. Pozostaw puste, aby wybrał Supernotify."
+                        }
+                    },
+                    "maintenance_items": {
+                        "name": "Konserwacja",
+                        "description": "Liczba cykli między każdą czynnością, gdy konserwacja jest śledzona. 0, aby pominąć czynność. Licznik startuje po włączeniu śledzenia, a dla czynności już w toku ustawia się go akcją Resetuj konserwację.",
+                        "data": {
+                            "maintenance_drum_clean": "Czyszczenie bębna",
+                            "maintenance_filter": "Czyszczenie filtra",
+                            "maintenance_lint_filter": "Czyszczenie filtra kłaczków",
+                            "maintenance_machine_clean": "Czyszczenie urządzenia",
+                            "maintenance_condenser": "Czyszczenie skraplacza"
+                        }
+                    }
+                }
+            },
+            "power": {
+                "title": "Pomiar mocy dla {name}",
+                "description": "Urządzenie startuje, gdy jego moc przekroczy próg, i kończy pracę, gdy przez czas karencji pozostaje na progu lub poniżej.",
+                "data": {
+                    "power_entity": "Czujnik mocy",
+                    "threshold": "Próg mocy",
+                    "grace_period": "Czas karencji",
+                    "min_duration": "Minimalny czas pracy",
+                    "switch_entity": "Inteligentne gniazdko",
+                    "switch_off_button": "Przycisk Wyłącz"
+                },
+                "data_description": {
+                    "power_entity": "Czujnik mierzący moc pobieraną przez urządzenie",
+                    "threshold": "Urządzenie pracuje, dopóki pobiera więcej niż ta wartość",
+                    "grace_period": "Jak długo moc musi pozostać na progu lub poniżej, zanim cykl się zakończy, aby krótkie spadki były ignorowane",
+                    "min_duration": "Jak długo moc musi być powyżej progu, zanim zostanie uznana za cykl, aby otwarcie drzwiczek lub naciśnięcie przycisku było ignorowane",
+                    "switch_entity": "Przełącznik, do którego podłączone jest urządzenie, proponowany jako przycisk do wyłączenia go po zakończeniu",
+                    "switch_off_button": "Dodaj przycisk Wyłącz dla inteligentnego gniazdka do powiadomienia o zakończeniu. Wyłącz dla gniazdka, które ma pozostać włączone."
+                }
+            }
+        }
+    },
+    "selector": {
+        "appliance_words": {
+            "options": {
+                "dishwasher": "zmywarka, zmywarki",
+                "washer": "pralka, pralki",
+                "washer_dryer": "pralko-suszarka, pralkosuszarka, pralka z suszarką",
+                "dryer": "suszarka, suszarki",
+                "oven": "piekarnik",
+                "microwave": "mikrofalówka, mikrofalowka, kuchenka mikrofalowa",
+                "hob": "płyta grzewcza, płyta indukcyjna, plyta, płyta",
+                "hood": "okap",
+                "coffee_maker": "ekspres, kawa, kawy",
+                "cleaning_robot": "odkurzacz",
+                "kettle": "czajnik"
+            }
+        },
+        "live_title": {
+            "options": {
+                "name_program": "Nazwa urządzenia i program",
+                "program": "Tylko program",
+                "name": "Tylko nazwa urządzenia"
+            }
+        },
+        "live_detail": {
+            "options": {
+                "time_remaining": "Pozostały czas",
+                "program": "Program",
+                "status": "Stan",
+                "program_status": "Program i stan"
+            }
+        }
+    },
+    "entity": {
+        "todo": {
+            "maintenance": {
+                "name": "Konserwacja urządzeń"
+            }
+        }
+    },
+    "services": {
+        "reset_maintenance": {
+            "name": "Resetuj konserwację",
+            "description": "Oznacza konserwację jako wykonaną, dla jednej czynności urządzenia lub wszystkich, albo ustawia liczbę cykli od ostatniego razu, znaną sprzed śledzenia tutaj. Część, której żywotność podaje urządzenie, resetuje się przyciskiem jej własnej integracji, jeśli taki ma.",
+            "fields": {
+                "config_entry_id": {
+                    "name": "Urządzenie",
+                    "description": "Urządzenie, jako jego wpis w Appliance Auto Notify"
+                },
+                "item": {
+                    "name": "Czynność",
+                    "description": "Czynność, na przykład drum_clean lub encja części, albo pomiń dla wszystkich"
+                },
+                "cycles": {
+                    "name": "Cykle",
+                    "description": "Liczba cykli od ostatniego razu, 0 dla wykonanej teraz"
+                }
+            }
+        },
+        "snooze_maintenance": {
+            "name": "Odłóż konserwację",
+            "description": "Odkłada należną konserwację, dla jednej czynności urządzenia lub wszystkich, po czym znów staje się należna.",
+            "fields": {
+                "config_entry_id": {
+                    "name": "Urządzenie",
+                    "description": "Urządzenie, jako jego wpis w Appliance Auto Notify"
+                },
+                "item": {
+                    "name": "Czynność",
+                    "description": "Czynność, na przykład drum_clean lub encja części, albo pomiń dla wszystkich"
+                },
+                "days": {
+                    "name": "Dni",
+                    "description": "Na jak długo ją odłożyć"
+                }
+            }
+        }
+    },
+    "issues": {
+        "beta_feedback": {
+            "title": "Jak poradziło sobie {name}?",
+            "description": "{name} działa przez {integration}, której obsługa w Appliance Auto Notify jest nowa i została napisana bez prawdziwego urządzenia do wypróbowania. Pierwszy cykl się zakończył: czy powiadomienia o starcie i zakończeniu, postęp i pozostały czas przyszły wtedy, kiedy powinny?\n\nNiezależnie od tego, czy poszło dobrze, czy nie, daj znać przez *Dowiedz się więcej* i dołącz diagnostykę {name}, pobraną z jego wpisu w *Appliance Auto Notify* w *Urządzenia oraz usługi*. Zawiera ona to, co urządzenie zgłaszało w pierwszych cyklach, i dzięki niej obsługa staje się poprawna. Zignoruj to po wykonaniu."
+        },
+        "appliance_removed": {
+            "title": "{name} zostało usunięte",
+            "fix_flow": {
+                "step": {
+                    "confirm": {
+                        "title": "Usunąć {name}?",
+                        "description": "{name} nie ma już w Home Assistant, na przykład po usunięciu z jego własnej integracji, więc nie ma już czego obserwować. Usuń je również z Appliance Auto Notify, razem z jego urządzeniem, cyklem zachowanym między restartami i licznikami konserwacji.\n\nJeśli wróci, na przykład po ponownym dodaniu jego integracji, zignoruj to: będzie znów obserwowane po powrocie, a to zniknie samo."
+                    }
+                }
+            }
+        },
+        "no_targets": {
+            "title": "Brak miejsca docelowego dla powiadomień",
+            "description": "{name} miało powiadomienie do wysłania, ale nie ma dokąd go wysłać: Supernotify nie jest zainstalowany, w ustawieniach urządzenia nie wybrano *Odbiorców*, a żaden telefon nie ma aplikacji Home Assistant skonfigurowanej do powiadomień.\n\nZainstaluj aplikację na telefonie i zaloguj się albo wybierz encje notify w *Odbiorcy powiadomień* w ustawieniach urządzenia. To zniknie, gdy tylko zostanie wysłane powiadomienie."
+        }
+    },
+    "exceptions": {
+        "not_tracked": {
+            "message": "Konserwacja nie jest śledzona dla {entry_id}"
+        },
+        "no_item": {
+            "message": "Brak czynności konserwacyjnej {item} dla {entry_id}"
+        },
+        "part_life_read": {
+            "message": "{item} to część, której żywotność jest odczytywana, a nie liczona w cyklach"
+        },
+        "no_cycle_entity": {
+            "message": "Nie znaleziono encji stanu cyklu dla {name}"
+        },
+        "no_vacuum_entity": {
+            "message": "Nie znaleziono encji odkurzacza dla {name}"
+        },
+        "appliance_removed": {
+            "message": "{name} zostało usunięte z Home Assistant"
+        }
+    }
+}

@@ -1,0 +1,276 @@
+{
+    "config": {
+        "flow_title": "{name}",
+        "step": {
+            "user": {
+                "title": "Notifications des appareils",
+                "description": "{supernotify}\n\n{found}\n\nLes appareils Home Connect (Bosch, Siemens, Neff) sont découverts automatiquement. Un compteur de puissance nommé d'après un lave-linge, un sèche-linge, un lave-vaisselle ou un four, comme une prise connectée appelée « Lave-linge », est proposé comme *Découvert*, pour vérifier le seuil avant de l'ajouter. Tout autre appareil sur un compteur de puissance peut être configuré manuellement une fois l'installation terminée.",
+                "data": {
+                    "auto_discover": "Configurer les appareils automatiquement"
+                },
+                "data_description": {
+                    "auto_discover": "Désactiver pour se voir proposer chaque appareil trouvé et choisir lesquels ajouter"
+                }
+            },
+            "power": {
+                "title": "Appareil suivi par sa puissance",
+                "description": "Pour tout appareil sur une prise connectée ou un autre compteur de puissance. Il démarre quand sa puissance dépasse le seuil, et se termine une fois qu'elle est restée au seuil ou en dessous pendant le délai de grâce.",
+                "data": {
+                    "name": "Nom de l'appareil",
+                    "power_entity": "Capteur de puissance",
+                    "threshold": "Seuil de puissance",
+                    "grace_period": "Délai de grâce",
+                    "min_duration": "Durée minimale de fonctionnement",
+                    "switch_entity": "Prise connectée",
+                    "switch_off_button": "Bouton Éteindre"
+                },
+                "data_description": {
+                    "name": "Utilisé dans les notifications et pour choisir une icône",
+                    "power_entity": "Le capteur qui mesure la puissance consommée par l'appareil",
+                    "threshold": "L'appareil fonctionne tant qu'il consomme plus que cela",
+                    "grace_period": "Combien de temps la puissance doit rester au seuil ou en dessous avant que le cycle soit terminé, pour ignorer les courtes baisses",
+                    "min_duration": "Combien de temps la puissance doit avoir été au-dessus du seuil avant de compter comme un cycle, pour ignorer une porte ouverte ou un bouton pressé",
+                    "switch_entity": "L'interrupteur sur lequel l'appareil est branché, proposé comme bouton pour l'éteindre une fois terminé",
+                    "switch_off_button": "Mettre un bouton Éteindre pour la prise connectée dans la notification de fin. Désactiver pour une prise qui doit rester allumée."
+                }
+            },
+            "confirm": {
+                "title": "Notifications pour {name}",
+                "description": "Être prévenu quand {name} démarre et se termine ?\n\n{supernotify}{beta}"
+            }
+        },
+        "abort": {
+            "already_configured": "Cet appareil est déjà configuré",
+            "already_in_progress": "La configuration de cet appareil est déjà en cours"
+        }
+    },
+    "options": {
+        "step": {
+            "discovery": {
+                "title": "Découverte automatique",
+                "description": "Avec la découverte automatique, chaque appareil pris en charge est configuré pour vous, maintenant et chaque fois que vous en ajoutez un autre. Les appareils déjà configurés restent tels quels.",
+                "data": {
+                    "auto_discover": "Configurer les appareils automatiquement"
+                },
+                "data_description": {
+                    "auto_discover": "Désactiver pour se voir proposer chaque appareil trouvé et choisir lesquels ajouter"
+                }
+            },
+            "settings": {
+                "title": "Notifications pour {name}",
+                "description": "Tout ici est facultatif.\n\n{supernotify}",
+                "data": {
+                    "notify_start": "Notifier le démarrage",
+                    "notify_end": "Notifier la fin",
+                    "notify_phase": "Notifier les phases",
+                    "notify_progress": "Notifier la progression",
+                    "dashboard": "Tableau de bord à ouvrir",
+                    "live_title": "Titre de l'Activité en direct",
+                    "live_detail": "L'Activité en direct affiche",
+                    "maintenance": "Suivre l'entretien"
+                },
+                "data_description": {
+                    "notify_start": "Envoyer une notification quand l'appareil démarre. Si désactivé, l'Activité en direct est quand même ouverte, en silence et uniquement sur les téléphones.",
+                    "notify_end": "Envoyer une notification quand l'appareil a terminé. Si désactivé, l'Activité en direct est quand même fermée.",
+                    "notify_phase": "Envoyer une notification quand une phase du cycle est terminée, comme un four qui atteint sa température. Si désactivé, elle n'est affichée que dans l'Activité en direct.",
+                    "dashboard": "Ouvert quand on touche une notification ou l'Activité en direct. Laisser vide pour ouvrir l'application là où elle était. Réglé sur un tableau de bord nommé d'après l'appareil ou son type, comme « Lave-vaisselle » ou « Lave-linge », s'il en existait un quand l'appareil a été ajouté.",
+                    "notify_progress": "Envoyer une notification tous les 10 % du cycle. Si désactivé, la progression n'est affichée que sur la barre de progression de l'Activité en direct, mise à jour en silence.",
+                    "live_title": "Le titre de l'Activité en direct. Le programme est utile à côté du nom quand le temps restant prend la place du message, comme sur l'écran verrouillé d'un iPhone. Ne choisir que le nom si les noms des programmes sont trop longs, ou si l'appareil utilise toujours le même programme.",
+                    "live_detail": "Afficher le temps restant, quand l'appareil indique quand il aura fini, ou à la place le programme, l'état, c'est-à-dire ce qu'il fait dans son cycle, comme le séchage ou un robot aspirateur qui se repositionne, ou les deux. Le programme peut être le cycle entier ou une phase, comme un prélavage, et pour un robot aspirateur c'est son mode de nettoyage. Ce que l'appareil n'indique pas est omis.",
+                    "maintenance": "Compter les cycles, et la durée de vie restante des pièces que l'appareil signale, et mettre ce qui est dû sur la liste de tâches Entretien des appareils, avec une notification à l'échéance. Proposé une fois dans la notification de fin si désactivé."
+                },
+                "sections": {
+                    "start": {
+                        "name": "Message de démarrage",
+                        "description": "Envoyé quand l'appareil démarre. Videz un champ pour revenir au texte habituel. Mettez {program_placeholder} là où le programme en cours doit être nommé.",
+                        "data": {
+                            "start_title": "Titre",
+                            "start_message": "Message"
+                        }
+                    },
+                    "end": {
+                        "name": "Message de fin",
+                        "description": "Envoyé quand l'appareil a terminé. Videz un champ pour revenir au texte habituel. Mettez {program_placeholder} là où le programme exécuté doit être nommé.",
+                        "data": {
+                            "end_title": "Titre",
+                            "end_message": "Message",
+                            "reminder": "Rappel",
+                            "reminder_repeats": "Répétitions du rappel",
+                            "grace_period": "Attente sur la base"
+                        },
+                        "data_description": {
+                            "reminder": "Minutes après lesquelles la fin est renvoyée, jusqu'à ce que Terminé soit pressé dans la notification. 0 pour aucun. Me rappeler plus tard dans la notification attend ce délai, ou 30 minutes.",
+                            "reminder_repeats": "Combien de fois la fin est renvoyée",
+                            "grace_period": "Secondes pendant lesquelles un robot aspirateur doit rester sur sa base, de retour du nettoyage, avant que le nettoyage soit terminé, au cas où il repartirait. Augmentez-le pour un robot qui revient en cours de route laver sa serpillière ou vider son bac. Si l'aspirateur indique sa propre progression, ou s'il est en train de nettoyer, comme Roborock, c'est cela qui est suivi, quelle que soit cette valeur."
+                        }
+                    },
+                    "notify": {
+                        "name": "Destinataires des notifications",
+                        "description": "Qui et quoi est notifié. Laissez tout vide pour le choix habituel.",
+                        "data": {
+                            "targets": "Destinataires",
+                            "target": "Destinataires",
+                            "custom_target": "Destinataires personnalisés",
+                            "deliveries": "Livraisons"
+                        },
+                        "data_description": {
+                            "targets": "Entités notify auxquelles envoyer. Laisser vide pour chaque téléphone avec l'application Home Assistant.",
+                            "target": "Qui ou quoi notifier, comme pour toute notification Supernotify. Laisser vide pour que Supernotify choisisse.",
+                            "custom_target": "Destinataires hors de Home Assistant, comme des adresses e-mail ou des numéros de téléphone.",
+                            "deliveries": "Limiter les notifications à ces livraisons Supernotify. Laisser vide pour que Supernotify choisisse."
+                        }
+                    },
+                    "maintenance_items": {
+                        "name": "Entretien",
+                        "description": "Cycles entre chaque tâche, quand l'entretien est suivi. 0 pour omettre une tâche. Le compte commence quand le suivi est activé, et se règle avec l'action Réinitialiser l'entretien pour une tâche déjà en cours.",
+                        "data": {
+                            "maintenance_drum_clean": "Nettoyage du tambour",
+                            "maintenance_filter": "Nettoyage du filtre",
+                            "maintenance_lint_filter": "Nettoyage du filtre à peluches",
+                            "maintenance_machine_clean": "Nettoyage de la machine",
+                            "maintenance_condenser": "Nettoyage du condenseur"
+                        }
+                    }
+                }
+            },
+            "power": {
+                "title": "Suivi de la puissance pour {name}",
+                "description": "L'appareil démarre quand sa puissance dépasse le seuil, et se termine une fois qu'elle est restée au seuil ou en dessous pendant le délai de grâce.",
+                "data": {
+                    "power_entity": "Capteur de puissance",
+                    "threshold": "Seuil de puissance",
+                    "grace_period": "Délai de grâce",
+                    "min_duration": "Durée minimale de fonctionnement",
+                    "switch_entity": "Prise connectée",
+                    "switch_off_button": "Bouton Éteindre"
+                },
+                "data_description": {
+                    "power_entity": "Le capteur qui mesure la puissance consommée par l'appareil",
+                    "threshold": "L'appareil fonctionne tant qu'il consomme plus que cela",
+                    "grace_period": "Combien de temps la puissance doit rester au seuil ou en dessous avant que le cycle soit terminé, pour ignorer les courtes baisses",
+                    "min_duration": "Combien de temps la puissance doit avoir été au-dessus du seuil avant de compter comme un cycle, pour ignorer une porte ouverte ou un bouton pressé",
+                    "switch_entity": "L'interrupteur sur lequel l'appareil est branché, proposé comme bouton pour l'éteindre une fois terminé",
+                    "switch_off_button": "Mettre un bouton Éteindre pour la prise connectée dans la notification de fin. Désactiver pour une prise qui doit rester allumée."
+                }
+            }
+        }
+    },
+    "selector": {
+        "appliance_words": {
+            "options": {
+                "dishwasher": "lave-vaisselle, lave vaisselle",
+                "washer": "lave-linge, lave linge, machine à laver, machine a laver",
+                "washer_dryer": "lave-linge séchant, lave linge séchant, lave-linge sechant, lavante-séchante, lavante séchante",
+                "dryer": "sèche-linge, seche-linge, sèche linge, seche linge, séchoir",
+                "oven": "four",
+                "microwave": "micro-ondes, micro ondes, microondes",
+                "hob": "plaque de cuisson, table de cuisson, plaque",
+                "hood": "hotte",
+                "coffee_maker": "café, cafe, cafetière",
+                "cleaning_robot": "aspirateur",
+                "kettle": "bouilloire"
+            }
+        },
+        "live_title": {
+            "options": {
+                "name_program": "Nom de l'appareil et programme",
+                "program": "Programme seulement",
+                "name": "Nom de l'appareil seulement"
+            }
+        },
+        "live_detail": {
+            "options": {
+                "time_remaining": "Temps restant",
+                "program": "Programme",
+                "status": "État",
+                "program_status": "Programme et état"
+            }
+        }
+    },
+    "entity": {
+        "todo": {
+            "maintenance": {
+                "name": "Entretien des appareils"
+            }
+        }
+    },
+    "services": {
+        "reset_maintenance": {
+            "name": "Réinitialiser l'entretien",
+            "description": "Indique que l'entretien a été fait, pour une tâche d'un appareil ou toutes, ou règle les cycles depuis la dernière fois, tels qu'ils étaient connus avant d'être suivis ici. Une pièce dont l'appareil signale la durée de vie se réinitialise avec le bouton de sa propre intégration, s'il en a un.",
+            "fields": {
+                "config_entry_id": {
+                    "name": "Appareil",
+                    "description": "L'appareil, sous la forme de son entrée Appliance Auto Notify"
+                },
+                "item": {
+                    "name": "Tâche",
+                    "description": "La tâche, comme drum_clean ou l'entité d'une pièce, ou omettre pour toutes"
+                },
+                "cycles": {
+                    "name": "Cycles",
+                    "description": "Les cycles depuis la dernière fois, 0 pour fait maintenant"
+                }
+            }
+        },
+        "snooze_maintenance": {
+            "name": "Reporter l'entretien",
+            "description": "Reporte l'entretien dû, pour une tâche d'un appareil ou toutes, après quoi il est de nouveau dû.",
+            "fields": {
+                "config_entry_id": {
+                    "name": "Appareil",
+                    "description": "L'appareil, sous la forme de son entrée Appliance Auto Notify"
+                },
+                "item": {
+                    "name": "Tâche",
+                    "description": "La tâche, comme drum_clean ou l'entité d'une pièce, ou omettre pour toutes"
+                },
+                "days": {
+                    "name": "Jours",
+                    "description": "De combien le reporter"
+                }
+            }
+        }
+    },
+    "issues": {
+        "beta_feedback": {
+            "title": "Comment s'est passé {name} ?",
+            "description": "{name} passe par {integration}, dont la prise en charge dans Appliance Auto Notify est nouvelle et a été écrite sans véritable appareil pour l'essayer. Son premier cycle est terminé : les notifications de démarrage et de fin, la progression et le temps restant sont-ils arrivés quand il le fallait ?\n\nQue tout se soit bien passé ou non, dites-le avec *En savoir plus*, et joignez les diagnostics de {name}, téléchargés depuis son entrée sous *Appliance Auto Notify* dans *Appareils et services*. Ils contiennent ce que l'appareil a signalé pendant ses premiers cycles, et c'est ainsi que la prise en charge devient juste. Ignorez ceci une fois fait."
+        },
+        "appliance_removed": {
+            "title": "{name} a été supprimé",
+            "fix_flow": {
+                "step": {
+                    "confirm": {
+                        "title": "Supprimer {name} ?",
+                        "description": "{name} n'est plus dans Home Assistant, comme lorsqu'il est supprimé de sa propre intégration, il n'y a donc plus rien à surveiller. Supprimez-le aussi d'Appliance Auto Notify, avec son appareil, le cycle conservé entre les redémarrages et ses compteurs d'entretien.\n\nS'il doit revenir, par exemple après avoir rajouté son intégration, ignorez plutôt ceci : il sera de nouveau surveillé dès son retour, et ceci disparaîtra de lui-même."
+                    }
+                }
+            }
+        },
+        "no_targets": {
+            "title": "Nulle part où envoyer les notifications",
+            "description": "{name} avait une notification à envoyer, mais il n'y a nulle part où l'envoyer : Supernotify n'est pas installé, aucun *Destinataire* n'est choisi dans les paramètres de l'appareil, et aucun téléphone n'a l'application Home Assistant configurée pour les notifications.\n\nInstallez l'application sur un téléphone et connectez-vous, ou choisissez des entités notify dans *Destinataires des notifications* dans les paramètres de l'appareil. Ceci disparaît dès qu'une notification est envoyée."
+        }
+    },
+    "exceptions": {
+        "not_tracked": {
+            "message": "L'entretien n'est pas suivi pour {entry_id}"
+        },
+        "no_item": {
+            "message": "Aucune tâche d'entretien {item} pour {entry_id}"
+        },
+        "part_life_read": {
+            "message": "{item} est une pièce dont la durée de vie est lue, et non comptée en cycles"
+        },
+        "no_cycle_entity": {
+            "message": "Aucune entité d'état du cycle trouvée pour {name}"
+        },
+        "no_vacuum_entity": {
+            "message": "Aucune entité d'aspirateur trouvée pour {name}"
+        },
+        "appliance_removed": {
+            "message": "{name} a été supprimé de Home Assistant"
+        }
+    }
+}
