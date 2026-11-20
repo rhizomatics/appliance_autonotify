@@ -197,7 +197,7 @@ async def async_remove_entry(hass: HomeAssistant, entry: AppliancesConfigEntry) 
 
 
 async def async_remove_config_entry_device(
-    hass: HomeAssistant, entry: AppliancesConfigEntry, device_entry: dr.DeviceEntry
+    hass: HomeAssistant, entry: AppliancesConfigEntry, device_entry: dr.AnyDeviceEntry
 ) -> bool:
     """An appliance's device can be deleted by hand once the appliance is gone from Home Assistant, and not before,
     since it would only be made again"""
