@@ -17,6 +17,8 @@ homeassistant = { timestamp = "0001-01-01T00:00:00Z", span = "P2D" }
 homeassistant-repl = false
 pytest-homeassistant = { timestamp = "0001-01-01T00:00:00Z", span = "P2D" }
 ruff = { timestamp = "0001-01-01T00:00:00Z", span = "P2D" }
+signalk-cli = false
+updates2mqtt = false
 uv = { timestamp = "0001-01-01T00:00:00Z", span = "P2D" }
 
 [manifest]
