@@ -27,6 +27,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
     - name: Marketplace Action
       uses: "hacs/action@1ebf01c408f29afcb6406bd431bc98fd8cbb15aa"
       with:
@@ -94,17 +96,19 @@ jobs:
         name: badges
         path: badges
     - name: Push badges
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         TEMP_DIR=$(mktemp -d)
         cd $TEMP_DIR
         # the first time there's no badges branch to add to, so one is started with nothing else on it
-        if ! git clone --single-branch --branch badges https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git . 2>/dev/null; then
+        if ! git clone --single-branch --branch badges https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git . 2>/dev/null; then
           git init --initial-branch badges .
-          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git remote add origin https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
         fi
-        cp -r ${{ github.workspace }}/badges .
+        cp -r ${GITHUB_WORKSPACE}/badges .
         git add badges
         if git commit -m "Update badges [skip ci]"; then
           git push origin badges --force
