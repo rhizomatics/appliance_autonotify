@@ -2,6 +2,12 @@
 title: What's New
 ---
 
+# 1.0.1
+## 🐛 Fixes
+- Robot vacuum Live Activity no longer left at an old progress, such as 51%, all the way home, where its progress went unavailable with its cloud connection and came back at 100, as Roborock's can as it heads back
+  - Shown as it comes back, 100 or short of it where the vacuum couldn't get everywhere
+  - A 100 that comes back that way ends the cleaning soon after it's docked, as any other 100 does, rather than 10 minutes later
+
 # 1.0.0
 ## ✨ Enhancements
 - Diagnostics of *Automatic discovery* list the devices that look like appliances but weren't found to be one, with their make, model, integration and their entities' keys, options and states, to attach to an issue asking for their integration to be supported

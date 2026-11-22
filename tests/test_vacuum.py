@@ -785,6 +785,40 @@ async def test_vacuum_shows_its_cleaning_mode_status_and_progress(hass: HomeAssi
     assert (calls[-1].data["message"], calls[-1].data["extra_data"]["progress"]) == ("vac_and_mop · relocating", 5)
 
 
+@pytest.mark.parametrize(("back_at", "complete"), [(100, True), (87, False)])
+async def test_vacuum_progress_back_from_unavailable_on_its_way_home(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, back_at: int, complete: bool
+) -> None:
+    """Progress going unavailable as the vacuum heads back, with its cloud connection, and coming back at 100, which
+    left a Roborock's Live Activity at 51% all the way home on 22/11. Its progress is shown as it comes back, 100 or
+    short of it where it couldn't get everywhere, and a 100 still ends the cleaning soon after it's back"""
+    device_id, vacuum, status, _, progress = add_roborock(hass)
+    calls = mock_supernotify(hass)
+    await setup_vacuum(hass, device_id)
+
+    await set_state(hass, status, "sweeping")
+    await set_state(hass, vacuum, "cleaning")
+    await set_state(hass, progress, "0")
+    await set_state(hass, progress, "51")
+    await set_state(hass, status, "returning_home")
+    await set_state(hass, vacuum, "returning")
+    assert (calls[-1].data["message"], calls[-1].data["extra_data"]["progress"]) == ("vac_and_mop · returning_home", 51)
+
+    await set_state(hass, progress, "unavailable")
+    await set_state(hass, progress, str(back_at))
+    assert (calls[-1].data["message"], calls[-1].data["extra_data"]["progress"]) == (
+        "vac_and_mop · returning_home",
+        back_at,
+    )
+
+    count = len(calls)
+    await set_state(hass, vacuum, "docked")
+    await advance(hass, freezer, VACUUM_COMPLETE_SETTLE)
+    assert len(calls) > count if complete else len(calls) == count
+    await advance(hass, freezer, VACUUM_SETTLE)
+    assert calls[-1].data["message"] == "Bruno is finished"
+
+
 @pytest.mark.parametrize(
     ("detail", "title", "message"),
     [

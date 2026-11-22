@@ -194,6 +194,14 @@ def _iso(value: datetime | None) -> str | None:
     return value.isoformat() if value is not None else None
 
 
+def _float(state: State | None) -> float | None:
+    """A state as a number, or None where it isn't one, as when unavailable"""
+    try:
+        return float(state.state) if state is not None else None
+    except ValueError:
+        return None
+
+
 def _seconds_to(due: datetime) -> float:
     """Seconds till a time, none if it's already past"""
     return max(0.0, (due - dt_util.utcnow()).total_seconds())
@@ -1495,6 +1503,9 @@ class VacuumWatcher(ApplianceWatcher):
         self._set_off: datetime | None = None
         # its progress has dropped below 100 since it set off, so isn't what the cleaning before left
         self._progressing = False
+        # the last number each of its percentages gave, to go by when one comes back from being unavailable, as
+        # Roborock's do whenever its cloud connection drops, which can be just as the vacuum heads back at 100
+        self._percents: dict[str, float] = {}
 
     @callback
     def async_start(self) -> None:
@@ -1681,25 +1692,29 @@ class VacuumWatcher(ApplianceWatcher):
 
     async def _percentage_changed(self, event: Event[EventStateChangedData]) -> None:
         new_state, old_state = event.data["new_state"], event.data["old_state"]
-        try:
-            value = float(new_state.state) if new_state is not None else None
-            before = float(old_state.state) if old_state is not None else None
-        except ValueError:
+        entity_id = event.data["entity_id"]
+        value = _float(new_state)
+        if value is None:
+            # unavailable for now, which changes nothing
             return
-        if value is None or not self.running:
+        # what it was before going unavailable, if it did, so a 100 that comes back with it still counts
+        before = _float(old_state)
+        before = self._percents.get(entity_id) if before is None else before
+        self._percents[entity_id] = value
+        if not self.running:
             return
         if value < 100:
             self._complete = False
-            if event.data["entity_id"] == self.entity_ids.get(PROGRESS_KEY):
+            if entity_id == self.entity_ids.get(PROGRESS_KEY):
                 self._progressing = True
         elif before is not None and before < 100 and not self._complete:
-            _LOGGER.debug("APPLIANCES %s vacuum %s reached 100%%", self.name, event.data["entity_id"])
+            _LOGGER.debug("APPLIANCES %s vacuum %s reached 100%%", self.name, entity_id)
             self._complete = True
             if self._pending in (VACUUM_DONE, VACUUM_MIDWAY_KIND):
                 # already back, and now done by its own account
                 self._wait(self._settled, VACUUM_COMPLETE_KIND, event.context, VACUUM_COMPLETE_SETTLE)
         self._save()
-        if event.data["entity_id"] == self.entity_ids.get(PROGRESS_KEY):
+        if entity_id == self.entity_ids.get(PROGRESS_KEY):
             await self._progress_changed(event)
 
     def _progress(self) -> int | None:
