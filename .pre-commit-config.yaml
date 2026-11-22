@@ -57,3 +57,7 @@ repos:
       - id: ty
         # docs group for docgen's bs4; --frozen as for mypy above
         args: [--frozen, --isolated, --no-python-downloads, --group, docs]
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.24.2
+    hooks:
+      - id: gitleaks
