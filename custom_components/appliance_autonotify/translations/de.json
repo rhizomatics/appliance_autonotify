@@ -65,8 +65,8 @@
                     "notify_phase": "Phasen melden",
                     "notify_progress": "Fortschritt melden",
                     "dashboard": "Zu öffnendes Dashboard",
-                    "live_title": "Titel der Live-Aktivität",
-                    "live_detail": "Live-Aktivität zeigt",
+                    "live_timer": "Timer der Live-Aktivität",
+                    "live_show": "Live-Aktivität zeigt",
                     "maintenance": "Wartung verfolgen"
                 },
                 "data_description": {
@@ -75,8 +75,8 @@
                     "notify_phase": "Eine Benachrichtigung senden, wenn eine Phase des Zyklus vorbei ist, etwa wenn ein Backofen aufgeheizt ist. Wenn aus, wird sie nur in der Live-Aktivität angezeigt.",
                     "dashboard": "Wird geöffnet, wenn auf eine Benachrichtigung oder die Live-Aktivität getippt wird. Leer lassen, um die App dort zu öffnen, wo sie war. Wird auf ein Dashboard gesetzt, das nach dem Gerät oder seinem Typ benannt ist, etwa „Geschirrspüler“ oder „Waschmaschine“, falls es beim Hinzufügen des Geräts eines gab.",
                     "notify_progress": "Alle 10 % des Zyklus eine Benachrichtigung senden. Wenn aus, wird der Fortschritt nur im Fortschrittsbalken der Live-Aktivität angezeigt, der still aktualisiert wird.",
-                    "live_title": "Womit die Live-Aktivität betitelt wird. Das Programm ist neben dem Namen nützlich, wenn die Restzeit den Platz der Nachricht einnimmt, wie auf dem Sperrbildschirm eines iPhones. Wähle nur den Namen, wenn die Programmnamen zu lang sind oder das Gerät immer im selben Programm läuft.",
-                    "live_detail": "Die Restzeit anzeigen, wenn das Gerät meldet, wann es fertig ist, oder stattdessen das Programm, den Status, also was es innerhalb seines Zyklus gerade tut, etwa Trocknen oder ein Saugroboter, der sich neu positioniert, oder beides. Das Programm kann der ganze Zyklus sein oder eine Phase davon, etwa ein Vorspülen, und ist bei einem Saugroboter sein Reinigungsmodus. Was das Gerät nicht meldet, wird weggelassen.",
+                    "live_timer": "Die verbleibende Zeit auf der Live-Aktivität herunterzählen, sofern das Gerät meldet, wann es fertig ist. Auf dem Sperrbildschirm des iPhones ersetzt der Timer die Nachricht, daher kommt das unten Gezeigte stattdessen in den Titel, so viel neben den Namen passt.",
+                    "live_show": "Was das Gerät gerade tut, jeweils sofern es dies meldet und etwas zu sagen hat. Das Programm, etwa Eco 50ºC, kann bei einem Gerät, das immer dasselbe nutzt, weggelassen werden. Die Phase ist der Teil des Zyklus, etwa Vorspülen, Trocknen oder ein Saugroboter, der sich neu ausrichtet. Der Zustand wird nur gezeigt, wenn er mehr als „läuft“ besagt, etwa pausiert oder auf dem Weg zur Station. Ist im Titel nicht für alles Platz, entfällt zuerst das Programm.",
                     "maintenance": "Die Zyklen zählen, und wie viel Lebensdauer die Teile noch haben, über die das Gerät berichtet, und alles Fällige auf die To-do-Liste Gerätewartung setzen, mit einer Benachrichtigung, wenn es fällig wird. Wird einmal in der Endbenachrichtigung angeboten, wenn ausgeschaltet."
                 },
                 "sections": {
@@ -171,19 +171,11 @@
                 "kettle": "wasserkocher"
             }
         },
-        "live_title": {
+        "live_show": {
             "options": {
-                "name_program": "Gerätename und Programm",
-                "program": "Nur Programm",
-                "name": "Nur Gerätename"
-            }
-        },
-        "live_detail": {
-            "options": {
-                "time_remaining": "Restzeit",
                 "program": "Programm",
-                "status": "Status",
-                "program_status": "Programm und Status"
+                "phase": "Phase",
+                "state": "Zustand"
             }
         }
     },

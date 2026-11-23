@@ -65,8 +65,8 @@
                     "notify_phase": "Fasen melden",
                     "notify_progress": "Voortgang melden",
                     "dashboard": "Te openen dashboard",
-                    "live_title": "Titel van de Live Activity",
-                    "live_detail": "Live Activity toont",
+                    "live_timer": "Timer van de Live Activity",
+                    "live_show": "Live Activity toont",
                     "maintenance": "Onderhoud bijhouden"
                 },
                 "data_description": {
@@ -75,8 +75,8 @@
                     "notify_phase": "Een melding sturen wanneer een fase van de cyclus voorbij is, zoals een oven die op temperatuur is. Indien uit wordt dit alleen in de Live Activity getoond.",
                     "dashboard": "Geopend wanneer op een melding of de Live Activity wordt getikt. Leeg laten om de app te openen waar hij was. Ingesteld op een dashboard dat naar het apparaat of het type is genoemd, zoals 'Vaatwasser' of 'Wasmachine', als er een was toen het apparaat werd toegevoegd.",
                     "notify_progress": "Elke 10% van de cyclus een melding sturen. Indien uit wordt de voortgang alleen getoond op de voortgangsbalk van de Live Activity, die stil wordt bijgewerkt.",
-                    "live_title": "Waarmee de Live Activity wordt getiteld. Het programma is handig naast de naam wanneer de resterende tijd de plaats van het bericht inneemt, zoals op het toegangsscherm van een iPhone. Kies alleen de naam als de programmanamen te lang zijn, of als het apparaat altijd op hetzelfde programma draait.",
-                    "live_detail": "De resterende tijd tonen, als het apparaat meldt wanneer het klaar is, of in plaats daarvan het programma, de status, dus wat het binnen de cyclus doet, zoals drogen of een robotstofzuiger die zich verplaatst, of beide. Het programma kan de hele cyclus zijn of een fase ervan, zoals voorspoelen, en is voor een robotstofzuiger de schoonmaakmodus. Wat het apparaat niet meldt, wordt weggelaten.",
+                    "live_timer": "Tel de resterende tijd af op de Live Activity, als het apparaat meldt wanneer het klaar is. Op het vergrendelscherm van een iPhone neemt de timer de plaats van het bericht in, dus wat hieronder wordt getoond komt in de titel, voor zover het naast de naam past.",
+                    "live_show": "Wat het apparaat doet, elk voor zover het dat meldt en er iets over te zeggen is. Het programma, zoals Eco 50ºC, kan weg bij een apparaat dat altijd hetzelfde gebruikt. De fase is het deel van de cyclus, zoals voorspoelen, drogen of een robotstofzuiger die zich herpositioneert. De status wordt alleen getoond als die meer zegt dan bezig, zoals gepauzeerd of terug naar het dock. Als er in de titel geen ruimte is voor alles, valt het programma eerst weg.",
                     "maintenance": "De cycli bijhouden, en hoeveel levensduur de onderdelen waarover het apparaat rapporteert nog hebben, en wat nodig is op de takenlijst Apparaatonderhoud zetten, met een melding wanneer het zover is. Eenmaal aangeboden in de eindmelding als dit uit staat."
                 },
                 "sections": {
@@ -171,19 +171,11 @@
                 "kettle": "waterkoker"
             }
         },
-        "live_title": {
+        "live_show": {
             "options": {
-                "name_program": "Naam van het apparaat en programma",
-                "program": "Alleen programma",
-                "name": "Alleen naam van het apparaat"
-            }
-        },
-        "live_detail": {
-            "options": {
-                "time_remaining": "Resterende tijd",
                 "program": "Programma",
-                "status": "Status",
-                "program_status": "Programma en status"
+                "phase": "Fase",
+                "state": "Status"
             }
         }
     },

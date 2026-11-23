@@ -65,8 +65,8 @@
                     "notify_phase": "Powiadamiaj o fazach",
                     "notify_progress": "Powiadamiaj o postępie",
                     "dashboard": "Dashboard do otwarcia",
-                    "live_title": "Tytuł Aktywności na żywo",
-                    "live_detail": "Aktywność na żywo pokazuje",
+                    "live_timer": "Minutnik Aktywności na żywo",
+                    "live_show": "Aktywność na żywo pokazuje",
                     "maintenance": "Śledź konserwację"
                 },
                 "data_description": {
@@ -75,8 +75,8 @@
                     "notify_phase": "Wyślij powiadomienie, gdy kończy się faza cyklu, na przykład gdy piekarnik się nagrzeje. Gdy wyłączone, jest to pokazywane tylko w Aktywności na żywo.",
                     "dashboard": "Otwierany po stuknięciu powiadomienia lub Aktywności na żywo. Pozostaw puste, aby otworzyć aplikację tam, gdzie była. Ustawiany na dashboard nazwany jak urządzenie lub jego typ, na przykład „Zmywarka” lub „Pralka”, jeśli taki istniał w chwili dodania urządzenia.",
                     "notify_progress": "Wysyłaj powiadomienie co 10% cyklu. Gdy wyłączone, postęp jest pokazywany tylko na pasku postępu Aktywności na żywo, aktualizowanym po cichu.",
-                    "live_title": "Tytuł Aktywności na żywo. Program przydaje się obok nazwy, gdy pozostały czas zajmuje miejsce wiadomości, jak na ekranie blokady iPhone'a. Wybierz samą nazwę, jeśli nazwy programów są za długie albo urządzenie zawsze pracuje w tym samym programie.",
-                    "live_detail": "Pokazuj pozostały czas, gdy urządzenie podaje, kiedy skończy, albo zamiast niego program, stan, czyli co robi w ramach cyklu, na przykład suszenie lub robot sprzątający zmieniający położenie, albo oba. Program może być całym cyklem lub jego fazą, na przykład płukaniem wstępnym, a dla robota sprzątającego jest to tryb sprzątania. To, czego urządzenie nie podaje, jest pomijane.",
+                    "live_timer": "Odliczaj pozostały czas w Aktywności na żywo, jeśli urządzenie podaje, kiedy skończy. Na ekranie blokady iPhone'a minutnik zajmuje miejsce wiadomości, więc to, co pokazano poniżej, trafia do tytułu, tyle, ile zmieści się obok nazwy.",
+                    "live_show": "Co robi urządzenie, każde z nich, jeśli je podaje i jest coś do powiedzenia. Program, np. Eco 50ºC, można pominąć dla urządzenia zawsze na tym samym. Faza to część cyklu, np. płukanie wstępne, suszenie albo robot odkurzający zmieniający pozycję. Stan jest pokazywany tylko, gdy mówi więcej niż praca, np. wstrzymany albo powrót do stacji. Gdy w tytule nie ma miejsca na wszystko, najpierw pomijany jest program.",
                     "maintenance": "Licz cykle i to, ile życia zostało częściom, o których urządzenie informuje, i umieszczaj wszystko, co jest do zrobienia, na liście zadań Konserwacja urządzeń, z powiadomieniem, gdy nadejdzie termin. Proponowane raz w powiadomieniu o zakończeniu, jeśli wyłączone."
                 },
                 "sections": {
@@ -171,19 +171,11 @@
                 "kettle": "czajnik"
             }
         },
-        "live_title": {
+        "live_show": {
             "options": {
-                "name_program": "Nazwa urządzenia i program",
-                "program": "Tylko program",
-                "name": "Tylko nazwa urządzenia"
-            }
-        },
-        "live_detail": {
-            "options": {
-                "time_remaining": "Pozostały czas",
                 "program": "Program",
-                "status": "Stan",
-                "program_status": "Program i stan"
+                "phase": "Faza",
+                "state": "Stan"
             }
         }
     },

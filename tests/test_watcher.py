@@ -5,6 +5,7 @@ from datetime import timedelta
 from typing import Any
 from unittest.mock import patch
 
+import pytest
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.const import CONF_DEVICE_ID
 from homeassistant.core import Context, HomeAssistant, ServiceCall, ServiceResponse, SupportsResponse
@@ -12,6 +13,7 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import entity_registry as er
 from homeassistant.util import dt as dt_util
 
+from custom_components.appliance_autonotify import live_options
 from custom_components.appliance_autonotify.const import ANDROID_CHANNEL, CYCLE_SETTLE, DOMAIN, PREHEAT_SETTLE
 from tests.ha_testing import MockConfigEntry, async_fire_time_changed, async_mock_service
 
@@ -25,6 +27,8 @@ from .conftest import (
 )
 
 # the Android only fields that every Live Activity notification carries
+# an oven program, as Home Connect names it
+PIZZA = "cooking_oven_program_heating_mode_pizza_setting"
 ANDROID = {"channel": ANDROID_CHANNEL, "importance": "high", "sticky": True}
 
 
@@ -72,11 +76,15 @@ async def test_cycle_with_supernotify(hass: HomeAssistant) -> None:
         },
     }
 
-    # paused and resumed is the same cycle
+    # paused and resumed is the same cycle, said quietly on the Live Activity, and back to what it said once resumed
     await set_state(hass, appliance.cycle, "pause")
     await set_state(hass, appliance.cycle, "unavailable")
     await set_state(hass, appliance.cycle, "run")
-    assert len(calls) == 1
+    assert [(call.data["message"], call.data["extra_data"].get("silent")) for call in calls[1:]] == [
+        ("pause", True),
+        ("Dishwasher started", True),
+    ]
+    del calls[1:]
 
     await set_state(hass, appliance.cycle, "finished")
     assert len(calls) == 3
@@ -249,31 +257,65 @@ async def test_program_is_kept_out_of_the_title_when_switched_off(hass: HomeAssi
     calls = mock_supernotify(hass)
     hass.states.async_set(appliance.program, "Eco")
     hass.states.async_set(appliance.finish_time, "2026-10-06T21:44:16+00:00")
-    # as saved before the title was a choice, and taken as the name alone
+    # as saved before the title was a choice, and taken as the name alone, which is nothing shown beside it
     entry = await setup_watcher(hass, appliance, {"program_in_title": False}, minor_version=1)
-    assert (entry.minor_version, dict(entry.options)) == (3, {"live_title": "name"})
+    assert (entry.minor_version, dict(entry.options)) == (4, {"live_show": []})
 
     await set_state(hass, appliance.cycle, "run")
     await set_state(hass, appliance.progress, "5")
     assert [(call.data["title"], call.data["message"]) for call in calls] == [
         ("Dishwasher", "Dishwasher started"),
-        ("Dishwasher", "Eco"),
+        ("Dishwasher", "5% complete"),
     ]
 
 
-async def test_title_can_be_the_program_alone(hass: HomeAssistant) -> None:
+@pytest.mark.parametrize(
+    ("before", "after"),
+    [
+        ({}, {}),
+        ({"live_title": "name_program", "live_detail": "time_remaining"}, {}),
+        # the program alone in the title has no like, so is left to what's shown as it comes
+        ({"live_title": "program"}, {}),
+        ({"live_title": "name"}, {"live_show": []}),
+        ({"live_detail": "program"}, {"live_timer": False, "live_show": ["program", "state"]}),
+        ({"live_title": "name", "live_detail": "status"}, {"live_timer": False, "live_show": ["phase", "state"]}),
+        ({"live_detail": "program_status", "reminder": 30}, {"live_timer": False, "reminder": 30}),
+    ],
+)
+def test_live_activity_choices_carried_over(before: dict[str, object], after: dict[str, object]) -> None:
+    assert live_options(before) == after
+
+
+async def test_title_has_what_there_is_room_for(hass: HomeAssistant) -> None:
+    """With a timer, what's shown goes beside the name, leaving out the program, and then the phase, when there's no
+    room for it, and the state, such as paused, last of all"""
     appliance = add_appliance(hass)
+    # a stage, by the name SmartThings gives it, which any integration's entity may have
+    stage = (
+        er
+        .async_get(hass)
+        .async_get_or_create(
+            "sensor", "home_connect", "BOSCH-1-stage", device_id=appliance.device_id, translation_key="dishwasher_job_state"
+        )
+        .entity_id
+    )
     calls = mock_supernotify(hass)
     hass.states.async_set(appliance.program, "Eco")
     hass.states.async_set(appliance.finish_time, "2026-10-06T21:44:16+00:00")
-    await setup_watcher(hass, appliance, {"live_title": "program"})
+    await setup_watcher(hass, appliance)
 
     await set_state(hass, appliance.cycle, "run")
+    await set_state(hass, stage, "Main wash")
     await set_state(hass, appliance.progress, "5")
-    assert [(call.data["title"], call.data["message"]) for call in calls] == [
-        ("Eco", "Dishwasher started"),
-        ("Eco", "5% complete"),
-    ]
+    assert (calls[-1].data["title"], calls[-1].data["message"]) == ("Dishwasher · Eco · Main wash", "5% complete")
+    await set_state(hass, appliance.cycle, "pause")
+    assert calls[-1].data["title"] == "Dishwasher · Eco · Main wash · pause"
+    hass.states.async_set(appliance.program, "Intensive 70ºC with extra drying")
+    await set_state(hass, appliance.progress, "10")
+    assert calls[-1].data["title"] == "Dishwasher · Main wash · pause"
+    await set_state(hass, stage, "Final rinse with a long name")
+    await set_state(hass, appliance.progress, "15")
+    assert calls[-1].data["title"] == "Dishwasher · pause"
 
 
 async def test_program_can_be_shown_in_place_of_the_time_left(hass: HomeAssistant) -> None:
@@ -281,7 +323,7 @@ async def test_program_can_be_shown_in_place_of_the_time_left(hass: HomeAssistan
     calls = mock_supernotify(hass)
     hass.states.async_set(appliance.program, "Eco")
     hass.states.async_set(appliance.finish_time, "2026-10-06T21:44:16+00:00")
-    await setup_watcher(hass, appliance, {"live_title": "name", "live_detail": "program"})
+    await setup_watcher(hass, appliance, {"live_timer": False, "live_show": ["program"]})
 
     await set_state(hass, appliance.cycle, "run")
     await set_state(hass, appliance.progress, "5")
@@ -478,18 +520,18 @@ async def test_oven_progress_is_its_temperature_until_up_to_heat(hass: HomeAssis
     assert len(calls) == 1
     await set_temperature(hass, cavity, "104")
     assert len(calls) == 2
-    assert calls[1].data["message"] == "Pre-heating, 104 of 200°C"
+    assert calls[1].data["message"] == f"{PIZZA} · Pre-heating, 104 of 200°C"
     assert calls[1].data["extra_data"]["progress"] == 52
     assert calls[1].data["extra_data"]["silent"] is True
 
     await set_state(hass, oven.others["fast_pre_heat"], "on")
     await set_temperature(hass, cavity, "150")
-    assert calls[2].data["message"] == "Fast pre-heat, 150 of 200°C"
+    assert calls[2].data["message"] == f"{PIZZA} · Fast pre-heat, 150 of 200°C"
     assert calls[2].data["extra_data"]["progress"] == 75
 
     # a lower temperature asked for moves the bar on too
     await set_temperature(hass, oven.others["setpoint_temperature"], "170")
-    assert calls[3].data["message"] == "Fast pre-heat, 150 of 170°C"
+    assert calls[3].data["message"] == f"{PIZZA} · Fast pre-heat, 150 of 170°C"
     assert calls[3].data["extra_data"]["progress"] == 88
 
     # up to heat is told everywhere, in a notification of its own
@@ -539,7 +581,7 @@ async def test_oven_progress_is_its_temperature_until_up_to_heat(hass: HomeAssis
     await set_state(hass, oven.cycle, "run")
     assert calls[0].data["extra_data"]["progress"] == 59
     await set_temperature(hass, cavity, "165")
-    assert calls[1].data["message"] == "Fast pre-heat, 165 of 170°C"
+    assert calls[1].data["message"] == f"{PIZZA} · Fast pre-heat, 165 of 170°C"
 
 
 async def test_oven_is_up_to_heat_when_it_says_so(hass: HomeAssistant) -> None:
@@ -602,7 +644,7 @@ async def test_oven_temperatures_known_only_once_started(hass: HomeAssistant) ->
     await set_temperature(hass, cavity, "50")
     await set_temperature(hass, oven.others["setpoint_temperature"], "200")
     assert len(calls) == 3
-    assert calls[2].data["message"] == "Pre-heating, 50 of 200°C"
+    assert calls[2].data["message"] == f"{PIZZA} · Pre-heating, 50 of 200°C"
     assert calls[2].data["extra_data"]["progress"] == 25
 
     # hot enough without ever having been seen to warm up is still told of

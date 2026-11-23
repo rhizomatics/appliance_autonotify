@@ -35,8 +35,8 @@ from .const import (
     CONF_END_MESSAGE,
     CONF_END_TITLE,
     CONF_GRACE_PERIOD,
-    CONF_LIVE_DETAIL,
-    CONF_LIVE_TITLE,
+    CONF_LIVE_SHOW,
+    CONF_LIVE_TIMER,
     CONF_MAINTENANCE,
     CONF_MAINTENANCE_PREFIX,
     CONF_MIN_DURATION,
@@ -67,8 +67,7 @@ from .const import (
     DURATION_PLACEHOLDER,
     ENERGY_PLACEHOLDER,
     LIVE_DEFAULTS,
-    LIVE_DETAILS,
-    LIVE_TITLES,
+    LIVE_SHOWS,
     MAINTENANCE_ITEMS,
     NAME_PLACEHOLDER,
     PROGRAM_PLACEHOLDER,
@@ -78,8 +77,6 @@ from .const import (
     TYPE_DISCOVERY,
     TYPE_POWER,
     TYPE_VACUUM,
-    VACUUM_LIVE_DEFAULTS,
-    VACUUM_LIVE_DETAILS,
     VACUUM_SETTLE,
 )
 from .dashboards import dashboards
@@ -97,7 +94,7 @@ SECTION_NOTIFY = "notify"
 SECTION_MAINTENANCE = "maintenance_items"
 
 # a switch or a choice left as it comes isn't a setting either
-DEFAULT_CHOICES: dict[str, bool | str] = {
+DEFAULT_CHOICES: dict[str, Any] = {
     CONF_NOTIFY_START: False,
     CONF_NOTIFY_END: True,
     CONF_NOTIFY_PROGRESS: False,
@@ -153,15 +150,15 @@ async def settings_schema(
     if progress:
         fields[vol.Required(CONF_NOTIFY_PROGRESS, default=False)] = BooleanSelector()
     if live and supernotify_available(hass):
-        # only a Live Activity has a title that changes as the cycle goes on, and a timer, which a vacuum hasn't
-        defaults = VACUUM_LIVE_DEFAULTS if vacuum else LIVE_DEFAULTS
-        for key, options in (
-            (CONF_LIVE_TITLE, LIVE_TITLES),
-            (CONF_LIVE_DETAIL, VACUUM_LIVE_DETAILS if vacuum else LIVE_DETAILS),
-        ):
-            fields[vol.Required(key, default=defaults[key])] = SelectSelector(
-                SelectSelectorConfig(options=list(options), mode=SelectSelectorMode.DROPDOWN, translation_key=key)
+        # only a Live Activity shows what the appliance is doing as the cycle goes on, and has a timer, which a
+        # vacuum hasn't
+        if not vacuum:
+            fields[vol.Required(CONF_LIVE_TIMER, default=LIVE_DEFAULTS[CONF_LIVE_TIMER])] = BooleanSelector()
+        fields[vol.Required(CONF_LIVE_SHOW, default=LIVE_DEFAULTS[CONF_LIVE_SHOW])] = SelectSelector(
+            SelectSelectorConfig(
+                options=list(LIVE_SHOWS), multiple=True, mode=SelectSelectorMode.LIST, translation_key=CONF_LIVE_SHOW
             )
+        )
     notify: dict[vol.Marker, Any] = {}
     end: dict[vol.Marker, Any] = {
         vol.Optional(CONF_END_TITLE): TextSelector(),
@@ -262,7 +259,7 @@ class AppliancesConfigFlow(ConfigFlow, domain=DOMAIN):
     VERSION = 1
     # 2 has the choice of what the title of a Live Activity names in place of the switch for the program in it
     # 3 has a dashboard looked for as an appliance is first set up
-    MINOR_VERSION = 3
+    MINOR_VERSION = 4
 
     def __init__(self) -> None:
         self._device_id: str | None = None
@@ -413,7 +410,6 @@ class AppliancesOptionsFlow(OptionsFlowWithReload):
                 defaults
                 | DEFAULT_CHOICES
                 | usual
-                | (VACUUM_LIVE_DEFAULTS if vacuum else {})
                 | {
                     CONF_NOTIFY_PHASE: self._phase_default(),
                     CONF_REMINDER_REPEATS: DEFAULT_REMINDER_REPEATS,
@@ -424,11 +420,16 @@ class AppliancesOptionsFlow(OptionsFlowWithReload):
             # hasn't been asked
             if self.config_entry.options.get(CONF_MAINTENANCE) is None:
                 unset[CONF_MAINTENANCE] = False
+            chosen = flattened(user_input)
+            if CONF_LIVE_SHOW in chosen:
+                # in the order they're shown, so as ticked is the same whatever order they were ticked in
+                chosen[CONF_LIVE_SHOW] = [show for show in LIVE_SHOWS if show in chosen[CONF_LIVE_SHOW]]
             settings = {
                 key: value
-                for key, value in flattened(user_input).items()
-                # an item at 0 is one left out, not one left as it comes
-                if (value or value is False or (key in usual and value == 0)) and value != unset.get(key)
+                for key, value in chosen.items()
+                # an item at 0 is one left out, not one left as it comes, and nothing ticked is nothing shown
+                if (value or value is False or (key == CONF_LIVE_SHOW and value == []) or (key in usual and value == 0))
+                and value != unset.get(key)
             }
             if self._maintenance() is None:
                 # not on the form, so kept as it was

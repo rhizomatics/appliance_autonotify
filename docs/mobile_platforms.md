@@ -77,10 +77,10 @@ Where the Companion docs and the app source disagree, the source is followed and
 | --- | --- | --- | --- | --- |
 | `tag` | Notification id, same tag replaces | Activity id. Only `[A-Za-z0-9_-]`, at most 64 characters, or the activity is refused | Yes, as Supernotify's `mobile_push_notification_tag` | `appliance_<entry_id>` fits |
 | `live_update` | Ongoing, and promoted on Android 16+ | Starts or updates a Live Activity | Yes | |
-| `title` | Set on every notification | Shown as the latest one sent, though the docs still say it is fixed at the start | Yes, the start title on the start and every update, with the program after it, or in its place, in quiet updates that have a timer, or with no timer where the message doesn't say the program, as *Live Activity title* is chosen | An older iOS app keeps the title it started with |
-| `message` | Body text | Body text, replaced by the timer on the Lock Screen | Yes | In quiet updates the status or program, or both, as *Live Activity shows* is chosen, or the percentage when there's neither or when, with a timer, the program is in the title |
+| `title` | Set on every notification | Shown as the latest one sent, though the docs still say it is fixed at the start | Yes, the start title on the start and every update, with what the *Live Activity shows* after it in quiet updates that have a timer, as much as fits | An older iOS app keeps the title it started with |
+| `message` | Body text | Body text, replaced by the timer on the Lock Screen | Yes | In quiet updates what the *Live Activity shows*, or the percentage when there's nothing to show or when, with a timer, it's in the title |
 | `progress`, `progress_max` | `setProgress()` | Bar and percentage, only with both set | Yes, when reported | *Tested* |
-| `chronometer`, `when` | Counts down to `when`, then up into negatives | Counts down to `when`, then up | Yes, when a finish time is reported, unless *Live Activity shows* is other than *Time remaining* | *Tested*, see Time left |
+| `chronometer`, `when` | Counts down to `when`, then up into negatives | Counts down to `when`, then up | Yes, when a finish time is reported, unless *Live Activity timer* is off | *Tested*, see Time left |
 | `when_relative` | `when` as seconds from now | The same, and a negative value counts up to a stop | No | Home Connect gives an absolute time |
 | `critical_text` | Status bar chip text, which wins over the timer | Trailing value: wins over the percentage, loses to the timer in the Dynamic Island | Yes, the percentage, only when there's no finish time | *Tested*, see Status bar chip |
 | `notification_icon` | Small icon, a white MDI glyph, in the status bar and chip | Icon on every view | Yes, from the appliance name | |

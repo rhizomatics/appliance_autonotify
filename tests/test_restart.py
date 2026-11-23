@@ -229,7 +229,8 @@ async def test_vacuum_set_off_again_after_a_restart_is_the_same_cleaning(
     await set_state(hass, vacuum, "returning")
     await set_state(hass, vacuum, "docked")
     await wait(hass, freezer, VACUUM_SETTLE)
-    assert messages(calls) == ["Bruno started", "Bruno is finished", "Bruno is finished"]
+    # told quietly on its way back
+    assert messages(calls) == ["Bruno started", "returning", "Bruno is finished", "Bruno is finished"]
 
 
 async def test_reminder_kept_through_a_restart(hass: HomeAssistant, freezer: FrozenDateTimeFactory) -> None:
@@ -434,7 +435,8 @@ async def test_home_connect_cycle_carried_on_without_starting_again(
     assert entry.runtime_data.running
     await set_state(hass, appliance.cycle, "pause")
     await set_state(hass, appliance.cycle, "run")
-    assert messages(calls) == ["Dishwasher started"]
+    # told only on the Live Activity, as it pauses and carries on
+    assert messages(calls) == ["Dishwasher started", "pause", "Dishwasher started"]
 
     # finished while Home Assistant was off, and told as it starts
     assert await hass.config_entries.async_unload(entry.entry_id)
@@ -442,7 +444,7 @@ async def test_home_connect_cycle_carried_on_without_starting_again(
     freezer.tick(600)
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
-    assert messages(calls) == ["Dishwasher started", "Dishwasher is finished", "Dishwasher is finished"]
+    assert messages(calls)[3:] == ["Dishwasher is finished", "Dishwasher is finished"]
     assert not entry.runtime_data.running
 
 
@@ -472,7 +474,7 @@ async def test_oven_warming_up_through_a_restart(hass: HomeAssistant, freezer: F
     # still warming up, as it was before Home Assistant restarted
     await restart(hass, entry, freezer, off_for=30)
     await set_temperature(hass, cavity, "150")
-    assert messages(calls)[told:] == ["Pre-heating, 150 of 200°C"]
+    assert messages(calls)[told:] == ["cooking_oven_program_heating_mode_pizza_setting · Pre-heating, 150 of 200°C"]
     assert calls[-1].data["extra_data"]["progress"] == 75
 
     # and told once up to heat

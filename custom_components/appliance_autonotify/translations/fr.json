@@ -65,8 +65,8 @@
                     "notify_phase": "Notifier les phases",
                     "notify_progress": "Notifier la progression",
                     "dashboard": "Tableau de bord à ouvrir",
-                    "live_title": "Titre de l'Activité en direct",
-                    "live_detail": "L'Activité en direct affiche",
+                    "live_timer": "Minuteur de l'Activité en direct",
+                    "live_show": "L'Activité en direct affiche",
                     "maintenance": "Suivre l'entretien"
                 },
                 "data_description": {
@@ -75,8 +75,8 @@
                     "notify_phase": "Envoyer une notification quand une phase du cycle est terminée, comme un four qui atteint sa température. Si désactivé, elle n'est affichée que dans l'Activité en direct.",
                     "dashboard": "Ouvert quand on touche une notification ou l'Activité en direct. Laisser vide pour ouvrir l'application là où elle était. Réglé sur un tableau de bord nommé d'après l'appareil ou son type, comme « Lave-vaisselle » ou « Lave-linge », s'il en existait un quand l'appareil a été ajouté.",
                     "notify_progress": "Envoyer une notification tous les 10 % du cycle. Si désactivé, la progression n'est affichée que sur la barre de progression de l'Activité en direct, mise à jour en silence.",
-                    "live_title": "Le titre de l'Activité en direct. Le programme est utile à côté du nom quand le temps restant prend la place du message, comme sur l'écran verrouillé d'un iPhone. Ne choisir que le nom si les noms des programmes sont trop longs, ou si l'appareil utilise toujours le même programme.",
-                    "live_detail": "Afficher le temps restant, quand l'appareil indique quand il aura fini, ou à la place le programme, l'état, c'est-à-dire ce qu'il fait dans son cycle, comme le séchage ou un robot aspirateur qui se repositionne, ou les deux. Le programme peut être le cycle entier ou une phase, comme un prélavage, et pour un robot aspirateur c'est son mode de nettoyage. Ce que l'appareil n'indique pas est omis.",
+                    "live_timer": "Afficher le compte à rebours du temps restant sur l'Activité en direct, si l'appareil indique quand il aura fini. Sur l'écran verrouillé de l'iPhone, le minuteur prend la place du message, donc ce qui est affiché ci-dessous va dans le titre, autant qu'il en tient à côté du nom.",
+                    "live_show": "Ce que fait l'appareil, chaque élément s'il l'indique et qu'il y a quelque chose à dire. Le programme, comme Eco 50ºC, peut être retiré pour un appareil toujours sur le même. La phase est la partie du cycle en cours, comme un prélavage, le séchage ou un robot aspirateur qui se repositionne. L'état n'est affiché que s'il dit plus qu'en marche, comme en pause ou en retour à la base. Faute de place dans le titre, le programme est retiré en premier.",
                     "maintenance": "Compter les cycles, et la durée de vie restante des pièces que l'appareil signale, et mettre ce qui est dû sur la liste de tâches Entretien des appareils, avec une notification à l'échéance. Proposé une fois dans la notification de fin si désactivé."
                 },
                 "sections": {
@@ -171,19 +171,11 @@
                 "kettle": "bouilloire"
             }
         },
-        "live_title": {
+        "live_show": {
             "options": {
-                "name_program": "Nom de l'appareil et programme",
-                "program": "Programme seulement",
-                "name": "Nom de l'appareil seulement"
-            }
-        },
-        "live_detail": {
-            "options": {
-                "time_remaining": "Temps restant",
                 "program": "Programme",
-                "status": "État",
-                "program_status": "Programme et état"
+                "phase": "Phase",
+                "state": "État"
             }
         }
     },

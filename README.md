@@ -106,7 +106,7 @@ back on its dock is still the end. A cleaning under way when Home Assistant rest
 report a past error again for a while as they reconnect, with the vacuum carrying on.
 
 Where the vacuum's integration reports them, as Roborock's does, its *Cleaning mode* is its program, its *Status*, such as sweeping or relocating, is its status, and its *Cleaning progress* fills the bar of the Live Activity,
-once it has dropped from the 100% left by the cleaning before. A vacuum has no time left to show, so its *Live Activity shows* is the *Program and status* by default, such as "Vac and mop · Sweeping", and its *Live Activity title* the *Appliance name only*.
+once it has dropped from the 100% left by the cleaning before. A vacuum has no time left to show, so its Live Activity says what it's doing in its message, such as "Vac and mop · Sweeping", and "Returning" on its way back to its dock, whether or not it has a status of its own.
 
 ### Power Monitored Appliances
 
@@ -137,9 +137,9 @@ Nothing needs changing for notifications to work. Each appliance on the integrat
   -  on by default for ovens
 - *Notify progress* switch
   - off by default, switch on to get the percentage or ETA regularly notified
-- a choice of *Live Activity title* and of what the *Live Activity shows*
-  - Choose to have the main title be the appliance name and the programme name ("Dishwashed Intensive 70C"), or only the appliance name or programme
-  - Choose to have the 2nd line of live activity be the countdown clock, the programme name, the status, such as "Drying" or "Relocating", or the programme and status together
+- *Live Activity timer*, and what the *Live Activity shows*
+  - The timer counts down the time left, where the appliance reports when it will finish, on by default
+  - Tick any of the *Program*, such as "Intensive 70ºC", the *Phase*, such as "Drying" or "Relocating", and the *State*, such as "Paused" or "Returning", all ticked by default
   - Supernotify required for these options
 - *Dashboard to open*
   - when a notification or the Live Activity is tapped.
@@ -154,14 +154,15 @@ With *Notify start* or *Notify end* off, that notification isn't sent, but the L
 | End message          | The same for when it finishes, such as "Dishwasher is finished". `{duration}` is replaced by how long it ran, such as "1 h 40 min", `{energy}` by the energy it used, such as "0.74 kWh", where the appliance or its smart plug has an energy meter, and `{cost}` by what that cost, at the grid price set on the Energy dashboard, each by nothing where it isn't known. A line left with nothing but its emoji, such as "⚡ {energy}" with no meter, is left out. With Supernotify, also a *Reminder*, see below |
 | Notification targets | With Supernotify, *Targets* is the same choice of entities, devices, areas, floors and labels as any Supernotify notification, *Custom targets* is for those outside Home Assistant, such as e-mail addresses or phone numbers, and *Deliveries* limits notifications to those chosen. Leave them empty for Supernotify to choose. Without Supernotify, *Targets* is a choice of notify entities, and left empty means every phone with the Home Assistant app |
 
-*Live Activity shows* is the *Time remaining* by default, where the appliance reports when it will finish, or in its place the *Program*, the *Status*, or the *Program and status*, such as "Vac and mop · Sweeping". The program can be the whole cycle, or a phase of it, such as a pre-heat or a pre-rinse, so for some appliances it says more than the time left. The status is what the appliance is doing within its cycle, such as a dryer drying then cooling. Where the appliance reports only one of them, that one is shown.
+What the *Live Activity shows* is whichever of the program, the phase and the state are ticked, each only where the appliance reports it and has something to say:
 
-With no timer, the message is seen, so *Appliance name and program* puts the program in the title only where the message doesn't already say it, such as "Jill · Vac and mop" over "Sweeping" with *Status* chosen.
+- **Program**, such as "Eco 50ºC", worth unticking for an appliance that's always on the same one, a dishwasher, say, and worth keeping for one that isn't, such as an oven
+- **Phase**, the part of the cycle it's in, such as a pre-rinse, a dryer drying then cooling, an oven pre-heating, or a robot vacuum relocating
+- **State**, only when it's more than running, such as paused, waiting for something to be done, or a robot vacuum returning to its dock
 
-On the Lock Screen of an iPhone the timer takes the place of the message, which is where the program otherwise goes,
-so while there's a time left to show, *Live Activity title* is *Appliance name and program* by default, such as
-"Dishwasher · Eco 50ºC". Choose *Program only* to have the program alone, or *Appliance name only* for program names
-too long to fit, or for an appliance that's always on the same program.
+Any that says no more than another is left out, such as a vacuum's status of "Returning home" beside its "Returning".
+
+With the timer, the time left counts down on the Lock Screen of an iPhone in place of the message, so what's shown goes in the title beside the name, such as "Dishwasher · Eco 50ºC · Main wash", as much as fits: the program is left out first, then the phase, while the state, there least often and most worth knowing when it is, stays. The message has the progress, such as "40% complete". Turn the timer off to have the name alone as the title, and what's shown in the message, where there's room for all of it.
 
 ## Notifications
 

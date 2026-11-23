@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 from homeassistant.config_entries import SOURCE_USER, ConfigEntryState
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 from homeassistant.setup import async_setup_component
@@ -116,6 +116,20 @@ async def test_vacuum_offered_keeps_its_type(hass: HomeAssistant) -> None:
     assert result["data"] == {"device_id": device_id, "type": "vacuum"}
 
 
+def told(calls: list[ServiceCall]) -> list[ServiceCall]:
+    """What was notified, leaving out the quiet updates of the Live Activity as the vacuum pauses or heads back"""
+    told: list[ServiceCall] = []
+    after_state = False
+    for call in calls:
+        quiet = bool(call.data.get("extra_data", {}).get("silent"))
+        state = quiet and call.data["message"] in ("paused", "returning")
+        # carrying on after one is told of quietly too
+        if not state and not (quiet and after_state):
+            told.append(call)
+        after_state = state
+    return told
+
+
 async def test_vacuum_cleaning_is_a_cycle(hass: HomeAssistant) -> None:
     device_id, vacuum = add_vacuum(hass)
     calls = mock_supernotify(hass)
@@ -124,7 +138,7 @@ async def test_vacuum_cleaning_is_a_cycle(hass: HomeAssistant) -> None:
     tag = f"appliance_{entry.entry_id}"
 
     await set_state(hass, vacuum, "cleaning")
-    assert len(calls) == 1
+    assert len(told(calls)) == 1
     assert calls[0].data == {
         "message": "Bruno started",
         "title": "Bruno",
@@ -135,19 +149,21 @@ async def test_vacuum_cleaning_is_a_cycle(hass: HomeAssistant) -> None:
     # paused, on its way back, or away with the vendor cloud, it's still the same cleaning
     for state in ("paused", "cleaning", "returning", "unavailable"):
         await set_state(hass, vacuum, state)
-    assert len(calls) == 1
+    assert len(told(calls)) == 1
 
     # back, but not over till it has stayed back
     await set_state(hass, vacuum, "docked")
-    assert len(calls) == 1
+    assert len(told(calls)) == 1
     await pass_time(hass, VACUUM_SETTLE)
-    assert len(calls) == 3
-    assert calls[1].data["extra_data"] == {"mobile_push_notification_tag": tag, "mobile_push_clear_notification": True}
-    assert calls[2].data == ended("Bruno", entry.entry_id, ICON, force_resend=True)
+    assert len(told(calls)) == 3
+    # the Live Activity told quietly as it paused, carried on and headed back
+    assert [call.data["message"] for call in calls[1:4]] == ["paused", "Bruno started", "returning"]
+    assert told(calls)[1].data["extra_data"] == {"mobile_push_notification_tag": tag, "mobile_push_clear_notification": True}
+    assert told(calls)[2].data == ended("Bruno", entry.entry_id, ICON, force_resend=True)
 
     # docked again is no new end
     await set_state(hass, vacuum, "idle")
-    assert len(calls) == 3
+    assert len(told(calls)) == 3
 
 
 async def test_vacuum_stuck_is_told(hass: HomeAssistant) -> None:
@@ -215,12 +231,12 @@ async def test_vacuum_back_to_wash_its_mop_is_the_same_cleaning(hass: HomeAssist
     await advance(hass, freezer, VACUUM_SETTLE - 60)
     await set_state(hass, vacuum, "cleaning")
     await advance(hass, freezer, VACUUM_SETTLE)
-    assert len(calls) == 1
+    assert len(told(calls)) == 1
 
     await set_state(hass, vacuum, "returning")
     await set_state(hass, vacuum, "docked")
     await advance(hass, freezer, VACUUM_SETTLE)
-    assert len(calls) == 3
+    assert len(told(calls)) == 3
 
 
 async def test_vacuum_docked_as_it_sets_off_is_the_same_cleaning(hass: HomeAssistant, freezer: FrozenDateTimeFactory) -> None:
@@ -249,14 +265,14 @@ async def test_vacuum_docked_as_it_sets_off_is_the_same_cleaning(hass: HomeAssis
     ):
         await set_state(hass, vacuum, state)
         await advance(hass, freezer, seconds)
-    assert [call.data["message"] for call in calls] == ["Bruno started"]
+    assert [call.data["message"] for call in told(calls)] == ["Bruno started"]
 
     # back for good, and over once it has stayed so
     await set_state(hass, vacuum, "docked")
     await advance(hass, freezer, VACUUM_SETTLE - 1)
-    assert len(calls) == 1
+    assert len(told(calls)) == 1
     await advance(hass, freezer, 1)
-    assert [call.data["message"] for call in calls] == ["Bruno started", "Bruno is finished", "Bruno is finished"]
+    assert [call.data["message"] for call in told(calls)] == ["Bruno started", "Bruno is finished", "Bruno is finished"]
 
 
 async def test_vacuum_long_on_its_dock_part_way_through(hass: HomeAssistant, freezer: FrozenDateTimeFactory) -> None:
@@ -279,11 +295,11 @@ async def test_vacuum_long_on_its_dock_part_way_through(hass: HomeAssistant, fre
     ):
         await set_state(hass, vacuum, state)
         await advance(hass, freezer, seconds)
-    assert [call.data["message"] for call in calls] == ["Bruno started"]
+    assert [call.data["message"] for call in told(calls)] == ["Bruno started"]
 
     await set_state(hass, vacuum, "docked")
     await advance(hass, freezer, VACUUM_SETTLE)
-    assert [call.data["message"] for call in calls] == ["Bruno started", "Bruno is finished", "Bruno is finished"]
+    assert [call.data["message"] for call in told(calls)] == ["Bruno started", "Bruno is finished", "Bruno is finished"]
 
 
 async def test_vacuum_straight_back_from_cleaning_for_good(hass: HomeAssistant, freezer: FrozenDateTimeFactory) -> None:
@@ -323,12 +339,12 @@ async def test_vacuum_paused_on_its_dock_once_back(hass: HomeAssistant, freezer:
     await advance(hass, freezer, 60)
     await set_state(hass, vacuum, "unavailable")
     await advance(hass, freezer, VACUUM_SETTLE - 176)
-    assert [call.data["message"] for call in calls] == ["Bruno started", "Bruno is finished", "Bruno is finished"]
+    assert [call.data["message"] for call in told(calls)] == ["Bruno started", "Bruno is finished", "Bruno is finished"]
 
     # nor is it a new cleaning when it's back from the cloud
     for state in ("paused", "docked"):
         await set_state(hass, vacuum, state)
-    assert len(calls) == 3
+    assert len(told(calls)) == 3
 
 
 async def test_vacuum_paused_out_cleaning(hass: HomeAssistant, freezer: FrozenDateTimeFactory) -> None:
@@ -344,7 +360,7 @@ async def test_vacuum_paused_out_cleaning(hass: HomeAssistant, freezer: FrozenDa
     await advance(hass, freezer, 600)
     await set_state(hass, vacuum, "paused")
     await advance(hass, freezer, VACUUM_BLIP_SETTLE)
-    assert len(calls) == 1
+    assert len(told(calls)) == 1
 
 
 async def test_vacuum_cleaning_through_a_restart(hass: HomeAssistant, freezer: FrozenDateTimeFactory) -> None:
@@ -407,16 +423,16 @@ async def test_vacuum_as_a_real_one_reports_it(hass: HomeAssistant) -> None:
 
     for state in ("docked", "error", "docked", "paused", "docked", "paused", "docked"):
         await set_state(hass, vacuum, state)
-    assert calls == []
+    assert told(calls) == []
 
     await set_state(hass, vacuum, "cleaning")
     await set_state(hass, vacuum, "docked")
     await pass_time(hass, 128)
     await set_state(hass, vacuum, "returning")
     await set_state(hass, vacuum, "docked")
-    assert len(calls) == 1
+    assert len(told(calls)) == 1
     await pass_time(hass, VACUUM_SETTLE)
-    assert len(calls) == 3
+    assert len(told(calls)) == 3
     assert calls[2].data["message"] == "Bruno is finished"
 
 
@@ -432,8 +448,8 @@ async def test_vacuum_error_once_back_is_the_end(hass: HomeAssistant, freezer: F
     # an empty water tank, say, which the vacuum's own app tells of
     await set_state(hass, vacuum, "error")
     await pass_time(hass, VACUUM_SETTLE)
-    assert len(calls) == 2
-    assert calls[1].data["message"] == "Bruno is finished"
+    assert len(told(calls)) == 2
+    assert told(calls)[1].data["message"] == "Bruno is finished"
 
 
 async def test_vacuum_error_again_on_reconnecting_isnt_stuck(hass: HomeAssistant) -> None:
@@ -454,11 +470,11 @@ async def test_vacuum_error_again_on_reconnecting_isnt_stuck(hass: HomeAssistant
     await pass_time(hass, 240)
     await set_state(hass, vacuum, "returning")
     await set_state(hass, vacuum, "docked")
-    assert len(calls) == 1
+    assert len(told(calls)) == 1
     await pass_time(hass, VACUUM_SETTLE)
-    assert len(calls) == 3
+    assert len(told(calls)) == 3
     assert calls[2].data["message"] == "Bruno is finished"
-    assert "Bruno needs help" not in [call.data["message"] for call in calls]
+    assert "Bruno needs help" not in [call.data["message"] for call in told(calls)]
 
 
 async def test_vacuum_stuck_in_italian(hass: HomeAssistant) -> None:
@@ -500,18 +516,18 @@ async def test_vacuum_done_by_its_own_progress_ends_soon(hass: HomeAssistant, fr
     await advance(hass, freezer, 183)
     await set_state(hass, vacuum, "docked")
     await advance(hass, freezer, VACUUM_COMPLETE_SETTLE - 1)
-    assert len(calls) == 1
+    assert len(told(calls)) == 1
     await advance(hass, freezer, 1)
-    assert [call.data["message"] for call in calls] == ["Bruno started", "Bruno is finished", "Bruno is finished"]
+    assert [call.data["message"] for call in told(calls)] == ["Bruno started", "Bruno is finished", "Bruno is finished"]
 
     # the next cleaning starts from the 100 left by this one, which isn't its end
     await set_state(hass, vacuum, "cleaning")
     await set_state(hass, vacuum, "returning")
     await set_state(hass, vacuum, "docked")
     await advance(hass, freezer, VACUUM_SETTLE - 1)
-    assert len(calls) == 4
+    assert len(told(calls)) == 4
     await advance(hass, freezer, 1)
-    assert len(calls) == 6
+    assert len(told(calls)) == 6
 
 
 async def test_vacuum_back_to_wash_its_mop_short_of_100(hass: HomeAssistant, freezer: FrozenDateTimeFactory) -> None:
@@ -531,7 +547,7 @@ async def test_vacuum_back_to_wash_its_mop_short_of_100(hass: HomeAssistant, fre
     await advance(hass, freezer, VACUUM_SETTLE - 60)
     await set_state(hass, vacuum, "cleaning")
     await advance(hass, freezer, VACUUM_SETTLE)
-    assert len(calls) == 1
+    assert len(told(calls)) == 1
 
 
 async def test_vacuum_progress_at_100_once_back(hass: HomeAssistant, freezer: FrozenDateTimeFactory) -> None:
@@ -549,7 +565,7 @@ async def test_vacuum_progress_at_100_once_back(hass: HomeAssistant, freezer: Fr
     await advance(hass, freezer, 60)
     await set_state(hass, progress, "100")
     await advance(hass, freezer, VACUUM_COMPLETE_SETTLE)
-    assert len(calls) == 3
+    assert len(told(calls)) == 3
 
 
 async def test_vacuum_wait_on_its_dock_is_a_setting(hass: HomeAssistant, freezer: FrozenDateTimeFactory) -> None:
@@ -577,9 +593,9 @@ async def test_vacuum_wait_on_its_dock_is_a_setting(hass: HomeAssistant, freezer
     await set_state(hass, vacuum, "returning")
     await set_state(hass, vacuum, "docked")
     await advance(hass, freezer, 119)
-    assert len(calls) == 1
+    assert len(told(calls)) == 1
     await advance(hass, freezer, 1)
-    assert len(calls) == 3
+    assert len(told(calls)) == 3
 
 
 async def test_vacuum_recharging_part_way_through(hass: HomeAssistant, freezer: FrozenDateTimeFactory) -> None:
@@ -602,7 +618,7 @@ async def test_vacuum_recharging_part_way_through(hass: HomeAssistant, freezer: 
     await advance(hass, freezer, 60)
     await set_state(hass, vacuum, "docked")
     await advance(hass, freezer, 2 * 3600)
-    assert len(calls) == 1
+    assert len(told(calls)) == 1
     await set_state(hass, vacuum, "cleaning")
     await advance(hass, freezer, 1800)
     await set_state(hass, vacuum, "returning")
@@ -612,9 +628,9 @@ async def test_vacuum_recharging_part_way_through(hass: HomeAssistant, freezer: 
     await advance(hass, freezer, 10)
     await set_state(hass, cleaning, "off")
     await advance(hass, freezer, VACUUM_COMPLETE_SETTLE - 1)
-    assert len(calls) == 1
+    assert len(told(calls)) == 1
     await advance(hass, freezer, 1)
-    assert [call.data["message"] for call in calls] == ["Bruno started", "Bruno is finished", "Bruno is finished"]
+    assert [call.data["message"] for call in told(calls)] == ["Bruno started", "Bruno is finished", "Bruno is finished"]
 
 
 async def test_vacuum_running_sensor_off_before_its_back(hass: HomeAssistant, freezer: FrozenDateTimeFactory) -> None:
@@ -634,7 +650,7 @@ async def test_vacuum_running_sensor_off_before_its_back(hass: HomeAssistant, fr
     await set_state(hass, vacuum, "returning")
     await set_state(hass, vacuum, "docked")
     await advance(hass, freezer, VACUUM_COMPLETE_SETTLE)
-    assert len(calls) == 3
+    assert len(told(calls)) == 3
 
 
 async def test_vacuum_running_sensor_stuck_on(hass: HomeAssistant, freezer: FrozenDateTimeFactory) -> None:
@@ -653,9 +669,9 @@ async def test_vacuum_running_sensor_stuck_on(hass: HomeAssistant, freezer: Froz
     # paused on its dock is still waiting on it
     await set_state(hass, vacuum, "paused")
     await advance(hass, freezer, VACUUM_HELD_SETTLE - 1)
-    assert len(calls) == 1
+    assert len(told(calls)) == 1
     await advance(hass, freezer, 1)
-    assert len(calls) == 3
+    assert len(told(calls)) == 3
 
 
 async def test_vacuum_running_sensor_on_from_before(hass: HomeAssistant, freezer: FrozenDateTimeFactory) -> None:
@@ -672,7 +688,7 @@ async def test_vacuum_running_sensor_on_from_before(hass: HomeAssistant, freezer
     await set_state(hass, vacuum, "returning")
     await set_state(hass, vacuum, "docked")
     await advance(hass, freezer, VACUUM_SETTLE)
-    assert len(calls) == 3
+    assert len(told(calls)) == 3
 
     await set_state(hass, drying, "off")
     await set_state(hass, vacuum, "cleaning")
@@ -681,7 +697,7 @@ async def test_vacuum_running_sensor_on_from_before(hass: HomeAssistant, freezer
     await set_state(hass, vacuum, "returning")
     await set_state(hass, vacuum, "docked")
     await advance(hass, freezer, VACUUM_SETTLE)
-    assert len(calls) == 6
+    assert len(told(calls)) == 6
 
 
 async def test_vacuum_running_sensor_through_a_restart(hass: HomeAssistant, freezer: FrozenDateTimeFactory) -> None:
@@ -696,10 +712,10 @@ async def test_vacuum_running_sensor_through_a_restart(hass: HomeAssistant, free
     await set_state(hass, vacuum, "returning")
     await set_state(hass, vacuum, "docked")
     await advance(hass, freezer, VACUUM_SETTLE)
-    assert calls == []
+    assert told(calls) == []
     await set_state(hass, cleaning, "off")
     await advance(hass, freezer, VACUUM_COMPLETE_SETTLE)
-    assert len(calls) == 2
+    assert len(told(calls)) == 2
 
 
 async def test_vacuum_status_is_said_as_it_goes(hass: HomeAssistant) -> None:
@@ -820,26 +836,50 @@ async def test_vacuum_progress_back_from_unavailable_on_its_way_home(
 
 
 @pytest.mark.parametrize(
-    ("detail", "title", "message"),
+    ("show", "title", "message"),
     [
-        ("status", "Bruno · vac_and_mop", "sweeping"),
-        # with the mode in the message there's no need for it in the title too
-        ("program_status", "Bruno", "vac_and_mop · sweeping"),
-        ("program", "Bruno", "vac_and_mop"),
+        # with no timer the title is the name, and the message says it all
+        (None, "Bruno", "vac_and_mop · sweeping"),
+        (["phase"], "Bruno", "sweeping"),
+        (["program"], "Bruno", "vac_and_mop"),
     ],
 )
-async def test_vacuum_title_can_have_its_cleaning_mode(hass: HomeAssistant, detail: str, title: str, message: str) -> None:
+async def test_vacuum_shows_what_is_chosen(hass: HomeAssistant, show: list[str] | None, title: str, message: str) -> None:
     device_id, vacuum, status, _, _ = add_roborock(hass)
     calls = mock_supernotify(hass)
-    await setup_vacuum(hass, device_id, live_title="name_program", live_detail=detail)
+    await setup_vacuum(hass, device_id, **({} if show is None else {"live_show": show}))
 
     await set_state(hass, status, "sweeping")
     await set_state(hass, vacuum, "cleaning")
     assert (calls[-1].data["title"], calls[-1].data["message"]) == (title, message)
 
 
+async def test_vacuum_returning_is_shown(hass: HomeAssistant) -> None:
+    """On its way back to its dock, which is a while for some, said though it has no status of its own"""
+    device_id, vacuum = add_vacuum(hass)
+    calls = mock_supernotify(hass)
+    hass.states.async_set(vacuum, "docked")
+    await setup_vacuum(hass, device_id)
+
+    await set_state(hass, vacuum, "cleaning")
+    await set_state(hass, vacuum, "returning")
+    assert calls[-1].data["message"] == "returning"
+
+
+async def test_vacuum_returning_said_once(hass: HomeAssistant) -> None:
+    """With a status saying the same as it heads back, said once"""
+    device_id, vacuum, status, _, _ = add_roborock(hass)
+    calls = mock_supernotify(hass)
+    await setup_vacuum(hass, device_id)
+    await set_state(hass, status, "sweeping")
+    await set_state(hass, vacuum, "cleaning")
+    await set_state(hass, status, "returning_home")
+    await set_state(hass, vacuum, "returning")
+    assert calls[-1].data["message"] == "vac_and_mop · returning_home"
+
+
 async def test_vacuum_live_activity_settings(hass: HomeAssistant) -> None:
-    """A vacuum has no time left to show, and its own choices unless chosen otherwise, which aren't kept as settings"""
+    """A vacuum has no time left to show, so no timer to choose, and what's shown left as it comes isn't a setting"""
     device_id, _, _, _, _ = add_roborock(hass)
     mock_supernotify(hass)
     entry = await setup_vacuum(hass, device_id)
@@ -848,19 +888,19 @@ async def test_vacuum_live_activity_settings(hass: HomeAssistant) -> None:
     assert result["data_schema"] is not None
     fields = {str(k): k for k in schema(result)}
     assert "notify_progress" not in fields
-    assert (fields["live_title"].default(), fields["live_detail"].default()) == ("name", "program_status")
-    detail = schema(result)[fields["live_detail"]]
-    assert detail.config["options"] == ["program_status", "status", "program"]
+    assert "live_timer" not in fields
+    assert fields["live_show"].default() == ["program", "phase", "state"]
 
     form: dict[str, object] = {"start": {}, "end": {}, "notify": {}}
-    await hass.config_entries.options.async_configure(
-        result["flow_id"], form | {"live_title": "name", "live_detail": "program_status"}
-    )
+    await hass.config_entries.options.async_configure(result["flow_id"], form | {"live_show": ["state", "phase", "program"]})
     await hass.async_block_till_done()
     assert entry.options == {}
     result = await hass.config_entries.options.async_init(entry.entry_id)
-    await hass.config_entries.options.async_configure(
-        result["flow_id"], form | {"live_title": "name_program", "live_detail": "status"}
-    )
+    await hass.config_entries.options.async_configure(result["flow_id"], form | {"live_show": ["state", "phase"]})
     await hass.async_block_till_done()
-    assert entry.options == {"live_title": "name_program", "live_detail": "status"}
+    assert entry.options == {"live_show": ["phase", "state"]}
+    # and nothing ticked is nothing shown
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    await hass.config_entries.options.async_configure(result["flow_id"], form | {"live_show": []})
+    await hass.async_block_till_done()
+    assert entry.options == {"live_show": []}
