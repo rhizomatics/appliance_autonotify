@@ -27,7 +27,6 @@ docs=[
     "mkdocs-coverage",
     "mkdocs-pagetree-plugin",
     "properdocs",
-    "pngquant",
     "mkdocstrings",
     "mkdocstrings-python",
     "mkdocs-git-revision-date-localized-plugin",

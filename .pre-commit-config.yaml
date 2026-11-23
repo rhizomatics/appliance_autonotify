@@ -2,6 +2,16 @@ default_language_version:
   python: python3.14
 
 repos:
+  - repo: local
+    hooks:
+      - id: optimize-png
+        name: optimize PNGs
+        entry: python docgen/optimize_png.py
+        language: python
+        additional_dependencies: [pngquant-cli==3.0.3]
+        types: [png]
+        # the docs' own, as the docs build optimised, and not the brand icons Home Assistant shows
+        files: ^docs/
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:

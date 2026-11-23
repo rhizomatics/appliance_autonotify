@@ -17,6 +17,8 @@ homeassistant = { timestamp = "0001-01-01T00:00:00Z", span = "P2D" }
 homeassistant-repl = false
 pytest-homeassistant = { timestamp = "0001-01-01T00:00:00Z", span = "P2D" }
 ruff = { timestamp = "0001-01-01T00:00:00Z", span = "P2D" }
+signalk-cli = false
+updates2mqtt = false
 uv = { timestamp = "0001-01-01T00:00:00Z", span = "P2D" }
 
 [manifest]
@@ -326,7 +328,6 @@ docs = [
     { name = "mkdocs-pagetree-plugin" },
     { name = "mkdocstrings" },
     { name = "mkdocstrings-python" },
-    { name = "pngquant" },
     { name = "properdocs" },
     { name = "pymdown-extensions" },
 ]
@@ -362,7 +363,6 @@ docs = [
     { name = "mkdocs-pagetree-plugin" },
     { name = "mkdocstrings" },
     { name = "mkdocstrings-python" },
-    { name = "pngquant" },
     { name = "properdocs" },
     { name = "pymdown-extensions" },
 ]
@@ -2885,19 +2885,6 @@ wheels = [
 ]
 
 [[package]]
-name = "pngquant"
-version = "3.0.3"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "pillow" },
-    { name = "puremagic" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/2b/be/9484b64a5b5276d94012a0bd1bae924e785bd98bf1fd4f2947316a5e1a55/pngquant-3.0.3.tar.gz", hash = "sha256:a46ec30c5b0c589f0ae9d003e1f7f97d35dbdf52ae32573e69cfbcf992f55461", size = 5436, upload-time = "2025-03-25T09:39:30.031Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/ab/da/ccda14f6fe663d8227d7013b9e5fe64cc6a5fc9871e7e3a206794afa2109/pngquant-3.0.3-py2.py3-none-any.whl", hash = "sha256:1b02212272dbc027f9cbd2e977c0f03f834bf4a84ab940882a2e8760516c1759", size = 5864, upload-time = "2025-03-25T09:39:27.978Z" },
-]
-
-[[package]]
 name = "probatio"
 version = "0.13.0"
 source = { registry = "https://pypi.org/simple" }
@@ -3050,15 +3037,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/01/4f/32a51f53d645044740d0513a6a029d782b35bdc51a55ea171ce85034f5b7/psutil-home-assistant-0.0.1.tar.gz", hash = "sha256:ebe4f3a98d76d93a3140da2823e9ef59ca50a59761fdc453b30b4407c4c1bdb8", size = 6045, upload-time = "2022-08-25T14:28:39.926Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/cb/48/8a0acb683d1fee78b966b15e78143b673154abb921061515254fb573aacd/psutil_home_assistant-0.0.1-py3-none-any.whl", hash = "sha256:35a782e93e23db845fc4a57b05df9c52c2d5c24f5b233bd63b01bae4efae3c41", size = 6300, upload-time = "2022-08-25T14:28:38.083Z" },
-]
-
-[[package]]
-name = "puremagic"
-version = "2.3.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/a7/8d/4d60110e23f445e2dc106340f9bd5f422bb6c540f4fb21086d3ee44b52ab/puremagic-2.3.0.tar.gz", hash = "sha256:b54e4a69dd37c50bacc879380f132382ab4e9a935529628c8975abcc73e10640", size = 1214491, upload-time = "2026-11-16T04:55:04.12Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/8c/40/72fcaa2f4b850da0207c111be7d2748a57a1c8e8ab149fdc1618323a0b87/puremagic-2.3.0-py3-none-any.whl", hash = "sha256:15ce035fe4c3f23e884a105d07448a5a81dd2e297985bdb636928ddf89bb3fe7", size = 73366, upload-time = "2026-11-16T04:55:02.784Z" },
 ]
 
 [[package]]

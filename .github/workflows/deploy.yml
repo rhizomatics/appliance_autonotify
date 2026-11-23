@@ -74,7 +74,6 @@ jobs:
     - name: ProperDocs
       run:  |
         uv sync --dev --group docs
-        sudo apt-get install pngquant
         uv run properdocs build
     - name: Upload docs site
       # only main is published, a pull request just proves the docs build
