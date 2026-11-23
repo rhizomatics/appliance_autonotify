@@ -146,6 +146,8 @@ PROFILES: Final[dict[str, PlatformProfile]] = {
                 "sensor_remaining_program_time": REMAINING_TIME_KEY,
                 "sensor_active_program": "active_program",
                 "select_program": "selected_program",
+                # what a dishwasher is doing within its cycle, as Home Connect doesn't report it
+                "sensor_program_phase": STAGE_KEY,
             },
             program_types={
                 "laundrycare_washer_program_": "washer",
@@ -155,6 +157,8 @@ PROFILES: Final[dict[str, PlatformProfile]] = {
                 "consumerproducts_cleaningrobot_program_": "cleaning_robot",
                 "heatingventilationairconditioning_airconditioner_program_": "air_conditioner",
             },
+            # a dishwasher seen through a whole cycle, its washers, dryers and others yet to be
+            supported_types=frozenset({"dishwasher"}),
             issue_url="https://github.com/rhizomatics/appliance_autonotify/issues/28",
         ),
         # LG ThinQ, whose one state says both whether a washer, dryer or dishwasher is running and what it's doing,

@@ -45,11 +45,13 @@ Where an integration names its entities or states its own way, or has more to te
 
 | Integration | Appliances | Issue |
 | ----------- | ---------- | ----- |
-| [Home Connect Local](https://github.com/chris-mc1/homeconnect_local_hass) | Bosch, Siemens, Neff | [#28](https://github.com/rhizomatics/appliance_autonotify/issues/28) |
+| [Home Connect Local](https://github.com/chris-mc1/homeconnect_local_hass) | Bosch, Siemens, Neff washers, dryers and others (dishwashers supported) | [#28](https://github.com/rhizomatics/appliance_autonotify/issues/28) |
 | [LG ThinQ](https://www.home-assistant.io/integrations/lg_thinq/) | LG dishwashers (washers and dryers supported) | [#27](https://github.com/rhizomatics/appliance_autonotify/issues/27) |
 | [Miele](https://www.home-assistant.io/integrations/miele/) | Miele washers, dryers, dishwashers, ovens | [Issues](https://github.com/rhizomatics/appliance_autonotify/issues) |
 
 LG ThinQ has one state for both whether the appliance is running and what it's doing, such as *Rinsing*, which is shown as its status, and reports no progress, so it's worked out from the time the cycle takes and the time left, and moved on each minute.
+
+Home Connect Local reports a dishwasher's program phase, such as *Main wash*, which is shown as its status, where Home Connect reports none.
 
 Miele gives every appliance the same status, a fridge's as much as a washer's, so only one with a program phase too is taken to have a cycle. Its progress is worked out from the time the program has taken and the time it has left.
 

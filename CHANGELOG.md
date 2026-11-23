@@ -2,6 +2,12 @@
 title: What's New
 ---
 
+# 1.0.2
+## ✨ Enhancements
+- Home Connect Local dishwashers supported, now seen through a whole cycle, so no longer offered as new (#28)
+  - Its program phase, such as *Main wash* or *Drying*, shown as the status, where the Live Activity is chosen to show it
+  - Its washers, dryers and other appliances still new, till one of each has been tried
+
 # 1.0.1
 ## 🐛 Fixes
 - Robot vacuum Live Activity no longer left at an old progress, such as 51%, all the way home, where its progress went unavailable with its cloud connection and came back at 100, as Roborock's can as it heads back
