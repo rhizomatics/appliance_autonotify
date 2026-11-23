@@ -6,27 +6,51 @@
 ![Coverage](https://raw.githubusercontent.com/rhizomatics/appliance_autonotify/refs/heads/badges/badges/coverage.svg)
 ![Tests](https://raw.githubusercontent.com/rhizomatics/appliance_autonotify/refs/heads/badges/badges/tests.svg)
 
+![Logo](https://appliance-autonotify.rhizomatics.org.uk/assets/images/icon.png)
 Automatic notifications for household appliances in Home Assistant, with no automations or YAML.
+
+When a dishwasher, washing machine, oven or other appliance starts a cycle, you're told it started, your phone shows a [Live Activity](https://companion.home-assistant.io/docs/notifications/live-activities) with progress and time remaining while it runs, and you're told when it finishes.
 
 ![Example Dishwasher Progress](https://appliance-autonotify.rhizomatics.org.uk/assets/images/dishwasher_progress.png)
 
-When a dishwasher, washing machine, oven or other appliance starts a cycle, you're told it started, your phone shows a [Live Activity](https://companion.home-assistant.io/docs/notifications/live-activities) with progress
-and time remaining while it runs, and you're told when it finishes.
+## Supported Appliances
 
-It works with Bosch, Neff and Siemens appliances connected with the Home Assistant [Home Connect](https://www.home-assistant.io/integrations/home_connect/) integration, robot vacuums using the [Vacuum Integration](https://www.home-assistant.io/integrations/vacuum/) and Samsung washers, dryers and dishwashers through [SmartThings](https://www.home-assistant.io/integrations/smartthings/)
-or [LocalThings](https://github.com/mbillow/localthings), in English only, and LG washers and dryers through [LG ThinQ](https://www.home-assistant.io/integrations/lg_thinq/). Support for [Home Connect Local](https://github.com/chris-mc1/homeconnect_local_hass), LG dishwashers through LG ThinQ, and [Miele](https://www.home-assistant.io/integrations/miele/) is new, see [New Integrations](docs/how_it_works.md#new-integrations). Any other appliance can be added by hand if it has a power monitor, such as a smart plug.
+### Automatically Discovered and Configured
+
+- **Bosch**, **Neff** and **Siemens**
+  - Connected with the Home Assistant [Home Connect](https://www.home-assistant.io/integrations/home_connect/) integration
+  - [Home Connect Local](https://github.com/chris-mc1/homeconnect_local_hass) support is new and in beta
+- **Robot Vacuums**
+  - Any using the [Vacuum Integration](https://www.home-assistant.io/integrations/vacuum/), including popular brands like **Ecovacs** and **Roborock**
+- **Samsung**
+   - Washers, dryers and dishwashers through [SmartThings](https://www.home-assistant.io/integrations/smartthings/) or [LocalThings](https://github.com/mbillow/localthings)
+- **LG**
+  - Washers and dryers through [LG ThinQ](https://www.home-assistant.io/integrations/lg_thinq/).
+  - Dishwasher support is new and in beta
+- **Miele**
+   - Appliances using [Miele Integration](https://www.home-assistant.io/integrations/miele/) is new and in beta
+
+### Manually Added
+
+- **Power Monitors**
+  - Use these to monitor any appliance - even an ancient one can drive a Live Activity on a phone based on power usage.
+
+### Others
+
+See [New Integrations](docs/how_it_works.md#new-integrations).
+
+Any other appliance can be added by hand if it has a power monitor, such as a smart plug, and there's an option to submit your appliance data to the developers to help get it supported.
 
 ![Pizza Time](https://appliance-autonotify.rhizomatics.org.uk/assets/images/pizza_time.png)
 
 ## What You Need
 
 - Home Assistant 2026.5 or later
-- An appliance set up with the Home Connect, SmartThings or LocalThings integration, a robot vacuum of any make, or
-  one with a power sensor
+- An appliance set up with the Home Connect, SmartThings or LocalThings integration, a robot vacuum of any make, or one with a power sensor
 - [Supernotify](https://supernotify.rhizomatics.org.uk), installed from Marketplace, for Live Activities and for anything beyond a plain notification.
   - Optional, however without Supernotify, it only sends a start and an end notification, to every phone with the Home Assistant app unless you choose other notify entities.
   - `v2.14.0` recommended as minimum, though most features will work with earlier releases
-- Home Assistant app installed on an Apple mobile device, minimum iOS 17.2, or on an Android one, where a
+- Home Assistant companion app installed on an Apple mobile device, minimum iOS 17.2, or on an Android one, where a
   [Live Update](https://companion.home-assistant.io/docs/notifications/live-activities) needs Android 16 or later, and earlier versions show an ordinary notification with a progress bar.
 
 
