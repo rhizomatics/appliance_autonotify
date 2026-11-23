@@ -82,7 +82,7 @@
                 "sections": {
                     "start": {
                         "name": "Mensaje de inicio",
-                        "description": "Se envía cuando el electrodoméstico empieza. Vacía un campo para volver al texto habitual. Pon {program_placeholder} donde deba nombrarse el programa en curso.",
+                        "description": "Se envía cuando el electrodoméstico empieza. Vacía un campo para volver al texto habitual. Pon {program_placeholder} donde deba nombrarse el programa en curso. {start_time_placeholder} se sustituye por la hora de inicio, por ejemplo 11:29.",
                         "data": {
                             "start_title": "Título",
                             "start_message": "Mensaje"
@@ -90,7 +90,7 @@
                     },
                     "end": {
                         "name": "Mensaje de fin",
-                        "description": "Se envía cuando el electrodoméstico termina. Vacía un campo para volver al texto habitual. Pon {program_placeholder} donde deba nombrarse el programa que se ejecutó.",
+                        "description": "Se envía cuando el electrodoméstico termina. Vacía un campo para volver al texto habitual. Pon {program_placeholder} donde deba nombrarse el programa que se ejecutó. {start_time_placeholder} se sustituye por la hora de inicio y {totals_placeholders} por cuánto duró, la energía que usó, si tiene un medidor de energía, y lo que costó, si hay un precio en el panel de Energía. Se omite una línea sin nada conocido que poner.",
                         "data": {
                             "end_title": "Título",
                             "end_message": "Mensaje",

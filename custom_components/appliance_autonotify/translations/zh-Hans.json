@@ -82,7 +82,7 @@
                 "sections": {
                     "start": {
                         "name": "开始消息",
-                        "description": "家电开始时发送。清空文本框可恢复默认措辞。在需要显示当前程序的位置填入 {program_placeholder}。",
+                        "description": "家电开始时发送。清空文本框可恢复默认措辞。在需要显示当前程序的位置填入 {program_placeholder}。{start_time_placeholder} 会替换为开始时间，例如 11:29。",
                         "data": {
                             "start_title": "标题",
                             "start_message": "消息"
@@ -90,7 +90,7 @@
                     },
                     "end": {
                         "name": "结束消息",
-                        "description": "家电结束时发送。清空文本框可恢复默认措辞。在需要显示已运行程序的位置填入 {program_placeholder}。",
+                        "description": "家电结束时发送。清空文本框可恢复默认措辞。在需要显示已运行程序的位置填入 {program_placeholder}。{start_time_placeholder} 会替换为开始时间，{totals_placeholders} 会替换为运行时长、所用电量（如有电能表）以及电费（如已在能源仪表盘设置电价）。没有可填内容的行会被省略。",
                         "data": {
                             "end_title": "标题",
                             "end_message": "消息",

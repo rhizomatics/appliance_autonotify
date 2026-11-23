@@ -82,7 +82,7 @@
                 "sections": {
                     "start": {
                         "name": "Wiadomość o starcie",
-                        "description": "Wysyłana, gdy urządzenie startuje. Wyczyść pole, aby wrócić do zwykłego brzmienia. Wstaw {program_placeholder} tam, gdzie ma być podany trwający program.",
+                        "description": "Wysyłana, gdy urządzenie startuje. Wyczyść pole, aby wrócić do zwykłego brzmienia. Wstaw {program_placeholder} tam, gdzie ma być podany trwający program. {start_time_placeholder} zostaje zastąpione godziną startu, np. 11:29.",
                         "data": {
                             "start_title": "Tytuł",
                             "start_message": "Wiadomość"
@@ -90,7 +90,7 @@
                     },
                     "end": {
                         "name": "Wiadomość o zakończeniu",
-                        "description": "Wysyłana, gdy urządzenie kończy pracę. Wyczyść pole, aby wrócić do zwykłego brzmienia. Wstaw {program_placeholder} tam, gdzie ma być podany wykonany program.",
+                        "description": "Wysyłana, gdy urządzenie kończy pracę. Wyczyść pole, aby wrócić do zwykłego brzmienia. Wstaw {program_placeholder} tam, gdzie ma być podany wykonany program. {start_time_placeholder} zostaje zastąpione godziną startu, a {totals_placeholders} czasem pracy, zużytą energią, jeśli jest licznik energii, i jej kosztem, jeśli w panelu Energia ustawiono cenę. Wiersz, dla którego nic nie wiadomo, jest pomijany.",
                         "data": {
                             "end_title": "Tytuł",
                             "end_message": "Wiadomość",

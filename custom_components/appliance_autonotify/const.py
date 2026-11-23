@@ -85,6 +85,12 @@ DISCOVERY_TITLE: Final[str] = "Automatic discovery"
 NAME_PLACEHOLDER: Final[str] = "{name}"
 # the program under way, as Home Assistant shows it, and nothing at all for an appliance that reports none
 PROGRAM_PLACEHOLDER: Final[str] = "{program}"
+# the time of day the cycle began, as it runs and once it's over
+START_TIME_PLACEHOLDER: Final[str] = "{start_time}"
+# what the cycle came to, as it ends, and nothing at all where that isn't known
+DURATION_PLACEHOLDER: Final[str] = "{duration}"
+ENERGY_PLACEHOLDER: Final[str] = "{energy}"
+COST_PLACEHOLDER: Final[str] = "{cost}"
 DEFAULT_TITLE: Final[str] = "{name}"
 DEFAULT_START_MESSAGE: Final[str] = "{name} started"
 DEFAULT_END_MESSAGE: Final[str] = "{name} is finished"

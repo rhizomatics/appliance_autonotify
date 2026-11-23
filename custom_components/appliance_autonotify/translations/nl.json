@@ -82,7 +82,7 @@
                 "sections": {
                     "start": {
                         "name": "Startbericht",
-                        "description": "Verstuurd wanneer het apparaat start. Maak een vak leeg om terug te gaan naar de gebruikelijke tekst. Zet {program_placeholder} waar het lopende programma moet worden genoemd.",
+                        "description": "Verstuurd wanneer het apparaat start. Maak een vak leeg om terug te gaan naar de gebruikelijke tekst. Zet {program_placeholder} waar het lopende programma moet worden genoemd. {start_time_placeholder} wordt vervangen door de starttijd, bijvoorbeeld 11:29.",
                         "data": {
                             "start_title": "Titel",
                             "start_message": "Bericht"
@@ -90,7 +90,7 @@
                     },
                     "end": {
                         "name": "Eindbericht",
-                        "description": "Verstuurd wanneer het apparaat klaar is. Maak een vak leeg om terug te gaan naar de gebruikelijke tekst. Zet {program_placeholder} waar het gedraaide programma moet worden genoemd.",
+                        "description": "Verstuurd wanneer het apparaat klaar is. Maak een vak leeg om terug te gaan naar de gebruikelijke tekst. Zet {program_placeholder} waar het gedraaide programma moet worden genoemd. {start_time_placeholder} wordt vervangen door de starttijd, en {totals_placeholders} door hoe lang het liep, de verbruikte energie, als er een energiemeter is, en wat dat kostte, als er een prijs is ingesteld op het Energie-dashboard. Een regel waarvoor niets bekend is, wordt weggelaten.",
                         "data": {
                             "end_title": "Titel",
                             "end_message": "Bericht",
