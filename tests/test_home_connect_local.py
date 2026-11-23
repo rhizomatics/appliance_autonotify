@@ -32,6 +32,17 @@ WASHER: dict[str, tuple[str, list[str] | None]] = {
     "binary_sensor_door_state": ("binary_sensor", None),
 }
 WASHING_MACHINE = "mdi:washing-machine"
+DISHWASHER_ID = "BOSCH-SHE53C85N-68A40E000001"
+DISHWASHER_PROGRAMS = ["dishcare_dishwasher_program_auto2", "dishcare_dishwasher_program_eco50", "favorite_001"]
+# the entities of a dishwasher, as seen on a real one, with what it's doing within its cycle too
+DISHWASHER: dict[str, tuple[str, list[str] | None]] = {
+    "sensor_operation_state": ("sensor", OPERATION_STATES),
+    "sensor_program_progress": ("sensor", None),
+    "sensor_remaining_program_time": ("sensor", None),
+    "sensor_active_program": ("sensor", DISHWASHER_PROGRAMS),
+    "sensor_program_phase": ("sensor", ["none", "prerinse", "mainwash", "finalrinse", "drying"]),
+    "select_program": ("select", DISHWASHER_PROGRAMS),
+}
 
 
 def local_washer(hass: HomeAssistant) -> dict[str, str]:
@@ -46,6 +57,9 @@ def test_home_connect_local_is_in_beta() -> None:
     assert profile.appliance_type(PROGRAMS, []) == "washer"
     assert profile.appliance_type(["laundrycare_washerdryer_program_mix"], []) == "washer_dryer"
     assert profile.appliance_type(["dishcare_dishwasher_program_eco50"], []) == "dishwasher"
+    # a dishwasher seen through a whole cycle, a washer yet to be
+    assert not profile.beta_for("dishwasher")
+    assert profile.beta_for("washer")
 
 
 async def test_washer_offered_as_new(hass: HomeAssistant) -> None:
@@ -125,3 +139,23 @@ async def test_local_preferred_to_the_cloud_for_the_same_appliance(
     assert entry.runtime_data.fallback_cycle_entity_id == cloud["operation_state"]
     await set_state(hass, cloud["operation_state"], "run")
     assert calls[0].data["message"] == "Washer started"
+
+
+async def test_dishwasher_says_what_it_is_doing(hass: HomeAssistant) -> None:
+    dishwasher = add_device(hass, "homeconnect_ws", DISHWASHER_ID, "Dishwasher", DISHWASHER)
+    calls = mock_supernotify(hass)
+    hass.states.async_set(dishwasher["sensor_operation_state"], "ready")
+    hass.states.async_set(dishwasher["sensor_program_phase"], "none")
+    entry = await setup_appliance(hass, dishwasher["device_id"], live_detail="status")
+    assert entry.runtime_data.appliance_type == "dishwasher"
+    assert entry.runtime_data.entity_ids["stage"] == dishwasher["sensor_program_phase"]
+
+    hass.states.async_set(dishwasher["sensor_active_program"], "dishcare_dishwasher_program_auto2")
+    await set_state(hass, dishwasher["sensor_operation_state"], "run")
+    # the program in the title, and what it's doing within it in the message
+    hass.states.async_set(dishwasher["sensor_program_phase"], "mainwash")
+    await set_state(hass, dishwasher["sensor_program_progress"], "30")
+    assert (calls[-1].data["title"], calls[-1].data["message"]) == (
+        "Dishwasher · dishcare_dishwasher_program_auto2",
+        "mainwash",
+    )
