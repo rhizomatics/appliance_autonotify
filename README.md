@@ -19,7 +19,7 @@ When a dishwasher, washing machine, oven or other appliance starts a cycle, you'
 
 - **Bosch**, **Neff** and **Siemens**
   - Connected with the Home Assistant [Home Connect](https://www.home-assistant.io/integrations/home_connect/) integration
-  - [Home Connect Local](https://github.com/chris-mc1/homeconnect_local_hass) support is new and in beta
+  - Dishwashers through [Home Connect Local](https://github.com/chris-mc1/homeconnect_local_hass), with its other appliances new and in beta
 - **Robot Vacuums**
   - Any using the [Vacuum Integration](https://www.home-assistant.io/integrations/vacuum/), including popular brands like **Ecovacs** and **Roborock**
 - **Samsung**
