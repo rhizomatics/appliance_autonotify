@@ -2,6 +2,7 @@
     "domain": "appliance_autonotify",
     "name": "Appliance Auto Notify",
     "after_dependencies": [
+        "energy",
         "home_connect",
         "homeconnect_ws",
         "lg_thinq",
