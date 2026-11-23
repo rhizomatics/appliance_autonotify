@@ -82,7 +82,7 @@
                 "sections": {
                     "start": {
                         "name": "Startnachricht",
-                        "description": "Wird gesendet, wenn das Gerät startet. Leere ein Feld, um zum üblichen Wortlaut zurückzukehren. Setze {program_placeholder} dort ein, wo das laufende Programm genannt werden soll.",
+                        "description": "Wird gesendet, wenn das Gerät startet. Leere ein Feld, um zum üblichen Wortlaut zurückzukehren. Setze {program_placeholder} dort ein, wo das laufende Programm genannt werden soll. {start_time_placeholder} wird durch die Startzeit ersetzt, etwa 11:29.",
                         "data": {
                             "start_title": "Titel",
                             "start_message": "Nachricht"
@@ -90,7 +90,7 @@
                     },
                     "end": {
                         "name": "Endnachricht",
-                        "description": "Wird gesendet, wenn das Gerät fertig ist. Leere ein Feld, um zum üblichen Wortlaut zurückzukehren. Setze {program_placeholder} dort ein, wo das gelaufene Programm genannt werden soll.",
+                        "description": "Wird gesendet, wenn das Gerät fertig ist. Leere ein Feld, um zum üblichen Wortlaut zurückzukehren. Setze {program_placeholder} dort ein, wo das gelaufene Programm genannt werden soll. {start_time_placeholder} wird durch die Startzeit ersetzt, {totals_placeholders} durch die Laufzeit, die verbrauchte Energie, sofern ein Energiezähler vorhanden ist, und deren Kosten, sofern im Energie-Dashboard ein Preis eingestellt ist. Eine Zeile, für die nichts bekannt ist, entfällt.",
                         "data": {
                             "end_title": "Titel",
                             "end_message": "Nachricht",

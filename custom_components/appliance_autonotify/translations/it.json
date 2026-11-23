@@ -82,7 +82,7 @@
                 "sections": {
                     "start": {
                         "name": "Messaggio di inizio",
-                        "description": "Inviato quando l'elettrodomestico parte. Svuota un campo per tornare al testo predefinito. Scrivi {program_placeholder} dove va indicato il programma in corso.",
+                        "description": "Inviato quando l'elettrodomestico parte. Svuota un campo per tornare al testo predefinito. Scrivi {program_placeholder} dove va indicato il programma in corso. {start_time_placeholder} viene sostituito dall'ora di partenza, ad esempio 11:29.",
                         "data": {
                             "start_title": "Titolo",
                             "start_message": "Messaggio"
@@ -90,7 +90,7 @@
                     },
                     "end": {
                         "name": "Messaggio di fine",
-                        "description": "Inviato quando l'elettrodomestico finisce. Svuota un campo per tornare al testo predefinito. Scrivi {program_placeholder} dove va indicato il programma eseguito.",
+                        "description": "Inviato quando l'elettrodomestico finisce. Svuota un campo per tornare al testo predefinito. Scrivi {program_placeholder} dove va indicato il programma eseguito. {start_time_placeholder} viene sostituito dall'ora di partenza e {totals_placeholders} dalla durata, dall'energia consumata, se c'è un contatore di energia, e dal costo, se nella dashboard Energia è impostato un prezzo. Una riga senza nulla da indicare viene tolta.",
                         "data": {
                             "end_title": "Titolo",
                             "end_message": "Messaggio",

@@ -371,6 +371,8 @@ async def test_settings_without_supernotify(hass: HomeAssistant) -> None:
         "name": "Dishwasher",
         "supernotify": SUPERNOTIFY_MISSING,
         "program_placeholder": "{program}",
+        "start_time_placeholder": "{start_time}",
+        "totals_placeholders": "{duration}, {energy}, {cost}",
     }
     # with no Live Activity, there's no title for the program to go in
     assert not {"live_title", "live_detail"} & {str(k) for k in schema(result)}

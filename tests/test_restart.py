@@ -316,17 +316,23 @@ def kept(saved_at: timedelta, **data: Any) -> dict[str, Any]:
     }
 
 
-async def setup_kept_power_watcher(hass: HomeAssistant, hass_storage: dict[str, Any], saved_at: timedelta) -> MockConfigEntry:
+async def setup_kept_power_watcher(
+    hass: HomeAssistant,
+    hass_storage: dict[str, Any],
+    saved_at: timedelta,
+    options: dict[str, Any] | None = None,
+    **data: Any,
+) -> MockConfigEntry:
     """A power monitored washer with a cycle kept from before Home Assistant was last stopped"""
     entry_id = "washer"
-    hass_storage[f"appliance_autonotify.cycle.{entry_id}"] = kept(saved_at)
+    hass_storage[f"appliance_autonotify.cycle.{entry_id}"] = kept(saved_at, **data)
     entry = MockConfigEntry(
         domain="appliance_autonotify",
         entry_id=entry_id,
         title="Washer",
         unique_id=POWER,
         data={"type": "power"},
-        options={"power_entity": POWER, "grace_period": 120},
+        options={"power_entity": POWER, "grace_period": 120} | (options or {}),
     )
     entry.add_to_hass(hass)
     assert await hass.config_entries.async_setup(entry.entry_id)

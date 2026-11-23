@@ -82,7 +82,7 @@
                 "sections": {
                     "start": {
                         "name": "Message de démarrage",
-                        "description": "Envoyé quand l'appareil démarre. Videz un champ pour revenir au texte habituel. Mettez {program_placeholder} là où le programme en cours doit être nommé.",
+                        "description": "Envoyé quand l'appareil démarre. Videz un champ pour revenir au texte habituel. Mettez {program_placeholder} là où le programme en cours doit être nommé. {start_time_placeholder} est remplacé par l'heure de démarrage, par exemple 11:29.",
                         "data": {
                             "start_title": "Titre",
                             "start_message": "Message"
@@ -90,7 +90,7 @@
                     },
                     "end": {
                         "name": "Message de fin",
-                        "description": "Envoyé quand l'appareil a terminé. Videz un champ pour revenir au texte habituel. Mettez {program_placeholder} là où le programme exécuté doit être nommé.",
+                        "description": "Envoyé quand l'appareil a terminé. Videz un champ pour revenir au texte habituel. Mettez {program_placeholder} là où le programme exécuté doit être nommé. {start_time_placeholder} est remplacé par l'heure de démarrage, et {totals_placeholders} par la durée, l'énergie consommée, s'il a un compteur d'énergie, et son coût, si un prix est défini dans le tableau de bord Énergie. Une ligne sans rien de connu à afficher est omise.",
                         "data": {
                             "end_title": "Titre",
                             "end_message": "Message",

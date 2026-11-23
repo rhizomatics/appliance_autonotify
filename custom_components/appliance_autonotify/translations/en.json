@@ -82,7 +82,7 @@
                 "sections": {
                     "start": {
                         "name": "Start message",
-                        "description": "Sent when the appliance starts. Clear a box to go back to the usual wording. Put {program_placeholder} where the program under way should be named.",
+                        "description": "Sent when the appliance starts. Clear a box to go back to the usual wording. Put {program_placeholder} where the program under way should be named. {start_time_placeholder} is replaced by the time it started, such as 11:29.",
                         "data": {
                             "start_title": "Title",
                             "start_message": "Message"
@@ -90,7 +90,7 @@
                     },
                     "end": {
                         "name": "End message",
-                        "description": "Sent when the appliance finishes. Clear a box to go back to the usual wording. Put {program_placeholder} where the program that ran should be named.",
+                        "description": "Sent when the appliance finishes. Clear a box to go back to the usual wording. Put {program_placeholder} where the program that ran should be named. {start_time_placeholder} is replaced by the time it started, and {totals_placeholders} by how long it ran, the energy it used, where it has an energy meter, and what that cost, where a price is set on the Energy dashboard. A line with nothing known to fill it in is left out.",
                         "data": {
                             "end_title": "Title",
                             "end_message": "Message",
