@@ -137,6 +137,10 @@ Nothing needs changing for notifications to work. Each appliance on the integrat
   -  on by default for ovens
 - *Notify progress* switch
   - off by default, switch on to get the percentage or ETA regularly notified
+- *Notify offline after*
+  - minutes the appliance must be unavailable, as when it has dropped off Wi-Fi and its integration can't reach it, before you're told it's offline, such as "Dishwasher is offline since 23:10", and then told when it's back, such as "Dishwasher is back online after 9 h 20 min", in place of the first
+  - 0 by default, for none, since an appliance switched off at the wall is offline too. Choose it for one that's always left on, so it can't go quiet without a word
+  - a power monitored appliance is offline when its smart plug's power sensor is unavailable
 - *Live Activity timer*, and what the *Live Activity shows*
   - The timer counts down the time left, where the appliance reports when it will finish, on by default
   - Tick any of the *Program*, such as "Intensive 70ºC", the *Phase*, such as "Drying" or "Relocating", and the *State*, such as "Paused" or "Returning", all ticked by default
@@ -308,6 +312,7 @@ Notifications go through [Supernotify](https://supernotify.rhizomatics.org.uk) i
 - `No mobile push delivery found for …, Live Activity not updated`: Supernotify has no mobile push delivery, or none left after the *Deliveries* chosen in the appliance's settings, so the Live Activity can't be updated. Add a mobile push delivery to Supernotify, or include it in *Deliveries*
 - `Supernotify notification failed for …`: Supernotify raised an error, which follows in the log. Check its configuration
 - If there's no warning, check that *Notify start* or *Notify end* is on as wanted. With them off, only the Live Activity is updated, silently, and only on phones
+- If the appliance's own entities are *Unavailable*, its integration can't reach it, often because it has dropped off Wi-Fi, so there's nothing to notify of. Reconnect it from its own app. *Notify offline after* tells you when this happens
 
 ## Known Issues
 

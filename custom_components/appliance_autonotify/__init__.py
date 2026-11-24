@@ -182,6 +182,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: AppliancesConfigEntry) -
     # a cycle under way before Home Assistant restarted, to carry on with as it starts
     await watcher.async_load()
     watcher.async_start()
+    watcher.async_watch_health()
     await watcher.async_start_trace()
     if not watcher.beta:
         # its type of appliance has since been seen to work through its integration, so there's nothing more to ask

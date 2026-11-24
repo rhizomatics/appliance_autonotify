@@ -64,6 +64,7 @@
                     "notify_end": "Avisar del fin",
                     "notify_phase": "Avisar de las fases",
                     "notify_progress": "Avisar del progreso",
+                    "offline_after": "Avisar sin conexión tras",
                     "dashboard": "Panel que se abre",
                     "live_timer": "Temporizador de la Actividad en vivo",
                     "live_show": "La Actividad en vivo muestra",
@@ -75,6 +76,7 @@
                     "notify_phase": "Enviar una notificación cuando termine una fase del ciclo, como un horno que alcanza la temperatura. Si está desactivado, solo se muestra en la Actividad en vivo.",
                     "dashboard": "Se abre al tocar una notificación o la Actividad en vivo. Déjalo vacío para abrir la app donde estaba. Se elige un panel con el nombre del electrodoméstico o de su tipo, como «Lavavajillas» o «Lavadora», si había uno cuando se añadió el electrodoméstico.",
                     "notify_progress": "Enviar una notificación cada 10 % del ciclo. Si está desactivado, el progreso solo se muestra en la barra de progreso de la Actividad en vivo, que se actualiza en silencio.",
+                    "offline_after": "Minutos que el electrodoméstico debe estar no disponible, por ejemplo cuando su integración no lo alcanza por la red, antes de que una notificación diga que está sin conexión, y otra cuando vuelva. 0 para ninguna, lo habitual, ya que un electrodoméstico apagado desde el enchufe también está sin conexión.",
                     "live_timer": "Muestra la cuenta atrás del tiempo restante en la Actividad en vivo, si el electrodoméstico indica cuándo terminará. En la pantalla de bloqueo del iPhone el temporizador ocupa el lugar del mensaje, así que lo que se muestra abajo va en el título, tanto como quepa junto al nombre.",
                     "live_show": "Lo que está haciendo el electrodoméstico, cada cosa si la indica y hay algo que decir. El programa, como Eco 50ºC, se puede quitar en un electrodoméstico que usa siempre el mismo. La fase es la parte del ciclo, como un prelavado, el secado o un robot aspirador que se recoloca. El estado solo se muestra cuando dice más que en marcha, como en pausa o volviendo a la base. Si en el título no caben todos, primero se quita el programa.",
                     "maintenance": "Llevar la cuenta de los ciclos, y de cuánta vida les queda a las piezas de las que informa el electrodoméstico, y poner lo que toque en la lista de tareas Mantenimiento de electrodomésticos, con una notificación cuando toque. Se ofrece una vez en la notificación de fin si está desactivado."

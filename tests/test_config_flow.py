@@ -398,7 +398,7 @@ async def test_settings_without_supernotify(hass: HomeAssistant) -> None:
     assert not {"live_timer", "live_show"} & {str(k) for k in schema(result)}
     # everything but whether to notify progress is tucked away in three sections
     sections = {str(k): v for k, v in schema(result).items()}
-    for switch in ("notify_start", "notify_end", "maintenance", "notify_progress"):
+    for switch in ("notify_start", "notify_end", "maintenance", "notify_progress", "offline_after"):
         assert sections.pop(switch) is not None
     assert list(sections) == ["start", "end", "notify", "maintenance_items"]
     assert all(s.options == {"collapsed": True} for s in sections.values())
@@ -455,6 +455,7 @@ async def test_settings_with_supernotify(hass: HomeAssistant) -> None:
         "notify_end",
         "maintenance",
         "notify_progress",
+        "offline_after",
         "live_timer",
         "live_show",
         "start",
@@ -468,6 +469,8 @@ async def test_settings_with_supernotify(hass: HomeAssistant) -> None:
         "notify_end": True,
         "maintenance": False,
         "notify_progress": False,
+        # not told of as offline unless chosen
+        "offline_after": 0,
         "live_timer": True,
         "live_show": ["program", "phase", "state"],
     }

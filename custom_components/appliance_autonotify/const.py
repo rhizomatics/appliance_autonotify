@@ -94,6 +94,9 @@ TEXT_PREHEAT: Final[str] = "preheat"
 TEXT_FAST_PREHEAT: Final[str] = "fast_preheat"
 TEXT_PREHEATING: Final[str] = "preheating"
 TEXT_PREHEATED: Final[str] = "preheated"
+# the appliance unavailable for longer than chosen, since when, and back, after how long
+TEXT_OFFLINE: Final[str] = "offline"
+TEXT_ONLINE: Final[str] = "online"
 NOTIFICATION_TEXTS: Final[dict[str, dict[str, str]]] = {
     "en": {
         TEXT_START: "{name} started",
@@ -103,6 +106,8 @@ NOTIFICATION_TEXTS: Final[dict[str, dict[str, str]]] = {
         TEXT_FAST_PREHEAT: "Fast pre-heat",
         TEXT_PREHEATING: "{phase}, {current} of {target}{unit}",
         TEXT_PREHEATED: "{name} is pre-heated",
+        TEXT_OFFLINE: "{name} is offline since {since}",
+        TEXT_ONLINE: "{name} is back online after {duration}",
     },
     "it": {
         TEXT_START: "{name}: ciclo avviato",
@@ -112,6 +117,8 @@ NOTIFICATION_TEXTS: Final[dict[str, dict[str, str]]] = {
         TEXT_FAST_PREHEAT: "Preriscaldamento rapido",
         TEXT_PREHEATING: "{phase}, {current} di {target}{unit}",
         TEXT_PREHEATED: "{name}: preriscaldamento completato",
+        TEXT_OFFLINE: "{name}: offline dalle {since}",
+        TEXT_ONLINE: "{name}: di nuovo online dopo {duration}",
     },
     "de": {
         TEXT_START: "{name} gestartet",
@@ -121,6 +128,8 @@ NOTIFICATION_TEXTS: Final[dict[str, dict[str, str]]] = {
         TEXT_FAST_PREHEAT: "Schnellaufheizen",
         TEXT_PREHEATING: "{phase}, {current} von {target}{unit}",
         TEXT_PREHEATED: "{name} ist vorgeheizt",
+        TEXT_OFFLINE: "{name} ist seit {since} offline",
+        TEXT_ONLINE: "{name} ist nach {duration} wieder online",
     },
     "nl": {
         TEXT_START: "{name} gestart",
@@ -130,6 +139,8 @@ NOTIFICATION_TEXTS: Final[dict[str, dict[str, str]]] = {
         TEXT_FAST_PREHEAT: "Snel voorverwarmen",
         TEXT_PREHEATING: "{phase}, {current} van {target}{unit}",
         TEXT_PREHEATED: "{name} is voorverwarmd",
+        TEXT_OFFLINE: "{name} is offline sinds {since}",
+        TEXT_ONLINE: "{name} is na {duration} weer online",
     },
     "es": {
         TEXT_START: "{name}: ciclo iniciado",
@@ -139,6 +150,8 @@ NOTIFICATION_TEXTS: Final[dict[str, dict[str, str]]] = {
         TEXT_FAST_PREHEAT: "Precalentamiento rápido",
         TEXT_PREHEATING: "{phase}, {current} de {target}{unit}",
         TEXT_PREHEATED: "{name}: precalentamiento completado",
+        TEXT_OFFLINE: "{name}: sin conexión desde las {since}",
+        TEXT_ONLINE: "{name}: conexión restablecida tras {duration}",
     },
     "fr": {
         TEXT_START: "{name} : cycle démarré",
@@ -148,6 +161,8 @@ NOTIFICATION_TEXTS: Final[dict[str, dict[str, str]]] = {
         TEXT_FAST_PREHEAT: "Préchauffage rapide",
         TEXT_PREHEATING: "{phase}, {current} sur {target}{unit}",
         TEXT_PREHEATED: "{name} : préchauffage terminé",
+        TEXT_OFFLINE: "{name} : hors ligne depuis {since}",
+        TEXT_ONLINE: "{name} : de nouveau en ligne après {duration}",
     },
     "pl": {
         TEXT_START: "{name}: cykl rozpoczęty",
@@ -157,6 +172,8 @@ NOTIFICATION_TEXTS: Final[dict[str, dict[str, str]]] = {
         TEXT_FAST_PREHEAT: "Szybkie nagrzewanie",
         TEXT_PREHEATING: "{phase}, {current} z {target}{unit}",
         TEXT_PREHEATED: "{name}: nagrzewanie zakończone",
+        TEXT_OFFLINE: "{name}: offline od {since}",
+        TEXT_ONLINE: "{name}: znów online po {duration}",
     },
     "zh": {
         TEXT_START: "{name} 已启动",
@@ -166,6 +183,8 @@ NOTIFICATION_TEXTS: Final[dict[str, dict[str, str]]] = {
         TEXT_FAST_PREHEAT: "快速预热",
         TEXT_PREHEATING: "{phase}，{current}/{target}{unit}",
         TEXT_PREHEATED: "{name} 已预热",
+        TEXT_OFFLINE: "{name} 自 {since} 起离线",
+        TEXT_ONLINE: "{name} 离线 {duration} 后已恢复在线",
     },
     "hi": {
         TEXT_START: "{name} शुरू हो गया",
@@ -175,9 +194,14 @@ NOTIFICATION_TEXTS: Final[dict[str, dict[str, str]]] = {
         TEXT_FAST_PREHEAT: "तेज़ प्रीहीट",
         TEXT_PREHEATING: "{phase}, {target}{unit} में से {current}",
         TEXT_PREHEATED: "{name} प्रीहीट हो गया",
+        TEXT_OFFLINE: "{name} {since} से ऑफ़लाइन है",
+        TEXT_ONLINE: "{name} {duration} बाद फिर से ऑनलाइन है",
     },
 }
 
+# minutes an appliance must be unavailable, as when its integration can't reach it, before it's told of as offline,
+# and then again as it's back, none unless chosen, since one switched off at the wall is offline too
+CONF_OFFLINE_AFTER: Final[str] = "offline_after"
 # minutes after which the end is told again, for as long as nobody says the appliance has been seen to
 CONF_REMINDER: Final[str] = "reminder"
 # how many times it's told again
