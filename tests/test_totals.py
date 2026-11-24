@@ -64,13 +64,6 @@ def meter_reads(hass: HomeAssistant, reading: str) -> None:
     hass.states.async_set(ENERGY, reading, meter.attributes)
 
 
-def meter_reads(hass: HomeAssistant, reading: str) -> None:
-    """The plug's energy meter at a new reading, as it was otherwise"""
-    meter = hass.states.get(ENERGY)
-    assert meter is not None
-    hass.states.async_set(ENERGY, reading, meter.attributes)
-
-
 def priced(hass: HomeAssistant, *sources: dict[str, Any]) -> _patch[Any]:
     """Energy settings with the grid sources given"""
     hass.config.components.add("energy")

@@ -14,8 +14,8 @@ from homeassistant.helpers import entity_registry as er
 from homeassistant.util import dt as dt_util
 from homeassistant.util.unit_conversion import EnergyConverter
 
-from .platforms import profile_for
 from .const import DURATION_FORMATS, DURATION_HOURS, DURATION_HOURS_MINUTES, DURATION_MINUTES
+from .platforms import profile_for
 
 if TYPE_CHECKING:
     from datetime import datetime, timedelta

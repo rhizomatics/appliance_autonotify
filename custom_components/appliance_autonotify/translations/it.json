@@ -64,6 +64,7 @@
                     "notify_end": "Notifica la fine",
                     "notify_phase": "Notifica le fasi",
                     "notify_progress": "Notifica l'avanzamento",
+                    "offline_after": "Notifica offline dopo",
                     "dashboard": "Dashboard da aprire",
                     "live_timer": "Timer della Live Activity",
                     "live_show": "La Live Activity mostra",
@@ -75,6 +76,7 @@
                     "notify_phase": "Invia una notifica quando finisce una fase del ciclo, ad esempio quando il forno è arrivato in temperatura. Se disattivato, viene mostrata solo sulla Live Activity.",
                     "dashboard": "Aperta quando si tocca una notifica o la Live Activity. Lascia vuoto per aprire l'app dove si trovava. Impostata su una dashboard con il nome dell'elettrodomestico o del suo tipo, ad esempio \"Lavastoviglie\" o \"Lavatrice\", se ce n'era una quando l'elettrodomestico è stato aggiunto.",
                     "notify_progress": "Invia una notifica ogni 10% del ciclo. Se disattivato, l'avanzamento compare solo nella barra della Live Activity, aggiornata senza suono.",
+                    "offline_after": "Minuti in cui l'elettrodomestico deve restare non disponibile, ad esempio quando la sua integrazione non lo raggiunge in rete, prima che una notifica dica che è offline, e un'altra quando torna. 0 per nessuna, l'impostazione abituale, perché anche un elettrodomestico spento dalla presa è offline.",
                     "live_timer": "Mostra il conto alla rovescia del tempo rimanente sulla Live Activity, se l'elettrodomestico indica quando finirà. Sulla schermata di blocco dell'iPhone il timer prende il posto del messaggio, quindi ciò che è mostrato sotto va nel titolo, per quanto ci sta accanto al nome.",
                     "live_show": "Cosa sta facendo l'elettrodomestico, ciascuno se lo indica e ha qualcosa da dire. Il programma, come Eco 50ºC, si può togliere per un elettrodomestico che usa sempre lo stesso. La fase è la parte del ciclo in corso, come un prelavaggio, l'asciugatura o un robot aspirapolvere che si riposiziona. Lo stato è mostrato solo quando dice più che in funzione, come in pausa o in rientro alla base. Se nel titolo non c'è spazio per tutti, il programma viene tolto per primo.",
                     "maintenance": "Conta i cicli, e quanta vita resta alle parti di cui l'apparecchio la riporta, e mette ciò che va fatto nella lista Manutenzione elettrodomestici, con una notifica quando scade. Se è spento viene proposto una volta sulla notifica di fine."
