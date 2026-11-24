@@ -76,13 +76,11 @@ from .const import (
     CYCLE_SETTLE,
     CYCLE_STORE,
     CYCLE_STORE_VERSION,
-    DEFAULT_END_MESSAGE,
     DEFAULT_GRACE_PERIOD,
     DEFAULT_ICON,
     DEFAULT_MIN_DURATION,
     DEFAULT_REMINDER_REPEATS,
     DEFAULT_SNOOZE,
-    DEFAULT_START_MESSAGE,
     DEFAULT_THRESHOLD,
     DEFAULT_TITLE,
     DOMAIN,
@@ -91,7 +89,6 @@ from .const import (
     ENERGY_PLACEHOLDER,
     ENTITY_DOMAINS,
     FAST_PREHEAT_KEY,
-    FAST_PREHEAT_PHASE,
     FINISH_MOVED,
     FINISH_TIME_KEY,
     LIVE_DEFAULTS,
@@ -107,20 +104,17 @@ from .const import (
     MOBILE_APP_PLATFORM,
     MOBILE_PUSH_TRANSPORT,
     NAME_PLACEHOLDER,
+    NOTIFICATION_TEXTS,
     OVEN_MESSAGE,
     PHASES_NOTIFIED,
     PREHEAT_FINISHED_KEYS,
-    PREHEAT_MESSAGE,
-    PREHEAT_PHASE,
     PREHEAT_SETTLE,
-    PREHEATED_MESSAGE,
     PROGRAM_KEYS,
     PROGRAM_PLACEHOLDER,
     PROGRESS_CHIP,
     PROGRESS_FINAL,
     PROGRESS_FINAL_STEP,
     PROGRESS_KEY,
-    PROGRESS_MESSAGE,
     PROGRESS_NOTIFY_STEP,
     PROGRESS_STEP,
     PROGRESS_TICK,
@@ -140,6 +134,13 @@ from .const import (
     SUPERNOTIFY_DOMAIN,
     TARGET_TEMPERATURE_KEY,
     TEMPERATURE_STEP,
+    TEXT_END,
+    TEXT_FAST_PREHEAT,
+    TEXT_PREHEAT,
+    TEXT_PREHEATED,
+    TEXT_PREHEATING,
+    TEXT_PROGRESS,
+    TEXT_START,
     TOTAL_TIME_KEY,
     TYPE_DISCOVERY,
     TYPE_ICONS,
@@ -185,7 +186,7 @@ from .trace import CycleTrace, async_ask_feedback
 from .words import name_type
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Coroutine
+    from collections.abc import Callable, Coroutine, Mapping
     from datetime import datetime
 
     from homeassistant.config_entries import ConfigEntry
@@ -584,7 +585,7 @@ class ApplianceWatcher:
             message = (
                 self._progress_message(progress)
                 if progress is not None
-                else self._text(CONF_START_MESSAGE, DEFAULT_START_MESSAGE)
+                else self._text(CONF_START_MESSAGE, self._texts[TEXT_START])
             )
             if live and not ordinary:
                 # the bar already shows how far along it is, so there's room to say what it's doing
@@ -602,7 +603,7 @@ class ApplianceWatcher:
         self._save()
         async with self._sending:
             # resent, since to Supernotify a second cycle soon after the first is a repeat to be dropped
-            await self._tell(self._text(CONF_START_MESSAGE, DEFAULT_START_MESSAGE), self.notify_start, context, resend=True)
+            await self._tell(self._text(CONF_START_MESSAGE, self._texts[TEXT_START]), self.notify_start, context, resend=True)
             if supernotify_available(self.hass):
                 # whatever comes next waits its turn, the first progress being only moments behind the start
                 await asyncio.sleep(LIVE_SETTLE)
@@ -656,7 +657,7 @@ class ApplianceWatcher:
         self.program_kept = True
         await self._sum_up()
         title = self._text(CONF_END_TITLE, DEFAULT_TITLE)
-        message = self._text(CONF_END_MESSAGE, DEFAULT_END_MESSAGE)
+        message = self._text(CONF_END_MESSAGE, self._texts[TEXT_END])
         notify = finished and self.notify_end
         self._save()
         if self.trace is not None and self.trace.async_cycle_ended(finished):
@@ -779,7 +780,7 @@ class ApplianceWatcher:
     async def _tell_end(self, context: Context, resend: bool = False) -> None:
         """The end, with buttons to say the appliance has been seen to, to be reminded later, or to switch it off"""
         await self._supernotify(
-            self._text(CONF_END_MESSAGE, DEFAULT_END_MESSAGE),
+            self._text(CONF_END_MESSAGE, self._texts[TEXT_END]),
             self._text(CONF_END_TITLE, DEFAULT_TITLE),
             context,
             resend=resend,
@@ -842,7 +843,7 @@ class ApplianceWatcher:
             self._stop_reminding()
             self._save()
             await self._supernotify(
-                self._text(CONF_END_MESSAGE, DEFAULT_END_MESSAGE),
+                self._text(CONF_END_MESSAGE, self._texts[TEXT_END]),
                 self._text(CONF_END_TITLE, DEFAULT_TITLE),
                 event.context,
                 mobile_only=True,
@@ -861,6 +862,11 @@ class ApplianceWatcher:
                 )
             except HomeAssistantError:
                 _LOGGER.exception("APPLIANCES Switching off %s failed", self.name)
+
+    @property
+    def _texts(self) -> Mapping[str, str]:
+        """The texts of notifications in the language of Home Assistant"""
+        return translated(self.hass, NOTIFICATION_TEXTS)
 
     def _text(self, key: str, default: str) -> str:
         """The text chosen for a notification, filled in"""
@@ -934,7 +940,7 @@ class ApplianceWatcher:
         return self._timed_progress() if progress is None else int(progress)
 
     def _progress_message(self, progress: int) -> str:
-        return PROGRESS_MESSAGE.format(progress=progress)
+        return self._texts[TEXT_PROGRESS].format(progress=progress)
 
     def _phase(self) -> str | None:
         """What the appliance is doing, to say alongside a bar that already shows how far along it is"""
@@ -983,7 +989,7 @@ class ApplianceWatcher:
                 message = self._phase() or (
                     self._progress_message(progress)
                     if progress is not None
-                    else self._text(CONF_START_MESSAGE, DEFAULT_START_MESSAGE)
+                    else self._text(CONF_START_MESSAGE, self._texts[TEXT_START])
                 )
                 await self._tell(message, False, context, resend=True)
 
@@ -1282,8 +1288,9 @@ class HomeConnectWatcher(ApplianceWatcher):
             return None
         # a button on the oven for more of its elements to be used, which goes off by itself
         fast = self._state(FAST_PREHEAT_KEY)
-        phase = FAST_PREHEAT_PHASE if fast is not None and fast.state == STATE_ON else PREHEAT_PHASE
-        return PREHEAT_MESSAGE.format(
+        texts = self._texts
+        phase = texts[TEXT_FAST_PREHEAT] if fast is not None and fast.state == STATE_ON else texts[TEXT_PREHEAT]
+        return texts[TEXT_PREHEATING].format(
             phase=phase, current=f"{temperatures[0]:g}", target=f"{temperatures[1]:g}", unit=self._temperature_unit()
         )
 
@@ -1365,7 +1372,7 @@ class HomeConnectWatcher(ApplianceWatcher):
         # back to the progress of the program, for an oven with a timer set
         progress = self._progress()
         self.last_progress_mark = -1 if progress is None else self._mark(progress)
-        message = PREHEATED_MESSAGE.replace(NAME_PLACEHOLDER, self.name)
+        message = self._texts[TEXT_PREHEATED].replace(NAME_PLACEHOLDER, self.name)
         title = self._text(CONF_START_TITLE, DEFAULT_TITLE)
         async with self._sending:
             if not self.running or not self.notify_phase:
