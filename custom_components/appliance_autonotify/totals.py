@@ -14,6 +14,7 @@ from homeassistant.helpers import entity_registry as er
 from homeassistant.util import dt as dt_util
 from homeassistant.util.unit_conversion import EnergyConverter
 
+from .platforms import profile_for
 from .const import DURATION_FORMATS, DURATION_HOURS, DURATION_HOURS_MINUTES, DURATION_MINUTES
 
 if TYPE_CHECKING:
@@ -118,6 +119,13 @@ def energy_entity_id(hass: HomeAssistant, device_id: str | None) -> str | None:
         )
         found.append((METER_STATE_CLASSES.index(state_class) if state_class in METER_STATE_CLASSES else 2, entry.entity_id))
     return min(found)[1] if found else None
+
+
+def counts_program(hass: HomeAssistant, entity_id: str | None) -> bool:
+    """Whether the energy sensor counts only the program under way, as Miele's does, rather than adding up all the
+    energy the device has ever used"""
+    entry = er.async_get(hass).async_get(entity_id) if entity_id else None
+    return entry is not None and entry.translation_key in profile_for(entry.platform).program_meter_keys
 
 
 def energy_reading(hass: HomeAssistant, entity_id: str | None) -> float | None:
