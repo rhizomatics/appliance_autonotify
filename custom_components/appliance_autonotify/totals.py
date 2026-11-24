@@ -14,6 +14,8 @@ from homeassistant.helpers import entity_registry as er
 from homeassistant.util import dt as dt_util
 from homeassistant.util.unit_conversion import EnergyConverter
 
+from .const import DURATION_FORMATS, DURATION_HOURS, DURATION_HOURS_MINUTES, DURATION_MINUTES
+
 if TYPE_CHECKING:
     from datetime import datetime, timedelta
 
@@ -35,6 +37,11 @@ CURRENCY_SYMBOLS: dict[str, str] = {
     "INR": "₹",
     "PLN": "zł",
 }
+
+
+# languages that write the currency before the amount, such as $0.45, all others writing it after, as 0,45 €, with a
+# space between where it's written in letters, such as CHF 0.45, and always in Dutch
+SYMBOL_BEFORE_LANGUAGES: frozenset[str] = frozenset({"en", "zh", "hi", "ja", "ko", "nl"})
 
 
 # languages that write a decimal point, all others writing a decimal comma
@@ -71,11 +78,12 @@ def format_time(when: datetime) -> str:
 
 
 def format_duration(hass: HomeAssistant, duration: timedelta) -> str:
-    """As short as a notification wants it, such as 50 min or 1 h 40 min"""
+    """As short as a notification wants it, such as 50 min or 1 h 40 min, in the language of Home Assistant"""
     hours, minutes = divmod(max(round(duration.total_seconds() / 60), 1), 60)
+    formats = DURATION_FORMATS.get(_language(hass), DURATION_FORMATS["en"])
     if not hours:
-        return f"{minutes} min"
-    return f"{hours} h {minutes} min" if minutes else f"{hours} h"
+        return formats[DURATION_MINUTES].format(minutes=minutes)
+    return formats[DURATION_HOURS_MINUTES if minutes else DURATION_HOURS].format(hours=hours, minutes=minutes)
 
 
 def format_energy(hass: HomeAssistant, kwh: float) -> str:
@@ -84,7 +92,11 @@ def format_energy(hass: HomeAssistant, kwh: float) -> str:
 
 def format_cost(hass: HomeAssistant, cost: float) -> str:
     currency = hass.config.currency
-    return f"{_number(hass, cost)} {CURRENCY_SYMBOLS.get(currency, currency)}"
+    symbol, amount = CURRENCY_SYMBOLS.get(currency, currency), _number(hass, cost)
+    language = _language(hass)
+    if language not in SYMBOL_BEFORE_LANGUAGES:
+        return f"{amount} {symbol}"
+    return f"{symbol} {amount}" if symbol.isalpha() or language == "nl" else f"{symbol}{amount}"
 
 
 def energy_entity_id(hass: HomeAssistant, device_id: str | None) -> str | None:

@@ -14,6 +14,10 @@ title: What's New
 - Home Connect Local dishwashers supported, now seen through a whole cycle, so no longer offered as new (#28)
   - Their program phase, such as *Main wash* or *Drying*, shown as the phase
   - Its washers, dryers and other appliances still new, till one of each has been tried
+- How long a cycle ran, the energy it used and what it cost can be put in the end message, as `{duration}`, `{energy}` and `{cost}`, and when it started as `{start_time}` in the start and end messages (#35, thanks @lollox80)
+  - Energy from the appliance's or its smart plug's own energy meter, and cost at the grid price set on the Energy dashboard
+  - Each left out where it isn't known, along with a line left with nothing but its emoji
+  - Duration and cost written as in the language of Home Assistant, such as *1 Std. 40 Min.* in German, and *$0.45* or *0,45 €*
 
 # 1.0.1
 ## 🐛 Fixes

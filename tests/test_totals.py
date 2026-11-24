@@ -5,6 +5,7 @@ from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any
 from unittest.mock import patch
 
+import pytest
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 from homeassistant.util import dt as dt_util
@@ -12,6 +13,7 @@ from homeassistant.util import dt as dt_util
 from custom_components.appliance_autonotify.const import VACUUM_SETTLE
 from custom_components.appliance_autonotify.totals import (
     energy_entity_id,
+    format_cost,
     format_duration,
 )
 from tests.ha_testing import MockConfigEntry
@@ -62,6 +64,13 @@ def meter_reads(hass: HomeAssistant, reading: str) -> None:
     hass.states.async_set(ENERGY, reading, meter.attributes)
 
 
+def meter_reads(hass: HomeAssistant, reading: str) -> None:
+    """The plug's energy meter at a new reading, as it was otherwise"""
+    meter = hass.states.get(ENERGY)
+    assert meter is not None
+    hass.states.async_set(ENERGY, reading, meter.attributes)
+
+
 def priced(hass: HomeAssistant, *sources: dict[str, Any]) -> _patch[Any]:
     """Energy settings with the grid sources given"""
     hass.config.components.add("energy")
@@ -94,7 +103,7 @@ async def test_end_tells_what_the_cycle_came_to(hass: HomeAssistant, freezer: Fr
         await setup_power_watcher(hass, grace_period=120, end_message=SUMMARY, end_title="Lavatrice")
         await wash(hass, freezer, 0.74)
     # up to when it stopped drawing power, not once that was believed
-    assert calls[-1].data["message"] == "📌 Done\n⏱ 50 min\n⚡ 0.74 kWh\n💰 0.19 €"
+    assert calls[-1].data["message"] == "📌 Done\n⏱ 50 min\n⚡ 0.74 kWh\n💰 €0.19"
 
 
 async def test_reminder_tells_it_again(hass: HomeAssistant, freezer: FrozenDateTimeFactory) -> None:
@@ -119,7 +128,7 @@ async def test_price_from_an_entity(hass: HomeAssistant, freezer: FrozenDateTime
     with priced(hass, source):
         await setup_power_watcher(hass, grace_period=120, end_message="{energy}, {cost}")
         await wash(hass, freezer, 2000)
-    assert calls[-1].data["message"] == "2.00 kWh, 0.60 £"
+    assert calls[-1].data["message"] == "2.00 kWh, £0.60"
 
 
 async def test_nothing_told_that_isnt_known(hass: HomeAssistant, freezer: FrozenDateTimeFactory) -> None:
@@ -194,6 +203,35 @@ async def test_durations(hass: HomeAssistant) -> None:
     assert format_duration(hass, timedelta(minutes=8, seconds=20)) == "8 min"
     assert format_duration(hass, timedelta(hours=2)) == "2 h"
     assert format_duration(hass, timedelta(hours=1, minutes=40)) == "1 h 40 min"
+    # in the language of Home Assistant
+    hass.config.language = "de"
+    assert format_duration(hass, timedelta(hours=1, minutes=40)) == "1 Std. 40 Min."
+    hass.config.language = "zh-Hans"
+    assert format_duration(hass, timedelta(minutes=8)) == "8分钟"
+    hass.config.language = "sv"
+    assert format_duration(hass, timedelta(hours=2)) == "2 h"
+
+
+@pytest.mark.parametrize(
+    ("language", "currency", "cost"),
+    [
+        ("en", "USD", "$0.45"),
+        ("en", "GBP", "£0.45"),
+        ("en", "EUR", "€0.45"),
+        # written in letters, so a space between
+        ("en", "CHF", "CHF 0.45"),
+        ("en", "SEK", "SEK 0.45"),
+        ("hi", "INR", "₹0.45"),
+        ("nl", "EUR", "€ 0,45"),
+        ("it", "EUR", "0,45 €"),
+        ("de", "CHF", "0,45 CHF"),
+        ("pl", "PLN", "0,45 zł"),
+    ],
+)
+async def test_costs(hass: HomeAssistant, language: str, currency: str, cost: str) -> None:
+    hass.config.language = language
+    hass.config.currency = currency
+    assert format_cost(hass, 0.45) == cost
 
 
 async def test_start_time_as_it_starts_and_ends(hass: HomeAssistant, freezer: FrozenDateTimeFactory) -> None:
@@ -277,7 +315,7 @@ async def test_totals_carried_through_a_restart(hass: HomeAssistant, freezer: Fr
         meter_reads(hass, "100.77")
         await set_state(hass, POWER, "0")
         await tick(hass, freezer, 120)
-    assert calls[-1].data["message"] == "22:44 · 1 h 17 min · 0.77 kWh · 0.19 €"
+    assert calls[-1].data["message"] == "22:44 · 1 h 17 min · 0.77 kWh · €0.19"
 
 
 async def test_totals_up_to_the_stop_before_a_restart(hass: HomeAssistant, freezer: FrozenDateTimeFactory) -> None:
