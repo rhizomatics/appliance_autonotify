@@ -49,6 +49,9 @@ class PlatformProfile:
     # what else an appliance must have for its cycle state to be one, for an integration that gives every device the
     # same cycle state, a fridge's as much as a washer's
     cycle_needs: tuple[str, ...] = ()
+    # energy sensors, by translation key, that count only the program under way, going back to nothing as the next
+    # one starts, so what one says at the end is what the cycle used, rather than how far it has gone up since it began
+    program_meter_keys: frozenset[str] = frozenset()
     # the types of appliance seen to work, for one in beta, its others still yet to be tried
     supported_types: frozenset[str] = frozenset()
     # where to tell of how it went, for one in beta
@@ -215,6 +218,8 @@ PROFILES: Final[dict[str, PlatformProfile]] = {
                 "program_interrupted": "aborting",
             },
             cycle_needs=(STAGE_KEY,),
+            # what the program under way has used, which may still say what the one before did as the next starts
+            program_meter_keys=frozenset({"energy_consumption"}),
         ),
     )
     if profile.platform is not None

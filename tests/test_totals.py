@@ -51,6 +51,13 @@ def add_plug(hass: HomeAssistant, energy_unit: str = "kWh") -> None:
     hass.states.async_set(ENERGY, "100.0", {"unit_of_measurement": energy_unit, "device_class": "energy"})
 
 
+def meter_reads(hass: HomeAssistant, reading: str) -> None:
+    """The plug's energy meter at a new reading, as it was otherwise"""
+    meter = hass.states.get(ENERGY)
+    assert meter is not None
+    hass.states.async_set(ENERGY, reading, meter.attributes)
+
+
 def priced(hass: HomeAssistant, *sources: dict[str, Any]) -> _patch[Any]:
     """Energy settings with the grid sources given"""
     hass.config.components.add("energy")
@@ -69,7 +76,7 @@ async def wash(hass: HomeAssistant, freezer: FrozenDateTimeFactory, used: float,
     """A wash drawing power for the minutes given, the meter going up by what it used"""
     await set_state(hass, POWER, "1800")
     await tick(hass, freezer, minutes * 60)
-    hass.states.async_set(ENERGY, f"{100 + used}", hass.states.get(ENERGY).attributes)
+    meter_reads(hass, f"{100 + used}")
     await set_state(hass, POWER, "0")
     await tick(hass, freezer, 120)
 
@@ -247,7 +254,7 @@ async def test_totals_carried_through_a_restart(hass: HomeAssistant, freezer: Fr
         await tick(hass, freezer, 40 * 60)
         await restart(hass, entry, freezer, off_for=60)
         await tick(hass, freezer, 36 * 60)
-        hass.states.async_set(ENERGY, "100.77", hass.states.get(ENERGY).attributes)
+        meter_reads(hass, "100.77")
         await set_state(hass, POWER, "0")
         await tick(hass, freezer, 120)
     assert calls[-1].data["message"] == "22:44 · 1 h 17 min · 0.77 kWh · 0.19 €"
@@ -306,7 +313,7 @@ async def test_stopped_while_off_has_no_duration(hass: HomeAssistant, freezer: F
     entry = await setup_power_watcher(hass, grace_period=120, end_message="Washed\n⏱ {duration}\n⚡ {energy}")
     await set_state(hass, POWER, "1800")
     await tick(hass, freezer, 50 * 60)
-    hass.states.async_set(ENERGY, "100.5", hass.states.get(ENERGY).attributes)
+    meter_reads(hass, "100.5")
     assert await hass.config_entries.async_unload(entry.entry_id)
     await hass.async_block_till_done()
     # at rest by the time Home Assistant is back an hour later
@@ -335,7 +342,7 @@ async def test_kept_by_a_version_without_totals_timed_from_its_start(
         started_at=started.isoformat(),
     )
     await tick(hass, freezer, 10 * 60)
-    hass.states.async_set(ENERGY, "100.5", hass.states.get(ENERGY).attributes)
+    meter_reads(hass, "100.5")
     await set_state(hass, POWER, "0")
     await tick(hass, freezer, 120)
     assert calls[-1].data["message"] == "50 min"

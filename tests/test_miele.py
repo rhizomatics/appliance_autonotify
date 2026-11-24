@@ -33,6 +33,7 @@ WASHER: dict[str, tuple[str, list[str] | None]] = {
     "elapsed_time": ("sensor", None),
     "spin_speed": ("sensor", None),
 }
+ENERGY = {"device_class": "energy", "state_class": "total_increasing", "unit_of_measurement": "kWh"}
 FRIDGE: dict[str, tuple[str, list[str] | None]] = {"status": ("sensor", STATUSES), "temperature_zone_2": ("sensor", None)}
 NOW = datetime.fromisoformat("2026-11-13T10:00:00+00:00")
 WASHING_MACHINE = "mdi:washing-machine"
@@ -146,3 +147,24 @@ async def test_vacuum_status_is_its_program_phase(hass: HomeAssistant) -> None:
     await set_state(hass, vacuum, "cleaning")
     await set_state(hass, phase, "returning")
     assert [c.data["message"] for c in calls] == ["Bruno started", "auto · vacuum_cleaning", "auto · returning"]
+
+
+async def test_energy_of_the_program(hass: HomeAssistant, freezer) -> None:
+    """Miele's energy counts the program under way, so what it says at the end is what the cycle used, though as the
+    cycle began it still said what the program before had"""
+    freezer.move_to(NOW)
+    washer = miele_device(hass, "000987654321", "Washer", "Washing machine", WASHER | {"energy_consumption": ("sensor", None)})
+    calls = mock_supernotify(hass)
+    hass.states.async_set(washer["status"], "off")
+    hass.states.async_set(washer["program_phase"], "not_running")
+    hass.states.async_set(washer["energy_consumption"], "0.9", ENERGY)
+    await setup_appliance(hass, washer["device_id"], end_message="{energy}")
+
+    await set_state(hass, washer["status"], "in_use")
+    await set_state(hass, washer["program_phase"], "main_wash")
+    await pass_time(hass, 30)
+    # going back to nothing as the program got going, then counting what it used
+    hass.states.async_set(washer["energy_consumption"], "0.0", ENERGY)
+    hass.states.async_set(washer["energy_consumption"], "0.8", ENERGY)
+    await set_state(hass, washer["status"], "program_ended")
+    assert calls[-1].data["message"] == "0.80 kWh"
