@@ -48,7 +48,18 @@ def add_plug(hass: HomeAssistant, energy_unit: str = "kWh") -> None:
             config_entry=source,
             original_device_class=device_class,
         )
-    hass.states.async_set(ENERGY, "100.0", {"unit_of_measurement": energy_unit, "device_class": "energy"})
+    hass.states.async_set(
+        ENERGY,
+        "100.0",
+        {"unit_of_measurement": energy_unit, "device_class": "energy", "state_class": "total_increasing"},
+    )
+
+
+def meter_reads(hass: HomeAssistant, reading: str) -> None:
+    """The plug's energy meter at a new reading, as it was otherwise"""
+    meter = hass.states.get(ENERGY)
+    assert meter is not None
+    hass.states.async_set(ENERGY, reading, meter.attributes)
 
 
 def priced(hass: HomeAssistant, *sources: dict[str, Any]) -> _patch[Any]:
@@ -69,7 +80,7 @@ async def wash(hass: HomeAssistant, freezer: FrozenDateTimeFactory, used: float,
     """A wash drawing power for the minutes given, the meter going up by what it used"""
     await set_state(hass, POWER, "1800")
     await tick(hass, freezer, minutes * 60)
-    hass.states.async_set(ENERGY, f"{100 + used}", hass.states.get(ENERGY).attributes)
+    meter_reads(hass, f"{100 + used}")
     await set_state(hass, POWER, "0")
     await tick(hass, freezer, 120)
 
@@ -218,6 +229,22 @@ async def test_energy_meter_rather_than_what_was_used_since_the_last_reading(has
     assert energy_entity_id(hass, None) is None
 
 
+async def test_no_meter_without_one_that_adds_up(hass: HomeAssistant) -> None:
+    """An energy sensor that doesn't add up, such as what was used since the last reading, or an estimate, isn't a
+    meter, so what it says at the end less what it said at the start isn't what the cycle used"""
+    source = MockConfigEntry(domain="smartthings")
+    source.add_to_hass(hass)
+    device = dr.async_get(hass).async_get_or_create(config_entry_id=source.entry_id, identifiers={("smartthings", "x")})
+    registry = er.async_get(hass)
+    for key, state_class in (("delta", "measurement"), ("saved", None)):
+        entity = registry.async_get_or_create(
+            "sensor", "smartthings", key, suggested_object_id=f"dryer_{key}", device_id=device.id, config_entry=source
+        )
+        attributes = {"device_class": "energy", "unit_of_measurement": "kWh"}
+        hass.states.async_set(entity.entity_id, "1", attributes | ({"state_class": state_class} if state_class else {}))
+    assert energy_entity_id(hass, device.id) is None
+
+
 async def test_nothing_counted_leaves_its_line_out(hass: HomeAssistant, freezer: FrozenDateTimeFactory) -> None:
     """A real cold air cycle on a meter that counts in tenths of a kWh, which hadn't moved by the end"""
     device_id, vacuum = add_vacuum(hass)
@@ -247,7 +274,7 @@ async def test_totals_carried_through_a_restart(hass: HomeAssistant, freezer: Fr
         await tick(hass, freezer, 40 * 60)
         await restart(hass, entry, freezer, off_for=60)
         await tick(hass, freezer, 36 * 60)
-        hass.states.async_set(ENERGY, "100.77", hass.states.get(ENERGY).attributes)
+        meter_reads(hass, "100.77")
         await set_state(hass, POWER, "0")
         await tick(hass, freezer, 120)
     assert calls[-1].data["message"] == "22:44 · 1 h 17 min · 0.77 kWh · 0.19 €"
@@ -306,7 +333,7 @@ async def test_stopped_while_off_has_no_duration(hass: HomeAssistant, freezer: F
     entry = await setup_power_watcher(hass, grace_period=120, end_message="Washed\n⏱ {duration}\n⚡ {energy}")
     await set_state(hass, POWER, "1800")
     await tick(hass, freezer, 50 * 60)
-    hass.states.async_set(ENERGY, "100.5", hass.states.get(ENERGY).attributes)
+    meter_reads(hass, "100.5")
     assert await hass.config_entries.async_unload(entry.entry_id)
     await hass.async_block_till_done()
     # at rest by the time Home Assistant is back an hour later
@@ -335,7 +362,7 @@ async def test_kept_by_a_version_without_totals_timed_from_its_start(
         started_at=started.isoformat(),
     )
     await tick(hass, freezer, 10 * 60)
-    hass.states.async_set(ENERGY, "100.5", hass.states.get(ENERGY).attributes)
+    meter_reads(hass, "100.5")
     await set_state(hass, POWER, "0")
     await tick(hass, freezer, 120)
     assert calls[-1].data["message"] == "50 min"
