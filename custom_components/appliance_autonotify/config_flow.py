@@ -55,11 +55,9 @@ from .const import (
     CONF_TARGETS,
     CONF_THRESHOLD,
     COST_PLACEHOLDER,
-    DEFAULT_END_MESSAGE,
     DEFAULT_GRACE_PERIOD,
     DEFAULT_MIN_DURATION,
     DEFAULT_REMINDER_REPEATS,
-    DEFAULT_START_MESSAGE,
     DEFAULT_THRESHOLD,
     DEFAULT_TITLE,
     DISCOVERY_TITLE,
@@ -70,10 +68,13 @@ from .const import (
     LIVE_SHOWS,
     MAINTENANCE_ITEMS,
     NAME_PLACEHOLDER,
+    NOTIFICATION_TEXTS,
     PROGRAM_PLACEHOLDER,
     START_TIME_PLACEHOLDER,
     SUPERNOTIFY_MISSING,
     SUPERNOTIFY_PRESENT,
+    TEXT_END,
+    TEXT_START,
     TYPE_DISCOVERY,
     TYPE_POWER,
     TYPE_VACUUM,
@@ -81,6 +82,7 @@ from .const import (
 )
 from .dashboards import dashboards
 from .discovery import appliance_beta, appliance_profile, find_appliances, integration_name, plug_switch
+from .maintenance import translated
 from .platforms import profile_for
 from .supernotify_api import deliveries_by_transport, supernotify_available
 from .words import DATA_WORDS, async_load_words
@@ -101,12 +103,16 @@ DEFAULT_CHOICES: dict[str, Any] = {
     **LIVE_DEFAULTS,
 }
 
-DEFAULT_TEXTS: dict[str, str] = {
-    CONF_START_TITLE: DEFAULT_TITLE,
-    CONF_START_MESSAGE: DEFAULT_START_MESSAGE,
-    CONF_END_TITLE: DEFAULT_TITLE,
-    CONF_END_MESSAGE: DEFAULT_END_MESSAGE,
-}
+
+def default_texts(hass: HomeAssistant) -> dict[str, str]:
+    """The texts as they come, in the language of Home Assistant"""
+    texts = translated(hass, NOTIFICATION_TEXTS)
+    return {
+        CONF_START_TITLE: DEFAULT_TITLE,
+        CONF_START_MESSAGE: texts[TEXT_START],
+        CONF_END_TITLE: DEFAULT_TITLE,
+        CONF_END_MESSAGE: texts[TEXT_END],
+    }
 
 
 def supernotify_status(hass: HomeAssistant) -> str:
@@ -402,7 +408,7 @@ class AppliancesOptionsFlow(OptionsFlowWithReload):
         kind = self.config_entry.data.get(CONF_TYPE)
         vacuum = kind == TYPE_VACUUM
         # as they'll be sent, so there's the real text to edit rather than a template or an empty box
-        defaults = {key: text.replace(NAME_PLACEHOLDER, name) for key, text in DEFAULT_TEXTS.items()}
+        defaults = {key: text.replace(NAME_PLACEHOLDER, name) for key, text in default_texts(self.hass).items()}
         if user_input is not None:
             # text left as the default isn't a setting, so it goes on following the name of the appliance
             usual = {f"{CONF_MAINTENANCE_PREFIX}{key}": every for key, every in (self._maintenance() or {}).items()}
