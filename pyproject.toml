@@ -101,7 +101,7 @@ include = ["tests/ha_testing.py"]
 import-not-found = "ignore"
 
 [tool.codespell]
-ignore-words-list = "hass"
+ignore-words-list = "hass,ist"
 skip = "*.json,./.*,./htmlcov,./junit,cov.xml,coverage.xml,uv.lock"
 quiet-level = 2
 

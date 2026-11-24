@@ -85,9 +85,98 @@ DURATION_PLACEHOLDER: Final[str] = "{duration}"
 ENERGY_PLACEHOLDER: Final[str] = "{energy}"
 COST_PLACEHOLDER: Final[str] = "{cost}"
 DEFAULT_TITLE: Final[str] = "{name}"
-DEFAULT_START_MESSAGE: Final[str] = "{name} started"
-DEFAULT_END_MESSAGE: Final[str] = "{name} is finished"
-PROGRESS_MESSAGE: Final[str] = "{progress}% complete"
+# the texts of notifications, by the language of Home Assistant as for the buttons, English for any other, worded
+# so as not to depend on whether the appliance's name is masculine or feminine
+TEXT_START: Final[str] = "start"
+TEXT_END: Final[str] = "end"
+TEXT_PROGRESS: Final[str] = "progress"
+TEXT_PREHEAT: Final[str] = "preheat"
+TEXT_FAST_PREHEAT: Final[str] = "fast_preheat"
+TEXT_PREHEATING: Final[str] = "preheating"
+TEXT_PREHEATED: Final[str] = "preheated"
+NOTIFICATION_TEXTS: Final[dict[str, dict[str, str]]] = {
+    "en": {
+        TEXT_START: "{name} started",
+        TEXT_END: "{name} is finished",
+        TEXT_PROGRESS: "{progress}% complete",
+        TEXT_PREHEAT: "Pre-heating",
+        TEXT_FAST_PREHEAT: "Fast pre-heat",
+        TEXT_PREHEATING: "{phase}, {current} of {target}{unit}",
+        TEXT_PREHEATED: "{name} is pre-heated",
+    },
+    "it": {
+        TEXT_START: "{name}: ciclo avviato",
+        TEXT_END: "{name}: ciclo terminato",
+        TEXT_PROGRESS: "{progress}% completato",
+        TEXT_PREHEAT: "Preriscaldamento",
+        TEXT_FAST_PREHEAT: "Preriscaldamento rapido",
+        TEXT_PREHEATING: "{phase}, {current} di {target}{unit}",
+        TEXT_PREHEATED: "{name}: preriscaldamento completato",
+    },
+    "de": {
+        TEXT_START: "{name} gestartet",
+        TEXT_END: "{name} ist fertig",
+        TEXT_PROGRESS: "{progress} % erledigt",
+        TEXT_PREHEAT: "Vorheizen",
+        TEXT_FAST_PREHEAT: "Schnellaufheizen",
+        TEXT_PREHEATING: "{phase}, {current} von {target}{unit}",
+        TEXT_PREHEATED: "{name} ist vorgeheizt",
+    },
+    "nl": {
+        TEXT_START: "{name} gestart",
+        TEXT_END: "{name} is klaar",
+        TEXT_PROGRESS: "{progress}% voltooid",
+        TEXT_PREHEAT: "Voorverwarmen",
+        TEXT_FAST_PREHEAT: "Snel voorverwarmen",
+        TEXT_PREHEATING: "{phase}, {current} van {target}{unit}",
+        TEXT_PREHEATED: "{name} is voorverwarmd",
+    },
+    "es": {
+        TEXT_START: "{name}: ciclo iniciado",
+        TEXT_END: "{name}: ciclo terminado",
+        TEXT_PROGRESS: "{progress} % completado",
+        TEXT_PREHEAT: "Precalentando",
+        TEXT_FAST_PREHEAT: "Precalentamiento rápido",
+        TEXT_PREHEATING: "{phase}, {current} de {target}{unit}",
+        TEXT_PREHEATED: "{name}: precalentamiento completado",
+    },
+    "fr": {
+        TEXT_START: "{name} : cycle démarré",
+        TEXT_END: "{name} : cycle terminé",
+        TEXT_PROGRESS: "{progress} % terminé",
+        TEXT_PREHEAT: "Préchauffage",
+        TEXT_FAST_PREHEAT: "Préchauffage rapide",
+        TEXT_PREHEATING: "{phase}, {current} sur {target}{unit}",
+        TEXT_PREHEATED: "{name} : préchauffage terminé",
+    },
+    "pl": {
+        TEXT_START: "{name}: cykl rozpoczęty",
+        TEXT_END: "{name}: cykl zakończony",
+        TEXT_PROGRESS: "Ukończono {progress}%",
+        TEXT_PREHEAT: "Nagrzewanie",
+        TEXT_FAST_PREHEAT: "Szybkie nagrzewanie",
+        TEXT_PREHEATING: "{phase}, {current} z {target}{unit}",
+        TEXT_PREHEATED: "{name}: nagrzewanie zakończone",
+    },
+    "zh": {
+        TEXT_START: "{name} 已启动",
+        TEXT_END: "{name} 已完成",
+        TEXT_PROGRESS: "已完成 {progress}%",
+        TEXT_PREHEAT: "预热中",
+        TEXT_FAST_PREHEAT: "快速预热",
+        TEXT_PREHEATING: "{phase}，{current}/{target}{unit}",
+        TEXT_PREHEATED: "{name} 已预热",
+    },
+    "hi": {
+        TEXT_START: "{name} शुरू हो गया",
+        TEXT_END: "{name} पूरा हो गया",
+        TEXT_PROGRESS: "{progress}% पूरा",
+        TEXT_PREHEAT: "प्रीहीटिंग",
+        TEXT_FAST_PREHEAT: "तेज़ प्रीहीट",
+        TEXT_PREHEATING: "{phase}, {target}{unit} में से {current}",
+        TEXT_PREHEATED: "{name} प्रीहीट हो गया",
+    },
+}
 
 # minutes after which the end is told again, for as long as nobody says the appliance has been seen to
 CONF_REMINDER: Final[str] = "reminder"
@@ -281,10 +370,6 @@ MAINTENANCE_MESSAGES: Final[dict[str, dict[str, str]]] = {
 
 # the text of the Android status bar chip, which shows it in full only up to about 7 characters
 PROGRESS_CHIP: Final[str] = "{progress}%"
-PREHEAT_PHASE: Final[str] = "Pre-heating"
-FAST_PREHEAT_PHASE: Final[str] = "Fast pre-heat"
-PREHEAT_MESSAGE: Final[str] = "{phase}, {current} of {target}{unit}"
-PREHEATED_MESSAGE: Final[str] = "{name} is pre-heated"
 # a robot vacuum that has stopped where it is, stuck or lifted, and won't go on by itself, by the language of Home
 # Assistant as for the buttons, English for any other
 STUCK_MESSAGES: Final[dict[str, str]] = {
