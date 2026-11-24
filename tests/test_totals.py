@@ -50,7 +50,18 @@ def add_plug(hass: HomeAssistant, energy_unit: str = "kWh") -> None:
             config_entry=source,
             original_device_class=device_class,
         )
-    hass.states.async_set(ENERGY, "100.0", {"unit_of_measurement": energy_unit, "device_class": "energy"})
+    hass.states.async_set(
+        ENERGY,
+        "100.0",
+        {"unit_of_measurement": energy_unit, "device_class": "energy", "state_class": "total_increasing"},
+    )
+
+
+def meter_reads(hass: HomeAssistant, reading: str) -> None:
+    """The plug's energy meter at a new reading, as it was otherwise"""
+    meter = hass.states.get(ENERGY)
+    assert meter is not None
+    hass.states.async_set(ENERGY, reading, meter.attributes)
 
 
 def meter_reads(hass: HomeAssistant, reading: str) -> None:
@@ -254,6 +265,22 @@ async def test_energy_meter_rather_than_what_was_used_since_the_last_reading(has
         hass.states.async_set(entity.entity_id, "1", attributes | ({"state_class": state_class} if state_class else {}))
     assert energy_entity_id(hass, device.id) == "sensor.dryer_energy"
     assert energy_entity_id(hass, None) is None
+
+
+async def test_no_meter_without_one_that_adds_up(hass: HomeAssistant) -> None:
+    """An energy sensor that doesn't add up, such as what was used since the last reading, or an estimate, isn't a
+    meter, so what it says at the end less what it said at the start isn't what the cycle used"""
+    source = MockConfigEntry(domain="smartthings")
+    source.add_to_hass(hass)
+    device = dr.async_get(hass).async_get_or_create(config_entry_id=source.entry_id, identifiers={("smartthings", "x")})
+    registry = er.async_get(hass)
+    for key, state_class in (("delta", "measurement"), ("saved", None)):
+        entity = registry.async_get_or_create(
+            "sensor", "smartthings", key, suggested_object_id=f"dryer_{key}", device_id=device.id, config_entry=source
+        )
+        attributes = {"device_class": "energy", "unit_of_measurement": "kWh"}
+        hass.states.async_set(entity.entity_id, "1", attributes | ({"state_class": state_class} if state_class else {}))
+    assert energy_entity_id(hass, device.id) is None
 
 
 async def test_nothing_counted_leaves_its_line_out(hass: HomeAssistant, freezer: FrozenDateTimeFactory) -> None:

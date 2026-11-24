@@ -117,7 +117,9 @@ def energy_entity_id(hass: HomeAssistant, device_id: str | None) -> str | None:
         state_class = (state.attributes.get(ATTR_STATE_CLASS) if state else None) or (entry.capabilities or {}).get(
             ATTR_STATE_CLASS
         )
-        found.append((METER_STATE_CLASSES.index(state_class) if state_class in METER_STATE_CLASSES else 2, entry.entity_id))
+        # only one that adds up, since what another says at the end less what it said at the start means nothing
+        if state_class in METER_STATE_CLASSES:
+            found.append((METER_STATE_CLASSES.index(state_class), entry.entity_id))
     return min(found)[1] if found else None
 
 
