@@ -173,6 +173,7 @@ from .repairs import async_forget_no_targets, async_report_no_targets
 from .supernotify_api import deliveries_by_transport, supernotify_available
 from .totals import (
     CycleTotals,
+    counts_program,
     energy_entity_id,
     energy_price,
     energy_reading,
@@ -514,11 +515,14 @@ class ApplianceWatcher:
             duration = None if self._stop_unseen else (self.cycle_stopped or dt_util.utcnow()) - started
             used = cost = None
             end = energy_reading(self.hass, self._energy_entity_id)
-            # nothing to tell if the meter was reset part way through
-            if self._energy_start is not None and end is not None and end >= self._energy_start:
+            if end is not None and counts_program(self.hass, self._energy_entity_id):
+                # what the program used, whatever it said as it began, which may have been the program before
+                used = end
+            elif self._energy_start is not None and end is not None and end >= self._energy_start:
+                # and nothing to tell if the meter was reset part way through
                 used = end - self._energy_start
-                if (price := await energy_price(self.hass)) is not None:
-                    cost = used * price
+            if used is not None and (price := await energy_price(self.hass)) is not None:
+                cost = used * price
             totals = CycleTotals(started, duration, used, cost)
         self.totals = totals
         self._cycle_forgotten()
