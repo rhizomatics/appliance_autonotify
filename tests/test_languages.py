@@ -11,6 +11,7 @@ from homeassistant.core import HomeAssistant
 
 from custom_components.appliance_autonotify.const import (
     ACTION_TITLES,
+    DURATION_FORMATS,
     MAINTENANCE_ACTION_TITLES,
     MAINTENANCE_MESSAGES,
     MAINTENANCE_NAMES,
@@ -56,7 +57,15 @@ def test_texts_in_code_for_every_language() -> None:
     """A table in code for each language with translations, by the language without its script or region, as looked
     up from Home Assistant's"""
     languages = {language.split("-")[0] for language in LANGUAGES}
-    for table in (ACTION_TITLES, MAINTENANCE_ACTION_TITLES, MAINTENANCE_NAMES, MAINTENANCE_MESSAGES, STUCK_MESSAGES):
+    tables = (
+        ACTION_TITLES,
+        MAINTENANCE_ACTION_TITLES,
+        MAINTENANCE_NAMES,
+        MAINTENANCE_MESSAGES,
+        STUCK_MESSAGES,
+        DURATION_FORMATS,
+    )
+    for table in tables:
         assert set(table) == languages
         for texts in table.values():
             if isinstance(texts, dict):

@@ -300,6 +300,38 @@ STUCK_MESSAGES: Final[dict[str, str]] = {
 }
 # the title of a Live Activity with a timer, which iOS shows on the Lock Screen in place of the message
 LIVE_TITLE: Final[str] = "{title} · {phase}"
+# how long a cycle ran, in hours and minutes, by the language of Home Assistant as for the buttons, English for any
+# other
+DURATION_HOURS_MINUTES: Final[str] = "hours_minutes"
+DURATION_HOURS: Final[str] = "hours"
+DURATION_MINUTES: Final[str] = "minutes"
+DURATION_FORMATS: Final[dict[str, dict[str, str]]] = {
+    "en": {DURATION_HOURS_MINUTES: "{hours} h {minutes} min", DURATION_HOURS: "{hours} h", DURATION_MINUTES: "{minutes} min"},
+    "it": {DURATION_HOURS_MINUTES: "{hours} h {minutes} min", DURATION_HOURS: "{hours} h", DURATION_MINUTES: "{minutes} min"},
+    "de": {
+        DURATION_HOURS_MINUTES: "{hours} Std. {minutes} Min.",
+        DURATION_HOURS: "{hours} Std.",
+        DURATION_MINUTES: "{minutes} Min.",
+    },
+    "nl": {DURATION_HOURS_MINUTES: "{hours} u {minutes} min", DURATION_HOURS: "{hours} u", DURATION_MINUTES: "{minutes} min"},
+    "es": {DURATION_HOURS_MINUTES: "{hours} h {minutes} min", DURATION_HOURS: "{hours} h", DURATION_MINUTES: "{minutes} min"},
+    "fr": {DURATION_HOURS_MINUTES: "{hours} h {minutes} min", DURATION_HOURS: "{hours} h", DURATION_MINUTES: "{minutes} min"},
+    "pl": {
+        DURATION_HOURS_MINUTES: "{hours} godz. {minutes} min",
+        DURATION_HOURS: "{hours} godz.",
+        DURATION_MINUTES: "{minutes} min",
+    },
+    "zh": {
+        DURATION_HOURS_MINUTES: "{hours}小时{minutes}分钟",
+        DURATION_HOURS: "{hours}小时",
+        DURATION_MINUTES: "{minutes}分钟",
+    },
+    "hi": {
+        DURATION_HOURS_MINUTES: "{hours} घंटे {minutes} मिनट",
+        DURATION_HOURS: "{hours} घंटे",
+        DURATION_MINUTES: "{minutes} मिनट",
+    },
+}
 # between each of the things shown, in the title or the message
 LIVE_SEPARATOR: Final[str] = " · "
 # what an oven up to heat is doing, and how hot it is
