@@ -13,9 +13,10 @@ title: What's New
   - Brought up to date as the appliance pauses and carries on
   - *Live Activity timer* switch in place of choosing the time left in *Live Activity shows*
 - *Live Activity title* choice gone, taken over by what's ticked, with choices made before carried over
-- Home Connect Local dishwashers supported, now seen through a whole cycle, so no longer offered as new (#28)
-  - Their program phase, such as *Main wash* or *Drying*, shown as the phase
-  - Its washers, dryers and other appliances still new, till one of each has been tried
+- **Home Connect Local**
+ - Dishwashers supported, now seen through a whole cycle, so no longer offered as new (#28)
+   - Their program phase, such as *Main wash* or *Drying*, shown as the phase
+   - Its washers, dryers and other appliances still new, till one of each has been tried
 - How long a cycle ran, the energy it used and what it cost can be put in the end message, as `{duration}`, `{energy}` and `{cost}`, and when it started as `{start_time}` in the start and end messages (#35, thanks @lollox80)
   - Energy from the appliance's or its smart plug's own energy meter, and cost at the grid price set on the Energy dashboard
   - Each left out where it isn't known, along with a line left with nothing but its emoji
