@@ -2,10 +2,17 @@
 title: What's New
 ---
 
-# 1.0.2
+# 1.1.0
 ## ✨ Enhancements
+- Live Activity shows any of the program, the phase and the state, ticked in the settings, all by default, each where the appliance reports it and has something to say
+  - The phase is the part of the cycle it's in, such as *Main wash*, *Drying* or an oven *Pre-heating*
+  - The state is shown when it's more than running, such as *Paused*, or a robot vacuum *Returning* to its dock, which is now said whether or not the vacuum has a status of its own
+  - With the timer, they go in the title beside the name as much as fits, leaving out the program first, then the phase
+  - Brought up to date as the appliance pauses and carries on
+  - *Live Activity timer* switch in place of choosing the time left in *Live Activity shows*
+- *Live Activity title* choice gone, taken over by what's ticked, with choices made before carried over
 - Home Connect Local dishwashers supported, now seen through a whole cycle, so no longer offered as new (#28)
-  - Its program phase, such as *Main wash* or *Drying*, shown as the status, where the Live Activity is chosen to show it
+  - Their program phase, such as *Main wash* or *Drying*, shown as the phase
   - Its washers, dryers and other appliances still new, till one of each has been tried
 
 # 1.0.1

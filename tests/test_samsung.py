@@ -176,7 +176,11 @@ async def test_stopped_is_the_end(hass: HomeAssistant) -> None:
     entry = await setup_appliance(hass, dryer["device_id"])
     for state in ("pause", "run", "unavailable", "run"):
         await set_state(hass, dryer["dryer_machine_state"], state)
-    assert calls == []
+    # only the Live Activity told, quietly, as it pauses and carries on
+    assert [(call.data["message"], call.data["extra_data"]["silent"]) for call in calls] == [
+        ("pause", True),
+        ("Asciugatrice started", True),
+    ]
     await set_state(hass, dryer["dryer_machine_state"], "stop")
     assert calls[-1].data == ended("Asciugatrice", entry.entry_id, TUMBLE_DRYER, track=True, force_resend=True)
 
@@ -194,12 +198,12 @@ async def test_local_dryer_with_progress_and_program(hass: HomeAssistant) -> Non
     assert calls[0].data["message"] == "Samsung Dryer: 16"
     await set_state(hass, dryer["progress_percentage"], "40")
     assert calls[-1].data["extra_data"]["progress"] == 40
-    assert calls[-1].data["message"] == "drying"
-    # with a countdown, the program beside the name, and what it's doing below
+    assert calls[-1].data["message"] == "16 · drying"
+    # with a countdown, the program and what it's doing beside the name, the timer taking the message's place
     await set_state(hass, dryer["finish_time"], "2026-10-20T09:41:00+00:00")
     await set_state(hass, dryer["progress_percentage"], "55")
-    assert calls[-1].data["title"] == "Samsung Dryer · 16"
-    assert calls[-1].data["message"] == "drying"
+    assert calls[-1].data["title"] == "Samsung Dryer · 16 · drying"
+    assert calls[-1].data["message"] == "55% complete"
 
     # idle is the end once it has stayed so
     await set_state(hass, dryer["machine_state"], "idle")
@@ -367,14 +371,14 @@ async def test_reminder_names_the_program_of_the_cycle_over(hass: HomeAssistant)
 @pytest.mark.parametrize(
     ("options", "title", "message"),
     [
-        ({"live_detail": "program_status", "live_title": "name"}, "Samsung Dryer", "23 · drying"),
-        # the status alone, with the program in the title, there being no timer to take the message's place
-        ({"live_detail": "status"}, "Samsung Dryer · 23", "drying"),
-        ({"live_detail": "program"}, "Samsung Dryer", "23"),
+        # with no timer, the title is the name and the message says what's shown
+        ({"live_timer": False}, "Samsung Dryer", "23 · drying"),
+        ({"live_timer": False, "live_show": ["phase"]}, "Samsung Dryer", "drying"),
+        ({"live_timer": False, "live_show": ["program"]}, "Samsung Dryer", "23"),
     ],
 )
 async def test_status_and_program_shown_in_place_of_the_time_left(
-    hass: HomeAssistant, options: dict[str, str], title: str, message: str
+    hass: HomeAssistant, options: dict[str, object], title: str, message: str
 ) -> None:
     """The stage of any appliance is its status, shown alone, or with its program, in place of the time left"""
     dryer = localthings_dryer(hass)

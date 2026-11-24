@@ -375,7 +375,7 @@ async def test_settings_without_supernotify(hass: HomeAssistant) -> None:
         "totals_placeholders": "{duration}, {energy}, {cost}",
     }
     # with no Live Activity, there's no title for the program to go in
-    assert not {"live_title", "live_detail"} & {str(k) for k in schema(result)}
+    assert not {"live_timer", "live_show"} & {str(k) for k in schema(result)}
     # everything but whether to notify progress is tucked away in three sections
     sections = {str(k): v for k, v in schema(result).items()}
     for switch in ("notify_start", "notify_end", "maintenance", "notify_progress"):
@@ -435,8 +435,8 @@ async def test_settings_with_supernotify(hass: HomeAssistant) -> None:
         "notify_end",
         "maintenance",
         "notify_progress",
-        "live_title",
-        "live_detail",
+        "live_timer",
+        "live_show",
         "start",
         "end",
         "notify",
@@ -448,8 +448,8 @@ async def test_settings_with_supernotify(hass: HomeAssistant) -> None:
         "notify_end": True,
         "maintenance": False,
         "notify_progress": False,
-        "live_title": "name_program",
-        "live_detail": "time_remaining",
+        "live_timer": True,
+        "live_show": ["program", "phase", "state"],
     }
     notify = next(v for k, v in schema(result).items() if k == "notify").schema.schema
     # the notify entity list is only for use without Supernotify

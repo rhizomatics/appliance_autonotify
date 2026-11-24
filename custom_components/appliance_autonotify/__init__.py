@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from homeassistant.const import CONF_TYPE, EVENT_HOMEASSISTANT_STOP, Platform
 from homeassistant.core import ServiceCall, callback
@@ -14,12 +14,17 @@ from .compat import vol
 from .const import (
     CONF_DASHBOARD,
     CONF_DASHBOARD_FOUND,
+    CONF_LIVE_DETAIL,
+    CONF_LIVE_SHOW,
+    CONF_LIVE_TIMER,
     CONF_LIVE_TITLE,
     CONF_PROGRAM_IN_TITLE,
     CYCLE_STORE,
     CYCLE_STORE_VERSION,
     DOMAIN,
-    LIVE_TITLE_NAME,
+    LIVE_SHOW_PHASE,
+    LIVE_SHOW_PROGRAM,
+    LIVE_SHOW_STATE,
     MAINTENANCE_SNOOZE_DAYS,
     TYPE_DISCOVERY,
     TYPE_POWER,
@@ -41,6 +46,8 @@ from .watcher import ApplianceWatcher, HomeConnectWatcher, PowerWatcher, VacuumW
 from .words import async_load_words
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from homeassistant.config_entries import ConfigEntry
     from homeassistant.core import HomeAssistant
     from homeassistant.helpers import device_registry as dr
@@ -128,12 +135,32 @@ async def async_migrate_entry(hass: HomeAssistant, entry: AppliancesConfigEntry)
         options = dict(entry.options)
         # the program left out of the title is the name alone, and left in it is the choice as it comes
         if options.pop(CONF_PROGRAM_IN_TITLE, True) is False:
-            options[CONF_LIVE_TITLE] = LIVE_TITLE_NAME
+            options[CONF_LIVE_TITLE] = "name"
         hass.config_entries.async_update_entry(entry, options=options, minor_version=2)
     if entry.minor_version < 3:
         # set up before a dashboard was looked for, so left with whatever was chosen
         hass.config_entries.async_update_entry(entry, data=entry.data | {CONF_DASHBOARD_FOUND: True}, minor_version=3)
+    if entry.minor_version < 4:
+        hass.config_entries.async_update_entry(entry, options=live_options(entry.options), minor_version=4)
     return True
+
+
+def live_options(options: Mapping[str, Any]) -> dict[str, Any]:
+    """What a Live Activity shows, from the title and the detail once chosen, as near as ticking what's shown comes
+    to them, and left to the usual choice where they were"""
+    options = dict(options)
+    title, detail = options.pop(CONF_LIVE_TITLE, None), options.pop(CONF_LIVE_DETAIL, None)
+    if detail in (LIVE_SHOW_PROGRAM, "status", "program_status"):
+        # chosen in place of the time left, which a vacuum never had
+        options[CONF_LIVE_TIMER] = False
+    if detail == LIVE_SHOW_PROGRAM:
+        options[CONF_LIVE_SHOW] = [LIVE_SHOW_PROGRAM, LIVE_SHOW_STATE]
+    elif detail == "status":
+        options[CONF_LIVE_SHOW] = [LIVE_SHOW_PHASE, LIVE_SHOW_STATE]
+    elif title == "name" and detail in (None, "time_remaining"):
+        # the name alone over the time left
+        options[CONF_LIVE_SHOW] = []
+    return options
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: AppliancesConfigEntry) -> bool:

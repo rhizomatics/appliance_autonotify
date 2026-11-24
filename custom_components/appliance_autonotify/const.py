@@ -1,6 +1,6 @@
 """Constants for Appliance Auto Notify"""
 
-from typing import Final
+from typing import Any, Final
 
 DOMAIN: Final[str] = "appliance_autonotify"
 SUPERNOTIFY_DOMAIN: Final[str] = "supernotify"
@@ -22,31 +22,24 @@ CONF_NOTIFY_START: Final[str] = "notify_start"
 CONF_NOTIFY_END: Final[str] = "notify_end"
 # whether the end of a phase, such as an oven getting up to heat, is told with an ordinary notification
 CONF_NOTIFY_PHASE: Final[str] = "notify_phase"
-# what the title of a Live Activity names, the program going beside the name unless chosen otherwise, since it's
-# where the program shows on the iOS Lock Screen once a timer has taken the message's place
+# whether a Live Activity counts down the time left, where the appliance reports when it will finish, which on an
+# iPhone's Lock Screen takes the place of the message, so that what's shown goes in the title instead
+CONF_LIVE_TIMER: Final[str] = "live_timer"
+# what a Live Activity shows of what the appliance is doing, each where the appliance reports it: its program, the
+# phase of the cycle it's in, such as a pre-rinse or a robot vacuum returning to its dock, and its state where that
+# says more than that it's running, such as paused or waiting for something to be done
+CONF_LIVE_SHOW: Final[str] = "live_show"
+LIVE_SHOW_PROGRAM: Final[str] = "program"
+LIVE_SHOW_PHASE: Final[str] = "phase"
+LIVE_SHOW_STATE: Final[str] = "state"
+LIVE_SHOWS: Final[tuple[str, ...]] = (LIVE_SHOW_PROGRAM, LIVE_SHOW_PHASE, LIVE_SHOW_STATE)
+LIVE_DEFAULTS: Final[dict[str, Any]] = {CONF_LIVE_TIMER: True, CONF_LIVE_SHOW: list(LIVE_SHOWS)}
+# the choices these took over from, the title and what was shown in place of the time left
 CONF_LIVE_TITLE: Final[str] = "live_title"
-LIVE_TITLE_NAME_PROGRAM: Final[str] = "name_program"
-LIVE_TITLE_PROGRAM: Final[str] = "program"
-LIVE_TITLE_NAME: Final[str] = "name"
-LIVE_TITLES: Final[tuple[str, ...]] = (LIVE_TITLE_NAME_PROGRAM, LIVE_TITLE_PROGRAM, LIVE_TITLE_NAME)
-# what a Live Activity shows in place of its message, the time left where the appliance reports a finish time, or
-# the program, for an appliance whose program is always the same and so not worth the title, or its status, what it's
-# doing within its cycle, or both of those
 CONF_LIVE_DETAIL: Final[str] = "live_detail"
-LIVE_DETAIL_TIME: Final[str] = "time_remaining"
-LIVE_DETAIL_PROGRAM: Final[str] = "program"
-LIVE_DETAIL_STATUS: Final[str] = "status"
-LIVE_DETAIL_PROGRAM_STATUS: Final[str] = "program_status"
-LIVE_DETAILS: Final[tuple[str, ...]] = (LIVE_DETAIL_TIME, LIVE_DETAIL_PROGRAM, LIVE_DETAIL_STATUS, LIVE_DETAIL_PROGRAM_STATUS)
-# a robot vacuum has no time left to show
-VACUUM_LIVE_DETAILS: Final[tuple[str, ...]] = (LIVE_DETAIL_PROGRAM_STATUS, LIVE_DETAIL_STATUS, LIVE_DETAIL_PROGRAM)
-# the title and what's shown unless chosen otherwise, a vacuum with no timer saying both its cleaning mode and what
-# it's doing in its message, so needing no more than its name for a title
-LIVE_DEFAULTS: Final[dict[str, str]] = {CONF_LIVE_TITLE: LIVE_TITLE_NAME_PROGRAM, CONF_LIVE_DETAIL: LIVE_DETAIL_TIME}
-VACUUM_LIVE_DEFAULTS: Final[dict[str, str]] = {
-    CONF_LIVE_TITLE: LIVE_TITLE_NAME,
-    CONF_LIVE_DETAIL: LIVE_DETAIL_PROGRAM_STATUS,
-}
+# the longest title with all that's shown in it, past which the program and then the phase are left out, the
+# state being the least often there and the most worth knowing when it is
+LIVE_TITLE_ROOM: Final[int] = 40
 # the switch the title choice took over from, off being the name only
 CONF_PROGRAM_IN_TITLE: Final[str] = "program_in_title"
 # path of the dashboard opened by a tap on a notification, the app is opened where it was last if there's none
@@ -307,8 +300,8 @@ STUCK_MESSAGES: Final[dict[str, str]] = {
 }
 # the title of a Live Activity with a timer, which iOS shows on the Lock Screen in place of the message
 LIVE_TITLE: Final[str] = "{title} · {phase}"
-# the program and the status together, as the Live Activity shows them
-LIVE_PROGRAM_STATUS: Final[str] = "{program} · {status}"
+# between each of the things shown, in the title or the message
+LIVE_SEPARATOR: Final[str] = " · "
 # what an oven up to heat is doing, and how hot it is
 OVEN_MESSAGE: Final[str] = "{program}, {current}{unit}"
 SUPERNOTIFY_PRESENT: Final[str] = "Supernotify is installed, so mobile apps will show a Live Activity for each cycle."

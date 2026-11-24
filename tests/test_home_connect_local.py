@@ -146,16 +146,14 @@ async def test_dishwasher_says_what_it_is_doing(hass: HomeAssistant) -> None:
     calls = mock_supernotify(hass)
     hass.states.async_set(dishwasher["sensor_operation_state"], "ready")
     hass.states.async_set(dishwasher["sensor_program_phase"], "none")
-    entry = await setup_appliance(hass, dishwasher["device_id"], live_detail="status")
+    entry = await setup_appliance(hass, dishwasher["device_id"])
     assert entry.runtime_data.appliance_type == "dishwasher"
     assert entry.runtime_data.entity_ids["stage"] == dishwasher["sensor_program_phase"]
 
     hass.states.async_set(dishwasher["sensor_active_program"], "dishcare_dishwasher_program_auto2")
     await set_state(hass, dishwasher["sensor_operation_state"], "run")
-    # the program in the title, and what it's doing within it in the message
+    # its phase beside its program, in the title with the time left counting down in the message's place
+    hass.states.async_set(dishwasher["sensor_remaining_program_time"], "2", {"unit_of_measurement": "h"})
     hass.states.async_set(dishwasher["sensor_program_phase"], "mainwash")
     await set_state(hass, dishwasher["sensor_program_progress"], "30")
-    assert (calls[-1].data["title"], calls[-1].data["message"]) == (
-        "Dishwasher · dishcare_dishwasher_program_auto2",
-        "mainwash",
-    )
+    assert (calls[-1].data["title"], calls[-1].data["message"]) == ("Dishwasher · mainwash", "30% complete")

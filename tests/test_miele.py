@@ -86,7 +86,8 @@ async def test_washer_cycle(hass: HomeAssistant, freezer) -> None:
     hass.states.async_set(washer["finish"], (NOW + timedelta(minutes=60)).isoformat())
     hass.states.async_set(washer["elapsed_time"], "20", {"unit_of_measurement": "min"})
     await set_state(hass, washer["program_phase"], "main_wash")
-    assert calls[-1].data["message"] == "main_wash"
+    assert calls[-1].data["message"] == "25% complete"
+    assert calls[-1].data["title"].endswith(" · main_wash")
     extra = calls[-1].data["extra_data"]
     assert extra["progress"] == 25
     assert extra["when"] == int((NOW + timedelta(minutes=60)).timestamp())
