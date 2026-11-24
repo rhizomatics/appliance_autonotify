@@ -9,7 +9,7 @@
 ![Logo](https://appliance-autonotify.rhizomatics.org.uk/assets/images/icon.png)
 Automatic notifications for household appliances in Home Assistant, with no automations or YAML.
 
-When a dishwasher, washing machine, oven or other appliance starts a cycle, you're told it started, your phone shows a [Live Activity](https://companion.home-assistant.io/docs/notifications/live-activities) with progress and time remaining while it runs, and you're told when it finishes.
+When a dishwasher, washing machine, oven or other appliance starts a cycle, you're told it started, your phone shows a [Live Activity](https://companion.home-assistant.io/docs/notifications/live-activities) with progress and time remaining while it runs, and you're told when it finishes, and if you like, how long it ran, the energy it used and what that cost.
 
 ![Example Dishwasher Progress](https://appliance-autonotify.rhizomatics.org.uk/assets/images/dishwasher_progress.png)
 
@@ -150,8 +150,8 @@ With *Notify start* or *Notify end* off, that notification isn't sent, but the L
 
 | Section              | What it does                                                                                 |
 | -------------------- | -------------------------------------------------------------------------------------------- |
-| Start message        | The title and message sent when the appliance starts, shown as they'll be sent, such as "Dishwasher started". Clear a box to go back to the usual wording. `{program}` is replaced by the program under way, as Home Assistant shows it, such as "Eco 50ºC", and by nothing for an appliance that reports none. `{start_time}` is replaced by the time it started, such as 11:29, here and in the end message |
-| End message          | The same for when it finishes, such as "Dishwasher is finished". `{duration}` is replaced by how long it ran, such as "1 h 40 min", `{energy}` by the energy it used, such as "0.74 kWh", where the appliance or its smart plug has an energy meter, and `{cost}` by what that cost, at the grid price set on the Energy dashboard, each by nothing where it isn't known. A line left with nothing but its emoji, such as "⚡ {energy}" with no meter, is left out. With Supernotify, also a *Reminder*, see below |
+| Start message        | The title and message sent when the appliance starts, shown as they'll be sent, such as "Dishwasher started". Clear a box to go back to the usual wording. `{program}` is replaced by the program under way, as Home Assistant shows it, such as "Eco 50ºC", and by nothing for an appliance that reports none. `{start_time}` is replaced by the time it started, such as 11:29, here and in the end message, see [What a Cycle Came To](#what-a-cycle-came-to) |
+| End message          | The same for when it finishes, such as "Dishwasher is finished". `{duration}`, `{energy}` and `{cost}` are replaced by how long it ran, the energy it used and what that cost, see [What a Cycle Came To](#what-a-cycle-came-to). With Supernotify, also a *Reminder*, see below |
 | Notification targets | With Supernotify, *Targets* is the same choice of entities, devices, areas, floors and labels as any Supernotify notification, *Custom targets* is for those outside Home Assistant, such as e-mail addresses or phone numbers, and *Deliveries* limits notifications to those chosen. Leave them empty for Supernotify to choose. Without Supernotify, *Targets* is a choice of notify entities, and left empty means every phone with the Home Assistant app |
 
 What the *Live Activity shows* is whichever of the program, the phase and the state are ticked, each only where the appliance reports it and has something to say:
@@ -167,6 +167,39 @@ With the timer, the time left counts down on the Lock Screen of an iPhone in pla
 ## Notifications
 
 Nothing is polled: notifications go out as the appliance's own entities change. Their usual wording, and their buttons, are in the language of Home Assistant where there's a translation (English, Chinese, Dutch, French, German, Hindi, Italian, Polish and Spanish), such as "Spülmaschine ist fertig", and in English for any other. See [What Gets Sent](docs/how_it_works.md#what-gets-sent) for each notification and Live Activity update, with and without Supernotify.
+
+### What a Cycle Came To
+
+The end message can say how long the cycle ran, the energy it used and what that cost, by putting these in it, in the *End message* section of the appliance's settings:
+
+| Placeholder    | Replaced by                                                   | Needs                                                                       |
+| -------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `{start_time}` | When it started, such as "11:29", in Home Assistant's time zone. In the start message too | Nothing                                          |
+| `{duration}`   | How long it ran, such as "1 h 40 min"                         | Nothing                                                                     |
+| `{energy}`     | The energy it used, such as "0.74 kWh"                        | An energy meter on the appliance, or on its smart plug for one that's power monitored |
+| `{cost}`       | What that energy cost, such as "€0.19"                        | The meter, and a grid price set on Home Assistant's *Energy* dashboard, as a number or an entity |
+
+For example, an end message of
+
+```text
+📌 {name} is finished
+⏱ {duration}
+⚡ {energy}
+💰 {cost}
+```
+
+is sent as
+
+```text
+📌 Washer is finished
+⏱ 50 min
+⚡ 0.74 kWh
+💰 €0.19
+```
+
+Each is replaced by nothing where it isn't known, such as the energy of an appliance with no meter, and a line left with nothing but its emoji, as "⚡" would be, is left out altogether. So is an energy or cost that rounds to nothing, such as 0.004 kWh. A reminder of the end says the same again, and so does one sent after Home Assistant has restarted.
+
+The duration is written in the language of Home Assistant, such as "1 Std. 40 Min." in German, and the cost in its currency, written as the language writes it, such as "$0.45" or "0,45 €". See [Cycle Totals](docs/how_it_works.md#cycle-totals) for how each is worked out.
 
 ### Buttons on the End Notification
 

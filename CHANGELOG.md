@@ -20,6 +20,8 @@ title: What's New
   - Energy from the appliance's or its smart plug's own energy meter, and cost at the grid price set on the Energy dashboard
   - Each left out where it isn't known, along with a line left with nothing but its emoji
   - Duration and cost written as in the language of Home Assistant, such as *1 Std. 40 Min.* in German, and *$0.45* or *0,45 €*
+## 📚 Documentation
+- *What a Cycle Came To* in README, with an example end message, and *Cycle Totals* in How it Works, on how each is worked out
 
 # 1.0.1
 ## 🐛 Fixes
