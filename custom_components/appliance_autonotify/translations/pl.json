@@ -64,6 +64,7 @@
                     "notify_end": "Powiadamiaj o zakończeniu",
                     "notify_phase": "Powiadamiaj o fazach",
                     "notify_progress": "Powiadamiaj o postępie",
+                    "offline_after": "Powiadom o braku połączenia po",
                     "dashboard": "Dashboard do otwarcia",
                     "live_timer": "Minutnik Aktywności na żywo",
                     "live_show": "Aktywność na żywo pokazuje",
@@ -75,6 +76,7 @@
                     "notify_phase": "Wyślij powiadomienie, gdy kończy się faza cyklu, na przykład gdy piekarnik się nagrzeje. Gdy wyłączone, jest to pokazywane tylko w Aktywności na żywo.",
                     "dashboard": "Otwierany po stuknięciu powiadomienia lub Aktywności na żywo. Pozostaw puste, aby otworzyć aplikację tam, gdzie była. Ustawiany na dashboard nazwany jak urządzenie lub jego typ, na przykład „Zmywarka” lub „Pralka”, jeśli taki istniał w chwili dodania urządzenia.",
                     "notify_progress": "Wysyłaj powiadomienie co 10% cyklu. Gdy wyłączone, postęp jest pokazywany tylko na pasku postępu Aktywności na żywo, aktualizowanym po cichu.",
+                    "offline_after": "Minuty, przez które urządzenie musi być niedostępne, np. gdy integracja nie może się z nim połączyć przez sieć, zanim powiadomienie poinformuje, że jest offline, a kolejne, gdy wróci. 0 oznacza brak, jak zwykle, bo urządzenie wyłączone z gniazdka też jest offline.",
                     "live_timer": "Odliczaj pozostały czas w Aktywności na żywo, jeśli urządzenie podaje, kiedy skończy. Na ekranie blokady iPhone'a minutnik zajmuje miejsce wiadomości, więc to, co pokazano poniżej, trafia do tytułu, tyle, ile zmieści się obok nazwy.",
                     "live_show": "Co robi urządzenie, każde z nich, jeśli je podaje i jest coś do powiedzenia. Program, np. Eco 50ºC, można pominąć dla urządzenia zawsze na tym samym. Faza to część cyklu, np. płukanie wstępne, suszenie albo robot odkurzający zmieniający pozycję. Stan jest pokazywany tylko, gdy mówi więcej niż praca, np. wstrzymany albo powrót do stacji. Gdy w tytule nie ma miejsca na wszystko, najpierw pomijany jest program.",
                     "maintenance": "Licz cykle i to, ile życia zostało częściom, o których urządzenie informuje, i umieszczaj wszystko, co jest do zrobienia, na liście zadań Konserwacja urządzeń, z powiadomieniem, gdy nadejdzie termin. Proponowane raz w powiadomieniu o zakończeniu, jeśli wyłączone."

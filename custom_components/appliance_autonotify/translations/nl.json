@@ -64,6 +64,7 @@
                     "notify_end": "Einde melden",
                     "notify_phase": "Fasen melden",
                     "notify_progress": "Voortgang melden",
+                    "offline_after": "Offline melden na",
                     "dashboard": "Te openen dashboard",
                     "live_timer": "Timer van de Live Activity",
                     "live_show": "Live Activity toont",
@@ -75,6 +76,7 @@
                     "notify_phase": "Een melding sturen wanneer een fase van de cyclus voorbij is, zoals een oven die op temperatuur is. Indien uit wordt dit alleen in de Live Activity getoond.",
                     "dashboard": "Geopend wanneer op een melding of de Live Activity wordt getikt. Leeg laten om de app te openen waar hij was. Ingesteld op een dashboard dat naar het apparaat of het type is genoemd, zoals 'Vaatwasser' of 'Wasmachine', als er een was toen het apparaat werd toegevoegd.",
                     "notify_progress": "Elke 10% van de cyclus een melding sturen. Indien uit wordt de voortgang alleen getoond op de voortgangsbalk van de Live Activity, die stil wordt bijgewerkt.",
+                    "offline_after": "Minuten dat het apparaat niet beschikbaar moet zijn, bijvoorbeeld als de integratie het niet via het netwerk bereikt, voordat een melding zegt dat het offline is, en nog een als het terug is. 0 voor geen, de gebruikelijke instelling, want een apparaat dat bij het stopcontact is uitgeschakeld is ook offline.",
                     "live_timer": "Tel de resterende tijd af op de Live Activity, als het apparaat meldt wanneer het klaar is. Op het vergrendelscherm van een iPhone neemt de timer de plaats van het bericht in, dus wat hieronder wordt getoond komt in de titel, voor zover het naast de naam past.",
                     "live_show": "Wat het apparaat doet, elk voor zover het dat meldt en er iets over te zeggen is. Het programma, zoals Eco 50ºC, kan weg bij een apparaat dat altijd hetzelfde gebruikt. De fase is het deel van de cyclus, zoals voorspoelen, drogen of een robotstofzuiger die zich herpositioneert. De status wordt alleen getoond als die meer zegt dan bezig, zoals gepauzeerd of terug naar het dock. Als er in de titel geen ruimte is voor alles, valt het programma eerst weg.",
                     "maintenance": "De cycli bijhouden, en hoeveel levensduur de onderdelen waarover het apparaat rapporteert nog hebben, en wat nodig is op de takenlijst Apparaatonderhoud zetten, met een melding wanneer het zover is. Eenmaal aangeboden in de eindmelding als dit uit staat."

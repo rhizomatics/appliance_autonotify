@@ -44,6 +44,7 @@ from .const import (
     CONF_NOTIFY_PHASE,
     CONF_NOTIFY_PROGRESS,
     CONF_NOTIFY_START,
+    CONF_OFFLINE_AFTER,
     CONF_POWER_ENTITY,
     CONF_REMINDER,
     CONF_REMINDER_REPEATS,
@@ -155,6 +156,10 @@ async def settings_schema(
         fields[vol.Required(CONF_NOTIFY_PHASE, default=phase)] = BooleanSelector()
     if progress:
         fields[vol.Required(CONF_NOTIFY_PROGRESS, default=False)] = BooleanSelector()
+    # none unless chosen, since an appliance switched off at the wall is unavailable too
+    fields[vol.Required(CONF_OFFLINE_AFTER, default=0)] = NumberSelector(
+        NumberSelectorConfig(min=0, max=1440, step=1, mode=NumberSelectorMode.BOX, unit_of_measurement=UnitOfTime.MINUTES)
+    )
     if live and supernotify_available(hass):
         # only a Live Activity shows what the appliance is doing as the cycle goes on, and has a timer, which a
         # vacuum hasn't

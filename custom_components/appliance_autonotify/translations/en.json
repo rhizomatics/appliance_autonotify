@@ -64,6 +64,7 @@
                     "notify_end": "Notify end",
                     "notify_phase": "Notify phases",
                     "notify_progress": "Notify progress",
+                    "offline_after": "Notify offline after",
                     "dashboard": "Dashboard to open",
                     "live_timer": "Live Activity timer",
                     "live_show": "Live Activity shows",
@@ -75,6 +76,7 @@
                     "notify_phase": "Send a notification when a phase of the cycle is over, such as an oven getting up to heat. When off, it is only shown on the Live Activity.",
                     "dashboard": "Opened when a notification or the Live Activity is tapped. Leave empty to open the app where it was. Set to a dashboard named for the appliance or its type, such as \"Dishwasher\" or \"Washing Machine\", if there was one when the appliance was added.",
                     "notify_progress": "Send a notification every 10% of the cycle. When off, progress is only shown on the progress bar of the Live Activity, which is updated silently.",
+                    "offline_after": "Minutes the appliance must be unavailable, as when its integration can't reach it over the network, before a notification says it's offline, and another when it's back. 0 for none, which is the usual, since an appliance switched off at the wall is offline too.",
                     "live_timer": "Count down the time left on the Live Activity, where the appliance reports when it will finish. On an iPhone's Lock Screen the timer takes the place of the message, so what's shown below goes in the title instead, as much as fits beside the name.",
                     "live_show": "What the appliance is doing, each where it reports it and has something to say. The program, such as Eco 50ºC, is worth leaving out for an appliance that's always on the same one. The phase is the part of the cycle it's in, such as a pre-rinse, drying, or a robot vacuum relocating. The state is shown only when it's more than running, such as paused or returning to its dock. Where there's no room for all of them in the title, the program is left out first.",
                     "maintenance": "Keep count of the cycles, and of how much life the parts the appliance reports on have left, and put whatever is due on the Appliance maintenance to-do list, with a notification as it falls due. Offered once on the end notification if left off."

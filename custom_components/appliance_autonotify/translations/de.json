@@ -64,6 +64,7 @@
                     "notify_end": "Ende melden",
                     "notify_phase": "Phasen melden",
                     "notify_progress": "Fortschritt melden",
+                    "offline_after": "Offline melden nach",
                     "dashboard": "Zu öffnendes Dashboard",
                     "live_timer": "Timer der Live-Aktivität",
                     "live_show": "Live-Aktivität zeigt",
@@ -75,6 +76,7 @@
                     "notify_phase": "Eine Benachrichtigung senden, wenn eine Phase des Zyklus vorbei ist, etwa wenn ein Backofen aufgeheizt ist. Wenn aus, wird sie nur in der Live-Aktivität angezeigt.",
                     "dashboard": "Wird geöffnet, wenn auf eine Benachrichtigung oder die Live-Aktivität getippt wird. Leer lassen, um die App dort zu öffnen, wo sie war. Wird auf ein Dashboard gesetzt, das nach dem Gerät oder seinem Typ benannt ist, etwa „Geschirrspüler“ oder „Waschmaschine“, falls es beim Hinzufügen des Geräts eines gab.",
                     "notify_progress": "Alle 10 % des Zyklus eine Benachrichtigung senden. Wenn aus, wird der Fortschritt nur im Fortschrittsbalken der Live-Aktivität angezeigt, der still aktualisiert wird.",
+                    "offline_after": "Minuten, die das Gerät nicht verfügbar sein muss, etwa wenn seine Integration es nicht über das Netzwerk erreicht, bevor eine Benachrichtigung meldet, dass es offline ist, und eine weitere, wenn es wieder da ist. 0 für keine, die übliche Einstellung, da auch ein an der Steckdose ausgeschaltetes Gerät offline ist.",
                     "live_timer": "Die verbleibende Zeit auf der Live-Aktivität herunterzählen, sofern das Gerät meldet, wann es fertig ist. Auf dem Sperrbildschirm des iPhones ersetzt der Timer die Nachricht, daher kommt das unten Gezeigte stattdessen in den Titel, so viel neben den Namen passt.",
                     "live_show": "Was das Gerät gerade tut, jeweils sofern es dies meldet und etwas zu sagen hat. Das Programm, etwa Eco 50ºC, kann bei einem Gerät, das immer dasselbe nutzt, weggelassen werden. Die Phase ist der Teil des Zyklus, etwa Vorspülen, Trocknen oder ein Saugroboter, der sich neu ausrichtet. Der Zustand wird nur gezeigt, wenn er mehr als „läuft“ besagt, etwa pausiert oder auf dem Weg zur Station. Ist im Titel nicht für alles Platz, entfällt zuerst das Programm.",
                     "maintenance": "Die Zyklen zählen, und wie viel Lebensdauer die Teile noch haben, über die das Gerät berichtet, und alles Fällige auf die To-do-Liste Gerätewartung setzen, mit einer Benachrichtigung, wenn es fällig wird. Wird einmal in der Endbenachrichtigung angeboten, wenn ausgeschaltet."

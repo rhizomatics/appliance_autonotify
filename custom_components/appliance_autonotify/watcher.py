@@ -59,6 +59,7 @@ from .const import (
     CONF_NOTIFY_PHASE,
     CONF_NOTIFY_PROGRESS,
     CONF_NOTIFY_START,
+    CONF_OFFLINE_AFTER,
     CONF_POWER_ENTITY,
     CONF_REMINDER,
     CONF_REMINDER_REPEATS,
@@ -136,6 +137,8 @@ from .const import (
     TEMPERATURE_STEP,
     TEXT_END,
     TEXT_FAST_PREHEAT,
+    TEXT_OFFLINE,
+    TEXT_ONLINE,
     TEXT_PREHEAT,
     TEXT_PREHEATED,
     TEXT_PREHEATING,
@@ -313,6 +316,13 @@ class ApplianceWatcher:
         # and what is to be written, None till anything has changed
         self._store: Store[dict[str, Any]] = Store(hass, CYCLE_STORE_VERSION, CYCLE_STORE.format(entry_id=entry.entry_id))
         self._restored: dict[str, Any] = {}
+        # minutes the appliance must be unavailable before it's told of as offline, none unless chosen, and since when
+        # it has been, and whether that's been told, to tell it's back
+        self.offline_after: float = float(entry.options.get(CONF_OFFLINE_AFTER) or 0)
+        self.offline_since: datetime | None = None
+        self.offline_told: bool = False
+        self._cancel_offline: CALLBACK_TYPE | None = None
+        self.offline_tag: str = f"{self.tag}_offline"
         self._kept: dict[str, Any] = {}
         self._written: dict[str, Any] | None = None
         # whether maintenance is tracked, None until it's been asked for or turned down
@@ -399,6 +409,9 @@ class ApplianceWatcher:
                     "last": _totals_kept(self.totals),
                 },
             }
+        if self.offline_since is not None:
+            # kept whether or not a cycle is, to tell it's back however long it's been
+            data["offline"] = {"since": _iso(self.offline_since), "told": self.offline_told}
         if data == self._kept:
             return
         self._kept = data
@@ -417,6 +430,86 @@ class ApplianceWatcher:
     @callback
     def async_start(self) -> None:
         raise NotImplementedError
+
+    def _health_entity_ids(self) -> list[str]:
+        """What says whether the appliance can be reached: its cycle state, through either integration"""
+        return [e for e in (self.cycle_entity_id, self.fallback_cycle_entity_id) if e]
+
+    @callback
+    def _unreachable(self) -> bool:
+        """Unavailable through every integration it's known by, as when it has lost its network or been switched
+        off at the wall"""
+        states = [state for e in self._health_entity_ids() if (state := self.hass.states.get(e)) is not None]
+        return bool(states) and all(state.state == STATE_UNAVAILABLE for state in states)
+
+    @callback
+    def async_watch_health(self) -> None:
+        """Tell when the appliance has been unavailable for longer than chosen, and when it's back, if chosen"""
+        kept: dict[str, Any] = self._restored.get("offline") or {}
+        if not self.offline_after or not (entity_ids := self._health_entity_ids()):
+            return
+        self.offline_since = _time(kept.get("since"))
+        self.offline_told = bool(kept.get("told"))
+        self.entry.async_on_unload(async_track_state_change_event(self.hass, entity_ids, self._availability_changed))
+        self.entry.async_on_unload(self._stop_offline_wait)
+        self.entry.async_create_background_task(
+            self.hass, self._availability_now(Context()), f"{DOMAIN} availability {self.name}"
+        )
+
+    async def _availability_changed(self, event: Event[EventStateChangedData]) -> None:
+        await self._availability_now(event.context)
+
+    async def _availability_now(self, context: Context) -> None:
+        if self._unreachable():
+            if self.offline_since is None:
+                states = [state for e in self._health_entity_ids() if (state := self.hass.states.get(e)) is not None]
+                self.offline_since = max(state.last_changed for state in states)
+                self._save()
+            if not self.offline_told and self._cancel_offline is None:
+                due = self.offline_since + timedelta(minutes=self.offline_after)
+                self._cancel_offline = async_call_later(self.hass, _seconds_to(due), self._offline_due)
+            return
+        self._stop_offline_wait()
+        since, told = self.offline_since, self.offline_told
+        if since is None:
+            return
+        self.offline_since, self.offline_told = None, False
+        self._save()
+        if told:
+            took = format_duration(self.hass, dt_util.utcnow() - since)
+            await self._tell_health(self._texts[TEXT_ONLINE].format(name=self.name, duration=took), context)
+
+    async def _offline_due(self, now: datetime) -> None:
+        self._cancel_offline = None
+        if self.offline_told or self.offline_since is None or not self._unreachable():
+            return
+        self.offline_told = True
+        self._save()
+        since = format_time(self.offline_since)
+        await self._tell_health(self._texts[TEXT_OFFLINE].format(name=self.name, since=since), Context())
+
+    @callback
+    def _stop_offline_wait(self) -> None:
+        if self._cancel_offline is not None:
+            self._cancel_offline()
+            self._cancel_offline = None
+
+    async def _tell_health(self, message: str, context: Context) -> None:
+        """Offline, or back, with a tag of its own, so being back takes the place of being offline"""
+        title = self._text(CONF_START_TITLE, DEFAULT_TITLE)
+        _LOGGER.info("APPLIANCES %s", message)
+        async with self._sending:
+            if supernotify_available(self.hass):
+                await self._supernotify(
+                    message,
+                    title,
+                    context,
+                    resend=True,
+                    extra_data={"notification_icon": self.icon, "mobile_push_notification_tag": self.offline_tag},
+                    actions=self._tap_actions(),
+                )
+            else:
+                await self._send_message(message, title, context)
 
     @property
     def beta(self) -> bool:
@@ -1645,6 +1738,10 @@ class PowerWatcher(ApplianceWatcher):
         if self._cancel_end is not None:
             self._cancel_end()
             self._cancel_end = None
+
+    def _health_entity_ids(self) -> list[str]:
+        """Its power sensor, which goes unavailable with the smart plug"""
+        return [self.power_entity_id]
 
     def _totals_device_id(self) -> str | None:
         """The smart plug's device, whose energy meter tells what a cycle used"""

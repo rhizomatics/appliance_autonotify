@@ -21,6 +21,9 @@ title: What's New
   - Energy from the appliance's or its smart plug's own energy meter, and cost at the grid price set on the Energy dashboard
   - Each left out where it isn't known, along with a line left with nothing but its emoji
   - Duration and cost written as in the language of Home Assistant, such as *1 Std. 40 Min.* in German, and *$0.45* or *0,45 €*
+- An appliance can be told of as offline once its integration can't reach it for longer than chosen, in *Notify offline after*, and as back when it can again
+  - None unless chosen, since an appliance switched off at the wall is offline too
+  - For one whose network connection has dropped, such as a dishwasher no longer on Wi-Fi, which otherwise goes quiet without a word
 ## 📚 Documentation
 - *What a Cycle Came To* in README, with an example end message, and *Cycle Totals* in How it Works, on how each is worked out
 
