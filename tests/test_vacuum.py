@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from unittest.mock import patch
 
 import pytest
 from homeassistant.config_entries import SOURCE_USER, ConfigEntryState
@@ -904,3 +905,34 @@ async def test_vacuum_live_activity_settings(hass: HomeAssistant) -> None:
     await hass.config_entries.options.async_configure(result["flow_id"], form | {"live_show": []})
     await hass.async_block_till_done()
     assert entry.options == {"live_show": []}
+
+
+async def test_vacuum_setting_off_is_one_update(hass: HomeAssistant, freezer: FrozenDateTimeFactory) -> None:
+    """As a real Roborock set off: its progress and status changing four times in the first 16 seconds, which sent
+    one after another, each as another start, left a second Live Activity that nothing updated or ended"""
+    device_id, vacuum, status, _, progress = add_roborock(hass)
+    calls = mock_supernotify(hass)
+    await setup_vacuum(hass, device_id)
+
+    with (
+        patch("custom_components.appliance_autonotify.watcher.LIVE_SETTLE", 30),
+        patch("custom_components.appliance_autonotify.watcher.LIVE_HOLD", 5),
+    ):
+        await set_state(hass, status, "sweeping")
+        await set_state(hass, vacuum, "cleaning")
+        await advance(hass, freezer, 4)
+        await set_state(hass, progress, "0")
+        await set_state(hass, status, "relocating")
+        for seconds, state in ((9, "sweeping"), (2, "transitioning"), (1, "sweeping")):
+            await advance(hass, freezer, seconds)
+            await set_state(hass, status, state)
+        assert [c.data["message"] for c in calls] == ["Bruno started"]
+        await advance(hass, freezer, 14)
+        assert [(c.data["message"], c.data["extra_data"].get("progress")) for c in calls[1:]] == [("vac_and_mop · sweeping", 0)]
+
+        # transitioning between rooms for a moment, which leaves it as it was, so nothing to send
+        await set_state(hass, status, "transitioning")
+        await advance(hass, freezer, 2)
+        await set_state(hass, status, "sweeping")
+        await advance(hass, freezer, 10)
+    assert len(calls) == 2

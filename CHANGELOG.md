@@ -2,6 +2,12 @@
 title: What's New
 ---
 
+# 1.1.1
+## 🐛 Fixes
+- Live Activity could be left open at the end, stuck where it started, as a robot vacuum's at 0%, when several updates came in the first moments of a cycle, each sent as another start before the phone had told Home Assistant how to reach the first
+  - Nothing more is sent for 30 seconds after the start, and then only the latest
+  - An update waits a few seconds, so what an appliance passes through in moments, as a vacuum transitioning between rooms, isn't sent, nor an update that would change nothing
+
 # 1.1.0
 ## ✨ Enhancements
 - Notifications in the language of Home Assistant, with their usual wording, progress and pre-heating, as their buttons and maintenance messages already were, which was meant for 1.0.0 but left out of it

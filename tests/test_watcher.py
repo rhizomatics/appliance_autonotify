@@ -753,22 +753,65 @@ async def test_progress_known_at_start_is_not_repeated(hass: HomeAssistant) -> N
     assert len(calls) == 2
 
 
-async def test_first_progress_waits_for_the_live_activity_to_open(hass: HomeAssistant) -> None:
+async def test_first_progress_waits_for_the_live_activity_to_open(hass: HomeAssistant, freezer) -> None:
+    """Until the phone has the new activity's own token, an update is another start, so nothing more is sent till
+    it has had time to open, and then only the latest"""
     appliance = add_appliance(hass)
     calls = mock_supernotify(hass)
     await setup_watcher(hass, appliance)
 
-    # as Home Connect tells it, the progress coming moments after the cycle starts
-    with patch("custom_components.appliance_autonotify.watcher.LIVE_SETTLE", 0.2):
-        hass.states.async_set(appliance.cycle, "run")
-        # a moment between, else HA before 2026.10 has both states set before telling of either
-        await asyncio.sleep(0.01)
-        hass.states.async_set(appliance.progress, "0")
-        await asyncio.sleep(0.05)
+    with patch("custom_components.appliance_autonotify.watcher.LIVE_SETTLE", 30):
+        await set_state(hass, appliance.cycle, "run")
+        await set_state(hass, appliance.progress, "0")
+        await pass_time(hass, 10)
+        await set_state(hass, appliance.progress, "5")
         assert [call.data["message"] for call in calls] == ["Dishwasher started"]
-        await hass.async_block_till_done()
+        freezer.tick(30)
+        await pass_time(hass, 0)
     assert len(calls) == 2
-    assert calls[1].data["extra_data"]["progress"] == 0
+    assert calls[1].data["extra_data"]["progress"] == 5
+
+
+async def test_live_activity_sent_only_the_latest(hass: HomeAssistant, freezer) -> None:
+    appliance = add_appliance(hass)
+    calls = mock_supernotify(hass)
+    await setup_watcher(hass, appliance)
+    await set_state(hass, appliance.cycle, "run")
+    assert len(calls) == 1
+
+    with patch("custom_components.appliance_autonotify.watcher.LIVE_HOLD", 5):
+        await set_state(hass, appliance.progress, "10")
+        freezer.tick(3)
+        await set_state(hass, appliance.progress, "15")
+        freezer.tick(3)
+        await pass_time(hass, 0)
+        assert len(calls) == 1
+        freezer.tick(2)
+        await pass_time(hass, 0)
+        assert [call.data["extra_data"]["progress"] for call in calls[1:]] == [15]
+
+        # however often it changes, it's sent at most so long after the first waiting
+        for progress in range(20, 60, 5):
+            await set_state(hass, appliance.progress, str(progress))
+            freezer.tick(4)
+            await pass_time(hass, 0)
+        assert [call.data["extra_data"]["progress"] for call in calls[1:]] == [15, 55]
+
+
+async def test_live_activity_waiting_is_not_sent_after_the_end(hass: HomeAssistant, freezer) -> None:
+    appliance = add_appliance(hass)
+    calls = mock_supernotify(hass)
+    await setup_watcher(hass, appliance)
+    await set_state(hass, appliance.cycle, "run")
+
+    with patch("custom_components.appliance_autonotify.watcher.LIVE_HOLD", 5):
+        await set_state(hass, appliance.progress, "95")
+        await set_state(hass, appliance.cycle, "finished")
+        freezer.tick(60)
+        await pass_time(hass, 0)
+    # were it sent after the clear, the mobile app would open the Live Activity again
+    assert not any(call.data["extra_data"].get("live_update") for call in calls[1:])
+    assert calls[1].data["extra_data"]["mobile_push_clear_notification"] is True
 
 
 async def test_start_is_not_held_up_without_supernotify(hass: HomeAssistant) -> None:
