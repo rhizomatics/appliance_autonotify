@@ -93,6 +93,8 @@ from .const import (
     FINISH_MOVED,
     FINISH_TIME_KEY,
     LIVE_DEFAULTS,
+    LIVE_HOLD,
+    LIVE_HOLD_MAX,
     LIVE_SEPARATOR,
     LIVE_SETTLE,
     LIVE_SHOW_PHASE,
@@ -287,6 +289,16 @@ class ApplianceWatcher:
         self.last_finish: datetime | None = None
         # one notification at a time, so a progress update can't overtake the end and reopen the Live Activity
         self._sending: asyncio.Lock = asyncio.Lock()
+        # the quiet Live Activity update waiting to be sent, the latest asked for, since when one has been waiting,
+        # and till when none is sent at all, while the Live Activity opens
+        self._live_pending: tuple[str, Context] | None = None
+        self._live_waiting: datetime | None = None
+        self._live_opening: datetime | None = None
+        self._cancel_live: CALLBACK_TYPE | None = None
+        # what the Live Activity was last sent quietly, so the same isn't sent again, Supernotify's own duplicate
+        # check being off for these
+        self._live_sent: tuple[str, str, dict[str, Any]] | None = None
+        entry.async_on_unload(self._stop_live)
         self.reminder: float = entry.options.get(CONF_REMINDER, 0)
         self.reminder_repeats: int = int(entry.options.get(CONF_REMINDER_REPEATS, DEFAULT_REMINDER_REPEATS))
         # the smart plug to switch off from the end notification, which only a power monitored appliance has
@@ -695,14 +707,19 @@ class ApplianceWatcher:
         self._stop_reminding()
         self._save()
         async with self._sending:
+            self._stop_live()
+            self._live_sent = None
+            self._live_opening = None
             # resent, since to Supernotify a second cycle soon after the first is a repeat to be dropped
-            await self._tell(self._text(CONF_START_MESSAGE, self._texts[TEXT_START]), self.notify_start, context, resend=True)
-            if supernotify_available(self.hass):
-                # whatever comes next waits its turn, the first progress being only moments behind the start
-                await asyncio.sleep(LIVE_SETTLE)
+            await self._tell(
+                self._text(CONF_START_MESSAGE, self._texts[TEXT_START]), self.notify_start, context, resend=True, at_once=True
+            )
+            # whatever comes next waits, the first progress being only moments behind the start
+            self._live_opening = dt_util.utcnow() + timedelta(seconds=LIVE_SETTLE)
 
-    async def _tell(self, message: str, ordinary: bool, context: Context, resend: bool = False) -> None:
-        """Notify of a cycle under way, either everywhere or with no more than its Live Activity brought up to date"""
+    async def _tell(self, message: str, ordinary: bool, context: Context, resend: bool = False, at_once: bool = False) -> None:
+        """Notify of a cycle under way, either everywhere or with no more than its Live Activity brought up to date,
+        which waits to send only the latest unless it's the start"""
         # a Live Activity keeps the title it started with
         title = self._text(CONF_START_TITLE, DEFAULT_TITLE)
         self.state_shown = self._state_shown()
@@ -712,23 +729,64 @@ class ApplianceWatcher:
             return
         self.last_finish = self._finish_time()
         if ordinary:
-            # everywhere, opening or updating the Live Activity on phones as it goes
+            # everywhere, opening or updating the Live Activity on phones as it goes, and not what was sent quietly
+            self._live_sent = None
             await self._supernotify(
                 message, title, context, resend=resend, extra_data=self._live_data(), actions=self._tap_actions()
             )
+            return
+        self._live_pending = (message, context)
+        now = dt_util.utcnow()
+        if at_once:
+            due = now
         else:
-            data = self._live_data()
-            title, message = self._live_title(title, message, timer="when" in data)
-            # with nothing to hear, and nothing sent anywhere but to phones
-            await self._supernotify(
-                message,
-                title,
-                context,
-                mobile_only=True,
-                extra_data=data | {"silent": True, "alert_once": True},
-                # iOS forgets where a tap goes unless told again on every update
-                actions=self._tap_actions(),
-            )
+            self._live_waiting = self._live_waiting or now
+            due = min(now + timedelta(seconds=LIVE_HOLD), self._live_waiting + timedelta(seconds=LIVE_HOLD_MAX))
+            if self._live_opening is not None:
+                due = max(due, self._live_opening)
+        self._stop_live(forget=False)
+        if due <= now:
+            await self._tell_live()
+        else:
+            self._cancel_live = async_call_later(self.hass, (due - now).total_seconds(), self._live_due)
+
+    async def _live_due(self, now: datetime) -> None:
+        self._cancel_live = None
+        async with self._sending:
+            if self.running:
+                await self._tell_live()
+
+    async def _tell_live(self) -> None:
+        """The latest quiet update of the Live Activity, as things are now, unless it's what was sent last"""
+        pending, self._live_pending, self._live_waiting = self._live_pending, None, None
+        if pending is None:
+            return
+        message, context = pending
+        data = self._live_data()
+        title, message = self._live_title(self._text(CONF_START_TITLE, DEFAULT_TITLE), message, timer="when" in data)
+        if (title, message, data) == self._live_sent:
+            return
+        self._live_sent = (title, message, data)
+        # with nothing to hear, and nothing sent anywhere but to phones
+        await self._supernotify(
+            message,
+            title,
+            context,
+            mobile_only=True,
+            extra_data=data | {"silent": True, "alert_once": True},
+            # iOS forgets where a tap goes unless told again on every update
+            actions=self._tap_actions(),
+        )
+
+    @callback
+    def _stop_live(self, forget: bool = True) -> None:
+        """No quiet update sent later, and none left to send unless only put off"""
+        if self._cancel_live is not None:
+            self._cancel_live()
+            self._cancel_live = None
+        if forget:
+            self._live_pending = None
+            self._live_waiting = None
 
     def _live_title(self, title: str, message: str, timer: bool) -> tuple[str, str]:
         """The title of a quiet Live Activity update, and its message. With a timer there's no message on the iOS Lock
@@ -767,6 +825,9 @@ class ApplianceWatcher:
 
     async def _tell_ended(self, notify: bool, title: str, message: str, context: Context) -> None:
         async with self._sending:
+            # an update sent after the end would open the Live Activity again
+            self._stop_live()
+            self._live_opening = None
             if not supernotify_available(self.hass):
                 if notify:
                     await self._send_message(message, title, context)

@@ -577,9 +577,14 @@ CYCLE_SETTLE: Final[float] = 10
 # seconds after the cycle starts before it's told of, since an integration may report its program and stage a moment
 # after the state of its cycle, as LocalThings does
 START_SETTLE: Final[float] = 3
-# seconds a Live Activity is left to open before anything more is sent to it, since a push sent straight after the
-# start can reach a phone ahead of it, and then be overwritten by the start, with no bar and no program
-LIVE_SETTLE: Final[float] = 5
+# seconds a Live Activity is left to open before anything more is sent to it, and then only the latest. Until the
+# phone has given Home Assistant the new activity's own token, each update is sent as another start, which leaves a
+# second activity that nothing ends, or is dropped once iOS has had too many starts
+LIVE_SETTLE: Final[float] = 30
+# seconds a quiet Live Activity update waits, and at most, sending only the latest, so what an appliance passes
+# through in moments, as a robot vacuum transitioning between rooms, isn't sent at all
+LIVE_HOLD: Final[float] = 5
+LIVE_HOLD_MAX: Final[float] = 30
 # where a cycle under way is kept through a restart of Home Assistant, one store for each appliance
 CYCLE_STORE: Final[str] = f"{DOMAIN}.cycle.{{entry_id}}"
 CYCLE_STORE_VERSION: Final[int] = 1

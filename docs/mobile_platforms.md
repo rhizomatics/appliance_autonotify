@@ -51,8 +51,8 @@ Where the Companion docs and the app source disagree, the source is followed and
   asks for it to be promoted to a Live Update. Core has no Android specific logic for `live_update`.
 - **iOS**: Core picks the token and whether it's a start, an update or an end (`mobile_app/live_activity`), and the
   relay builds the ActivityKit push. Updates go to the activity's own push token once the app has reported it.
-  Until then, each one is sent as another push-to-start, which always alerts and ignores `silent`, so the first
-  quiet update straight after the start may alert as well. `clear_notification` with the tag ends it, with an alert
+  Until then, each one is sent as another push-to-start, which always alerts and ignores `silent`, and can leave a
+  second activity that nothing updates or ends, so nothing more is sent for 30 seconds after the start. `clear_notification` with the tag ends it, with an alert
   of its own carrying the title. The app's field names were chosen to mirror Android's, so the same payload works
   on both.
 - **Local push**: on the home network, Core sends over the app's own connection first, and falls back to the relay
